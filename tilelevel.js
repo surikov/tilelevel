@@ -1,4 +1,4 @@
-﻿console.log('tilelevel.js v1.01');
+﻿console.log('tilelevel.js v1.02');
 
 
 function TileLevel(svgid, groupid) {
