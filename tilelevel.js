@@ -1024,13 +1024,21 @@ TileLevel.prototype.dropSpot = function (id) {
 };
 
 
-console.log('ValueTree v1.12');
+console.log('ValueTree v1.15');
 function ValueTree(name) {
 	this.children = [];
 	this.value = "";
 	this.name = name;
 	return this;
 }
+ValueTree.prototype.has = function (name) {
+	for (var i = 0; i < this.children.length; i++) {
+		if (this.children[i].name == name) {
+			return true;
+		}
+	}
+	return false;
+};
 ValueTree.prototype.of = function (name) {
 	for (var i = 0; i < this.children.length; i++) {
 		if (this.children[i].name == name) {
