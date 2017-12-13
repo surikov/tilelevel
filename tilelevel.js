@@ -1,4 +1,4 @@
-﻿console.log('tilelevel.js v1.02');
+﻿console.log('tilelevel.js v1.04');
 
 
 function TileLevel(svgid, groupid) {
@@ -585,6 +585,17 @@ TileLevel.prototype.reStick = function () {
 		}
 		if (this.layers[i].lockHorizontal) {
 			x = -this.translateX+this.layers[i].lockX*this.translateZ;
+			//console.log(x,this.layers[i].lockX);
+			if(this.layers[i].marginX){
+				//x=x+this.layers[i].marginX;
+				//console.log(x,this.layers[i].marginX);
+				if(x>this.layers[i].marginX){
+					//x=0;//x+this.layers[i].marginX;
+				}else{
+					
+					x=this.layers[i].marginX;
+				}
+			}
 		}
 		/*if((x)||(y)){
 		this.layers[i].g.setAttribute('transform', 'translate(' + x + ','+y+')');
