@@ -1,4 +1,4 @@
-﻿console.log('tilelevel.js v1.04');
+﻿console.log('tilelevel.js v1.06');
 
 
 function TileLevel(svgid, groupid) {
@@ -780,7 +780,7 @@ TileLevel.prototype.queueTiles = function () {
 };
 
 TileLevel.prototype.resetTiles = function () {
-	//console.log('resetTiles');
+	//console.log('start resetTiles');
 	var leftTopX = 0;
 	var leftTopY = 0;
 	var rightBottomX = this.svg.clientWidth;
@@ -806,6 +806,10 @@ TileLevel.prototype.resetTiles = function () {
 	}
 	this.addContent(xx, yy, ww, hh);
 	this.reStick();
+	//console.log('done resetTiles');
+	/*for(var i=0;i<this.spots.length;i++){
+		console.log(i,this.spots[i].id);
+	}*/
 };
 TileLevel.prototype.clearAllLayersChildren = function () {
 	for(var i=0;i<this.layers.length;i++){
@@ -818,11 +822,12 @@ TileLevel.prototype.clearAllUselessDetails = function (x, y, w, h) {
 	}
 };
 TileLevel.prototype.addContent = function (x, y, w, h) {
-	//console.log(this);
+	//console.log('addContent',x, y, w, h);
 	this.clearAllUselessDetails(x, y, w, h);//, this.contentGroup);
 	this.addTiles(x, y, w, h);
 };
 TileLevel.prototype.addTiles = function (x, y, w, h) {
+	//console.log('addTiles',x, y, w, h);
 	this.renderers[this.zoomLevel].render(x, y, w, h);
 };
 TileLevel.prototype.zoomLevelChanged = function () {
@@ -999,8 +1004,8 @@ TileLevel.prototype.runSpots = function (x, y) {
 	}
 };
 RenderLayer.prototype.addSpot = function (id, x, y, w, h, a) {
-	//console.log('addSpot',id, x, y, w, h);
 	this.tiler.dropSpot(id);
+	//console.log('addSpot',id, x, y, w, h);
 	var spot = {
 		id: id,
 		x: x,
@@ -1026,12 +1031,15 @@ TileLevel.prototype.findSpot = function (id) {
 	return null;
 };
 TileLevel.prototype.dropSpot = function (id) {
+	//console.log('dropSpot',id);
 	for (var i = 0; i < this.spots.length; i++) {
 		if (this.spots[i].id == id) {
 			this.spots.splice(i, 1);
-			break;
+			//console.log('dropSpot',i,id);
+			return;
 		}
 	}
+	//console.log('no spot',id);
 };
 
 
