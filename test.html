@@ -1,0 +1,289 @@
+<html>
+	<head>
+		<script>
+			console.log('load');
+			function LevelEngine(svg) {
+				var me = this;
+				me.svgns = "http://www.w3.org/2000/svg";
+				me.svg = svg;
+				//me.left = 0;
+				//me.top = 0;
+				me.width = me.svg.clientWidth;
+				me.height = me.svg.clientHeight;
+				me.innerWidth = me.width;
+				me.innerHeight = me.height;
+				//me.zoom = 1;
+				me.pxCmRatio = 1;
+				me.twoZoom = false;
+				me.startMouseScreenX = 0;
+				me.startMouseScreenY = 0;
+				me.clickX = 0;
+				me.clickY = 0;
+				me.translateX = 0;
+				me.translateY = 0;
+				me.translateZ = 1;
+				me.twodistance = 0;
+				me.startedTouch = false;
+				var rect = document.createElementNS(this.svgns, 'rect');
+				rect.setAttributeNS(null, 'height', '1cm');
+				rect.setAttributeNS(null, 'width', '1cm');
+				me.svg.appendChild(rect);
+				var tbb = rctn.getBBox();
+				me.tapSize=tbb.width;
+				//console.dir(me.tapSize);
+				me.svg.removeChild(rect);
+				me.applyZoomPosition = function () {
+					me.svg.setAttribute('viewBox', '' + (-me.translateX) + ' ' + (-me.translateY) + ' ' + me.width * me.translateZ + ' ' + me.height * me.translateZ);
+				};
+				me.adjustContentPosition = function () {
+					//me.left=-me.translateX;
+					//me.top=-me.translateY;
+					//me.zoom=me.translateZ;
+					//console.log('adjustContentPosition', me.translateX, me.translateY, me.translateZ, '/', me.width, me.height, '/', me.innerWidth, me.innerHeight);
+					if (me.width - me.translateX / me.translateZ > me.innerWidth / me.translateZ) {
+						me.translateX = me.width * me.translateZ - me.innerWidth;
+					}
+					if (me.height - me.translateY / me.translateZ > me.innerHeight / me.translateZ) {
+						me.translateY = me.height * me.translateZ - me.innerHeight;
+					}
+					if (me.translateX > 0) {
+						me.translateX = 0;
+					}
+					if (me.translateY > 0) {
+						me.translateY = 0;
+					}
+					if (me.translateZ < 1) {
+						me.translateZ = 1;
+					}
+					me.applyZoomPosition();
+				};
+				me.moveZoom=function(){
+					//me.left=-me.translateX;
+					//me.top=-me.translateY;
+					//me.zoom=me.translateZ;
+					//console.log('moveZoom',me.left,me.top,me.zoom);
+					me.applyZoomPosition();
+				};
+				me.queueTiles=function(){
+					//
+				};
+				me.click=function(){
+					console.log('click svg');
+				};
+				me.maxZoom=function(){
+					return 99;
+				};
+				me.rakeMouseDown = function (mouseEvent) {
+					mouseEvent.preventDefault();
+					me.svg.addEventListener('mousemove', me.rakeMouseMove, true);
+					me.svg.addEventListener('mouseup', me.rakeMouseUp, false);
+					me.startMouseScreenX = mouseEvent.offsetX;
+					me.startMouseScreenY = mouseEvent.offsetY;
+					me.clickX = me.startMouseScreenX;
+					me.clickY = me.startMouseScreenY;
+					//console.log('rakeMouseDown',me.startMouseScreenX,me.startMouseScreenY);
+				};
+				me.rakeMouseMove = function (mouseEvent) {
+					mouseEvent.preventDefault();
+					var dX = mouseEvent.offsetX - me.startMouseScreenX;
+					var dY = mouseEvent.offsetY - me.startMouseScreenY;
+					me.translateX = me.translateX + dX * me.translateZ;
+					me.translateY = me.translateY + dY * me.translateZ;
+					me.startMouseScreenX = mouseEvent.offsetX;
+					me.startMouseScreenY = mouseEvent.offsetY;
+					me.moveZoom();
+				};
+				me.rakeMouseUp = function (mouseEvent) {
+					mouseEvent.preventDefault();
+					me.svg.removeEventListener('mousemove', me.rakeMouseMove, true);
+					if (Math.abs(me.clickX - mouseEvent.offsetX) < me.translateZ * me.tapSize / 8 //
+						 && Math.abs(me.clickY - mouseEvent.offsetY) < me.translateZ * me.tapSize / 8) {
+						me.click();
+					}
+					me.adjustContentPosition();
+					me.queueTiles();
+				};
+				me.startTouchZoom = function (touchEvent) {
+					me.twoZoom = true;
+					var p1 = me.vectorFromTouch(touchEvent.touches[0]);
+					var p2 = me.vectorFromTouch(touchEvent.touches[1]);
+					me.twocenter = me.vectorFindCenter(p1, p2);
+					var d = me.vectorDistance(p1, p2);
+					if (d <= 0) {
+						d = 1;
+					}
+					me.twodistance = d;
+				};
+				me.rakeTouchStart = function (touchEvent) {
+					touchEvent.preventDefault();
+					me.startedTouch = true;
+					if (touchEvent.touches.length < 2) {
+						me.twoZoom = false;
+						me.startMouseScreenX = touchEvent.touches[0].clientX;
+						me.startMouseScreenY = touchEvent.touches[0].clientY;
+						me.clickX = me.startMouseScreenX;
+						me.clickY = me.startMouseScreenY;
+						me.twodistance = 0;
+						return;
+					} else {
+						me.startTouchZoom(touchEvent);
+					}
+				};
+				me.rakeTouchMove = function (touchEvent) {
+					touchEvent.preventDefault();
+					if (touchEvent.touches.length < 2) {
+						if (me.twoZoom) {
+							//
+						} else {
+							var dX = touchEvent.touches[0].clientX - me.startMouseScreenX;
+							var dY = touchEvent.touches[0].clientY - me.startMouseScreenY;
+							me.translateX = me.translateX + dX * me.translateZ;
+							me.translateY = me.translateY + dY * me.translateZ;
+							me.startMouseScreenX = touchEvent.touches[0].clientX;
+							me.startMouseScreenY = touchEvent.touches[0].clientY;
+							me.moveZoom();
+							return;
+						}
+					} else {
+						if (!me.twoZoom) {
+							me.startTouchZoom(touchEvent);
+						} else {
+							var p1 = me.vectorFromTouch(touchEvent.touches[0]);
+							var p2 = me.vectorFromTouch(touchEvent.touches[1]);
+							var d = me.vectorDistance(p1, p2);
+							if (d <= 0) {
+								d = 1;
+							}
+							var ratio = d / me.twodistance;
+							me.twodistance = d;
+							var zoom = me.translateZ / ratio;
+							if (zoom < 1) {
+								zoom = 1;
+							}
+							if (zoom > me.maxZoom()) {
+								zoom = me.maxZoom();
+							}
+							me.translateX = me.translateX - (me.translateZ - zoom) * me.twocenter.x;
+							me.translateY = me.translateY - (me.translateZ - zoom) * me.twocenter.y;
+							me.translateZ = zoom;
+							me.adjustContentPosition();
+						}
+					}
+				};
+				me.rakeTouchEnd = function (touchEvent) {
+					touchEvent.preventDefault();
+					me.queueTiles();
+					if (!me.twoZoom) {
+						if (touchEvent.touches.length < 2) {
+							if (me.startedTouch) {
+								if (Math.abs(me.clickX - me.startMouseScreenX) < me.translateZ * me.tapSize / 8 //
+									 && Math.abs(me.clickY - me.startMouseScreenY) < me.translateZ * me.tapSize / 8) {
+									me.click();
+								}
+							} else {
+								//console.log('touch ended already');
+							}
+							me.adjustContentPosition();
+							return;
+						}
+					}
+					me.twoZoom = false;
+					me.startedTouch = false;
+					me.adjustContentPosition();
+				};
+				me.rakeMouseWheel = function (e) {
+					e.preventDefault();
+					var wheelVal = e.wheelDelta || -e.detail;
+					var min = Math.min(1, wheelVal);
+					var delta = Math.max(-1, min);
+					var zoom = me.translateZ + delta * (me.translateZ) * 0.077;
+					if (zoom < 1) {
+						zoom = 1;
+					}
+					if (zoom > me.maxZoom()) {
+						zoom = me.maxZoom();
+					}
+					me.translateX = me.translateX - (me.translateZ - zoom) * e.offsetX;
+					me.translateY = me.translateY - (me.translateZ - zoom) * e.offsetY;
+					me.translateZ = zoom;
+					me.moveZoom();
+					me.adjustContentPosition();
+					me.queueTiles();
+					return false;
+				};
+				me.svg.addEventListener('mousedown', me.rakeMouseDown, true);
+				me.svg.addEventListener("mousewheel", me.rakeMouseWheel, false);
+				me.svg.addEventListener("DOMMouseScroll", me.rakeMouseWheel, false);
+				me.svg.addEventListener("touchstart", me.rakeTouchStart, false);
+				me.svg.addEventListener("touchmove", me.rakeTouchMove, false);
+				me.svg.addEventListener("touchend", me.rakeTouchEnd, false);
+				
+				return me;
+			}
+		</script>
+		<style>
+			.onecm {background-color: #557799;width:1cm; height:1cm;}			
+			.test {background-color: #4fe;width:480px; height:550px; overflow: scroll;}		
+			.levelSVG {width:600px; height:400px; border-style:solid; border-color:#00f; border-width:1px;}
+		</style>
+	</head>
+	<body>
+		<h1>Test v1.01</h1>
+		<p>
+			<a href='#' onclick='reset();'>reset</a>
+		</p>
+		<div class='onecm'></div>
+		<div class='test'>
+			<svg id="contentSVG" class='levelSVG' viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
+				<rect id='rb'; x="0px" y="0px" width="30cm" height="20cm" style="fill:#caf" />
+				<ellipse cx="15cm" cy="10cm" rx="15cm" ry="10cm" style="fill:#9fc;" />
+				<ellipse id='bgell' cx="5cm" cy="3cm" rx="2.5cm" ry="1.5cm" style="fill:#963;" />
+				<rect id='rctn'; x="0px" y="0px" width="1cm" height="1cm" style="fill:#7c9" />
+				<rect id='r2'; x="1cm" y="1cm" width="1cm" height="1cm" style="fill:#9a1" />
+				<rect id='r3'; x="2cm" y="2cm" width="1cm" height="1cm" style="fill:#f41" onclick='clicked(event);'/>
+				<rect id='r3'; x="2cm" y="2cm" width="1cm" height="1cm" style="fill:#f41" onclick='clicked(event);'/>
+			</svg>
+		</div>
+		<p>State</p>
+		<script>
+			console.log('start');
+			var levelEngine = new LevelEngine(document.getElementById('contentSVG'));
+			levelEngine.innerWidth = 30*levelEngine.tapSize;
+			levelEngine.innerHeight = 20*levelEngine.tapSize;
+			reset();
+			/*console.log('window.devicePixelRatio', window.devicePixelRatio);
+			console.log('test');
+			var rctn = document.getElementById("rctn");
+			var tbb = rctn.getBBox();
+			console.log(tbb);*/
+			/*bgell.setAttributeNS(null, 'cx', '2.5cm');
+			bgell.setAttributeNS(null, 'rx', '1.75cm');
+			tbb = bgell.getBBox();
+			console.log(tbb);*/
+			function clicked(e){
+				//console.log('clicked',e);
+				e.stopPropagation();
+			}
+			function clicked2(e){
+				console.log('2',e);
+				e.stopPropagation();
+			}
+			function reset() {
+				//var tbb = document.getElementById('contentSVG').getBBox();
+				//console.log(tbb);
+				levelEngine.translateX=0;
+				levelEngine.translateY=0;
+				levelEngine.translateZ=1;
+				//levelEngine.left = 0;
+				//levelEngine.top = 0;
+				//levelEngine.width = 600;
+				//levelEngine.height = 400;
+				//levelEngine.zoom = 1;
+				levelEngine.applyZoomPosition();
+				
+				
+			}
+			
+		</script>
+	</body>
+</html>
