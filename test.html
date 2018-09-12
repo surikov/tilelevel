@@ -267,7 +267,8 @@
 		</style>
 	</head>
 	<body>
-		<h1>Test v1.02</h1>
+		<h1>Test v1.03</h1>
+		<p id='stat' >State</p>
 		<p>
 			<a href='#' onclick='reset();'>reset</a>
 		</p>
@@ -283,7 +284,7 @@
 				<rect id='r3'; x="3cm" y="3cm" width="1cm" height="1cm" style="fill:#f49" onclick='clicked(event);'/>
 			</svg>
 		</div>
-		<p>State</p>
+		
 		<script>
 			console.log('start');
 			var levelEngine = new LevelEngine(document.getElementById('contentSVG'));
@@ -301,13 +302,13 @@
 			console.log(tbb);*/
 			function clicked(e){
 				e.stopPropagation();
-				alert('one clicked');
+				document.getElementById('stat').innerText='one clicked '+(new Date());
 				
 			}
 			function clicked2(e){
 				e.stopPropagation();
-				alert('two click');
-				
+				//alert('two click');
+				document.getElementById('stat').innerText='two clicked '+(new Date());
 			}
 			function reset() {
 				//var tbb = document.getElementById('contentSVG').getBBox();
