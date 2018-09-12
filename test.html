@@ -267,7 +267,7 @@
 		</style>
 	</head>
 	<body>
-		<h1>Test v1.03</h1>
+		<h1>Test v1.04</h1>
 		<p id='stat' >State</p>
 		<p>
 			<a href='#' onclick='reset();'>reset</a>
@@ -277,11 +277,11 @@
 			<svg id="contentSVG" class='levelSVG' viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
 				<rect id='rb'; x="0px" y="0px" width="30cm" height="20cm" style="fill:#caf" />
 				<ellipse cx="15cm" cy="10cm" rx="15cm" ry="10cm" style="fill:#9fc;" />
-				<ellipse id='bgell' cx="5cm" cy="3cm" rx="2.5cm" ry="1.5cm" style="fill:#963;"  onclick='clicked2(event);' />
+				<ellipse id='bgell' cx="5cm" cy="3cm" rx="2.5cm" ry="1.5cm" style="fill:#963;"  onclick='clicked2(event);'  ontouchend='clicked2(event);'/>
 				<rect id='rctn'; x="0px" y="0px" width="1cm" height="1cm" style="fill:#7c9" />
 				<rect id='r2'; x="1cm" y="1cm" width="1cm" height="1cm" style="fill:#9a1" />
 				<rect id='r3'; x="2cm" y="2cm" width="1cm" height="1cm" style="fill:#f41"/>
-				<rect id='r3'; x="3cm" y="3cm" width="1cm" height="1cm" style="fill:#f49" onclick='clicked(event);'/>
+				<rect id='r3'; x="3cm" y="3cm" width="1cm" height="1cm" style="fill:#f49" onclick='clicked(event);' ontouchend='clicked(event);'/>
 			</svg>
 		</div>
 		
