@@ -68,7 +68,7 @@
 					//
 				};
 				me.click=function(){
-					console.log('click svg');
+					//alert('click svg');
 				};
 				me.maxZoom=function(){
 					return 99;
@@ -102,6 +102,45 @@
 					}
 					me.adjustContentPosition();
 					me.queueTiles();
+				};
+				me.vectorDistance = function (xy1, xy2) {
+					var xy = me.vectorSubstract(xy1, xy2);
+					var n = me.vectorNorm(xy);
+					return n;
+				};
+				me.vectorSubstract = function (xy1, xy2) {
+					return {
+						x: xy1.x - xy2.x,
+						y: xy1.y - xy2.y
+					};
+				};
+				me.vectorNorm = function (xy) {
+					return Math.sqrt(me.vectorNormSquared(xy));
+				};
+				me.vectorNormSquared = function (xy) {
+					return xy.x * xy.x + xy.y * xy.y;
+				};
+				me.vectorFromTouch = function (touch) {
+					return {
+						x: touch.clientX,
+						y: touch.clientY
+					};
+				};
+				me.vectorFindCenter = function (xy1, xy2) {
+					var xy = me.vectorAdd(xy1, xy2);
+					return me.vectorScale(xy, 0.5);
+				};
+				me.vectorAdd = function (xy1, xy2) {
+					return {
+						x: xy1.x + xy2.x,
+						y: xy1.y + xy2.y
+					};
+				};
+				me.vectorScale = function (xy, coef) {
+					return {
+						x: xy.x * coef,
+						y: xy.y * coef
+					};
 				};
 				me.startTouchZoom = function (touchEvent) {
 					me.twoZoom = true;
@@ -211,7 +250,7 @@
 					me.queueTiles();
 					return false;
 				};
-				me.svg.addEventListener('mousedown', me.rakeMouseDown, true);
+				me.svg.addEventListener('mousedown', me.rakeMouseDown, false);
 				me.svg.addEventListener("mousewheel", me.rakeMouseWheel, false);
 				me.svg.addEventListener("DOMMouseScroll", me.rakeMouseWheel, false);
 				me.svg.addEventListener("touchstart", me.rakeTouchStart, false);
@@ -228,7 +267,7 @@
 		</style>
 	</head>
 	<body>
-		<h1>Test v1.01</h1>
+		<h1>Test v1.02</h1>
 		<p>
 			<a href='#' onclick='reset();'>reset</a>
 		</p>
@@ -237,11 +276,11 @@
 			<svg id="contentSVG" class='levelSVG' viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
 				<rect id='rb'; x="0px" y="0px" width="30cm" height="20cm" style="fill:#caf" />
 				<ellipse cx="15cm" cy="10cm" rx="15cm" ry="10cm" style="fill:#9fc;" />
-				<ellipse id='bgell' cx="5cm" cy="3cm" rx="2.5cm" ry="1.5cm" style="fill:#963;" />
+				<ellipse id='bgell' cx="5cm" cy="3cm" rx="2.5cm" ry="1.5cm" style="fill:#963;"  onclick='clicked2(event);' />
 				<rect id='rctn'; x="0px" y="0px" width="1cm" height="1cm" style="fill:#7c9" />
 				<rect id='r2'; x="1cm" y="1cm" width="1cm" height="1cm" style="fill:#9a1" />
-				<rect id='r3'; x="2cm" y="2cm" width="1cm" height="1cm" style="fill:#f41" onclick='clicked(event);'/>
-				<rect id='r3'; x="2cm" y="2cm" width="1cm" height="1cm" style="fill:#f41" onclick='clicked(event);'/>
+				<rect id='r3'; x="2cm" y="2cm" width="1cm" height="1cm" style="fill:#f41"/>
+				<rect id='r3'; x="3cm" y="3cm" width="1cm" height="1cm" style="fill:#f49" onclick='clicked(event);'/>
 			</svg>
 		</div>
 		<p>State</p>
@@ -261,12 +300,14 @@
 			tbb = bgell.getBBox();
 			console.log(tbb);*/
 			function clicked(e){
-				//console.log('clicked',e);
 				e.stopPropagation();
+				alert('one clicked');
+				
 			}
 			function clicked2(e){
-				console.log('2',e);
 				e.stopPropagation();
+				alert('two click');
+				
 			}
 			function reset() {
 				//var tbb = document.getElementById('contentSVG').getBBox();
