@@ -2,13 +2,13 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="initial-scale=1.0, width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-		<script src="WebAudioFontPlayer.js"></script>
 		<script>
 			console.log('load');
-			function LevelEngine(svg) {
+			function LevelEngine(svg,group) {
 				var me = this;
 				me.svgns = "http://www.w3.org/2000/svg";
 				me.svg = svg;
+				me.group=group;
 				//me.left = 0;
 				//me.top = 0;
 				me.width = me.svg.clientWidth;
@@ -22,6 +22,7 @@
 				me.startMouseScreenY = 0;
 				me.clickX = 0;
 				me.clickY = 0;
+				me.clicked = false;
 				me.translateX = 0;
 				me.translateY = 0;
 				me.translateZ = 1;
@@ -72,6 +73,7 @@
 				};
 				me.click=function(){
 					//alert('click svg');
+					me.clicked = true;
 				};
 				me.maxZoom=function(){
 					return 99;
@@ -85,6 +87,7 @@
 					me.clickX = me.startMouseScreenX;
 					me.clickY = me.startMouseScreenY;
 					//console.log('rakeMouseDown',me.startMouseScreenX,me.startMouseScreenY);
+					me.clicked = false;
 				};
 				me.rakeMouseMove = function (mouseEvent) {
 					mouseEvent.preventDefault();
@@ -170,6 +173,7 @@
 					} else {
 						me.startTouchZoom(touchEvent);
 					}
+					me.clicked = false;
 				};
 				me.rakeTouchMove = function (touchEvent) {
 					touchEvent.preventDefault();
@@ -253,6 +257,64 @@
 					me.queueTiles();
 					return false;
 				};
+				me.msEdgeHook = function (g) {
+					if (g.childNodes && (!(g.children))) {
+						g.children = g.childNodes;
+					}
+				};
+				me.clearUselessDetails = function (){//x, y, w, h) {
+
+					//levelEngine.clearUselessDetails(-levelEngine.translateX,-levelEngine.translateY,levelEngine.svg.clientWidth*levelEngine.translateZ,levelEngine.svg.clientHeight*levelEngine.translateZ);
+					var x = -me.translateX;
+					var y = -me.translateY;
+					var w = me.svg.clientWidth * me.translateZ;
+					var h = me.svg.clientHeight * me.translateZ;
+					me.msEdgeHook(me.group);
+					for (var i = 0; i < me.group.children.length; i++) {
+						//var group = me.g.children[i];
+						//me.clearUselessNodes(x, y, w, h, group);
+						if (me.group.children[i].nodeName == 'g') {
+							var group = me.group.children[i];
+							//console.log('group', group);
+							me.msEdgeHook(group);
+							for (var n = 0; n < group.children.length; n++) {
+								var child = group.children[n];
+								if (me.outOfView(child, x, y, w, h)) {
+									//console.log('remove child', child);
+									group.removeChild(child);
+									n--;
+								}
+							}
+						}
+					}
+				};
+				/*me.clearUselessNodes = function (x, y, w, h,group) {
+					me.msEdgeHook(group);
+					console.log('check',group);
+					if (me.outOfView(group, x, y, w, h)) {
+						//me.g.removeChild(group);						
+					}
+				};*/
+				me.outOfView = function (child, x, y, w, h) {
+					var tbb = child.getBBox();
+					return !(me.collision(tbb.x, tbb.y, tbb.width, tbb.height, x, y, w, h));
+				};
+				me.collision = function (x1, y1, w1, h1, x2, y2, w2, h2) {
+					if (this.collision2(x1, w1, x2, w2) && this.collision2(y1, h1, y2, h2)) {
+						return true;
+					} else {
+						return false;
+
+					}
+				};
+				me.collision2 = function (x, w, left, width) {
+					if (x + w < left || x > left + width) {
+						return false;
+					} else {
+						return true;
+
+					}
+				};
 				me.svg.addEventListener('mousedown', me.rakeMouseDown, false);
 				me.svg.addEventListener("mousewheel", me.rakeMouseWheel, false);
 				me.svg.addEventListener("DOMMouseScroll", me.rakeMouseWheel, false);
@@ -266,11 +328,20 @@
 		<style>
 			.onecm {background-color: #557799;width:1cm; height:1cm;}			
 			.test {background-color: #4fe;width:480px; height:550px; overflow: scroll;}		
-			.levelSVG {width:600px; height:400px; border-style:solid; border-color:#00f; border-width:1px;}
+			.levelSVG {width:300px; height:400px; border-style:solid; border-color:#00f; border-width:1px;}
+			.spectrum4 {
+				background:
+					linear-gradient(#00f, transparent),
+					linear-gradient(to top left, #0f0, transparent),
+					linear-gradient(to top right, #f00, transparent);
+				background-blend-mode: screen;
+				}
+			.bgRect {fill: #cc7799;}
+			.bgBlur {fill: #998833;filter: url(#pictureFilter);}
 		</style>
 	</head>
-	<body>
-		<h1>Test v1.05</h1>
+	<body class='spectrum4'>
+		<h1>Test v1.06</h1>
 		<p id='stat' >State</p>
 		<p>
 			<a href='#' onclick='reset();'>reset</a>
@@ -278,22 +349,39 @@
 		<div class='onecm'></div>
 		<div class='test'>
 			<svg id="contentSVG" class='levelSVG' viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
-				<rect id='rb'; x="0px" y="0px" width="30cm" height="20cm" style="fill:#caf" />
-				<ellipse cx="15cm" cy="10cm" rx="15cm" ry="10cm" style="fill:#9fc;" />
-				<ellipse id='bgell' cx="5cm" cy="3cm" rx="2.5cm" ry="1.5cm" style="fill:#963;"  onclick='clicked2(event);'  ontouchend='clicked2(event);'/>
-				<rect id='rctn'; x="0px" y="0px" width="1cm" height="1cm" style="fill:#7c9" />
-				<rect id='r2'; x="1cm" y="1cm" width="1cm" height="1cm" style="fill:#9a1" />
-				<rect id='r3'; x="2cm" y="2cm" width="1cm" height="1cm" style="fill:#f41"/>
-				<rect id='r3'; x="3cm" y="3cm" width="1cm" height="1cm" style="fill:#f49" onclick='clicked(event);' ontouchend='clicked(event);'/>
+				<filter id="pictureFilter" >
+					<feGaussianBlur stdDeviation="5" />
+				</filter>
+				
+				<g id='maingroup'>
+					<g>
+						<rect id='rb' class='bgRect' x="0px" y="0px" width="70cm" height="90cm"/>
+						<ellipse cx="10cm" cy="20cm" rx="10cm" ry="20cm" style="fill:#639;" />
+						<ellipse cx="15cm" cy="10cm" rx="15cm" ry="10cm" style="fill:#9fc;" />
+						
+						
+						<rect id='r2'; x="1cm" y="1cm" width="1cm" height="1cm" style="fill:#9a1" />
+						<rect id='r3'; x="2cm" y="2cm" width="1cm" height="1cm" class='bgBlur'/>
+						<g>
+							<ellipse id='bgell' cx="5cm" cy="3cm" rx="2.5cm" ry="1.5cm" style="fill:#963;"  onclick='clicked2(event);'  ontouchend='clicked2(event);'/>
+							<rect id='r3'; x="3cm" y="3cm" width="1cm" height="1cm" style="fill:#f49" onclick='clicked(event);' ontouchend='clicked(event);'/>						
+							
+						</g>
+						<rect id='rctn'; x="0px" y="0px" width="1cm" height="1cm" style="fill:rgba(255,0,0,0.2)" />
+					</g>
+				</g>
+				<g id='no'><text x="20" y="35" class="small">Myaer aer aer ar arbv </text></g>
 			</svg>
 		</div>
 		
 		<script>
 			console.log('start');
-			var levelEngine = new LevelEngine(document.getElementById('contentSVG'));
-			levelEngine.innerWidth = 30*levelEngine.tapSize;
-			levelEngine.innerHeight = 20*levelEngine.tapSize;
-			reset();
+			var levelEngine = new LevelEngine(document.getElementById('contentSVG'),document.getElementById('maingroup'));
+			levelEngine.innerWidth = 70*levelEngine.tapSize;
+			levelEngine.innerHeight = 90*levelEngine.tapSize;
+			//reset();
+			levelEngine.applyZoomPosition();
+			//console.log(document.getElementById('maingroup'));
 			/*console.log('window.devicePixelRatio', window.devicePixelRatio);
 			console.log('test');
 			var rctn = document.getElementById("rctn");
@@ -303,30 +391,45 @@
 			bgell.setAttributeNS(null, 'rx', '1.75cm');
 			tbb = bgell.getBBox();
 			console.log(tbb);*/
-			function clicked(e){
+			function clicked(e) {
 				e.stopPropagation();
-				document.getElementById('stat').innerText='one clicked '+(new Date());
-				
+				if (levelEngine.clicked) {
+					document.getElementById('stat').innerText = 'one clicked ' + (new Date());
+					console.log('1', levelEngine.clickX * levelEngine.translateZ, levelEngine.clickY * levelEngine.translateZ);
+				}
 			}
-			function clicked2(e){
+			function clicked2(e) {
 				e.stopPropagation();
 				//alert('two click');
-				document.getElementById('stat').innerText='two clicked '+(new Date());
+				if (levelEngine.clicked) {
+					document.getElementById('stat').innerText = 'two clicked ' + (new Date());
+					console.log('2', levelEngine.clickX * levelEngine.translateZ, levelEngine.clickY * levelEngine.translateZ);
+				}
 			}
 			function reset() {
 				//var tbb = document.getElementById('contentSVG').getBBox();
 				//console.log(tbb);
-				levelEngine.translateX=0;
-				levelEngine.translateY=0;
-				levelEngine.translateZ=1;
+				//levelEngine.translateX=0;
+				//levelEngine.translateY=0;
+				//levelEngine.translateZ=1;
 				//levelEngine.left = 0;
 				//levelEngine.top = 0;
 				//levelEngine.width = 600;
 				//levelEngine.height = 400;
 				//levelEngine.zoom = 1;
-				levelEngine.applyZoomPosition();
-				
-				
+				//levelEngine.applyZoomPosition();
+				/*
+				var tbb = levelEngine.svg.getBBox();
+				console.log(levelEngine.svg.clientHeight);
+				var rctn = document.getElementById("rctn");
+				var tbb = rctn.getBBox();
+				console.log(levelEngine.translateX,levelEngine.translateY,levelEngine.translateZ,' - ');
+				rctn.setAttribute("x", ''+(-levelEngine.translateX)+"px");
+				rctn.setAttribute("y", ''+(-levelEngine.translateY)+"px");
+				rctn.setAttribute("width", ''+(levelEngine.svg.clientWidth*levelEngine.translateZ)+"px");
+				rctn.setAttribute("height", ''+(levelEngine.svg.clientHeight*levelEngine.translateZ)+"px");
+				*/
+				levelEngine.clearUselessDetails();//-levelEngine.translateX,-levelEngine.translateY,levelEngine.svg.clientWidth*levelEngine.translateZ,levelEngine.svg.clientHeight*levelEngine.translateZ);
 			}
 			
 		</script>
