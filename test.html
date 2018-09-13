@@ -2,329 +2,7 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="initial-scale=1.0, width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-		<script>
-			console.log('load');
-			function LevelEngine(svg,group) {
-				var me = this;
-				me.svgns = "http://www.w3.org/2000/svg";
-				me.svg = svg;
-				me.group=group;
-				//me.left = 0;
-				//me.top = 0;
-				me.width = me.svg.clientWidth;
-				me.height = me.svg.clientHeight;
-				me.innerWidth = me.width;
-				me.innerHeight = me.height;
-				//me.zoom = 1;
-				me.pxCmRatio = 1;
-				me.twoZoom = false;
-				me.startMouseScreenX = 0;
-				me.startMouseScreenY = 0;
-				me.clickX = 0;
-				me.clickY = 0;
-				me.clicked = false;
-				me.translateX = 0;
-				me.translateY = 0;
-				me.translateZ = 1;
-				me.twodistance = 0;
-				me.startedTouch = false;
-				var rect = document.createElementNS(this.svgns, 'rect');
-				rect.setAttributeNS(null, 'height', '1cm');
-				rect.setAttributeNS(null, 'width', '1cm');
-				me.svg.appendChild(rect);
-				var tbb = rctn.getBBox();
-				me.tapSize=tbb.width;
-				//console.dir(me.tapSize);
-				me.svg.removeChild(rect);
-				me.applyZoomPosition = function () {
-					me.svg.setAttribute('viewBox', '' + (-me.translateX) + ' ' + (-me.translateY) + ' ' + me.width * me.translateZ + ' ' + me.height * me.translateZ);
-				};
-				me.adjustContentPosition = function () {
-					//me.left=-me.translateX;
-					//me.top=-me.translateY;
-					//me.zoom=me.translateZ;
-					//console.log('adjustContentPosition', me.translateX, me.translateY, me.translateZ, '/', me.width, me.height, '/', me.innerWidth, me.innerHeight);
-					if (me.width - me.translateX / me.translateZ > me.innerWidth / me.translateZ) {
-						me.translateX = me.width * me.translateZ - me.innerWidth;
-					}
-					if (me.height - me.translateY / me.translateZ > me.innerHeight / me.translateZ) {
-						me.translateY = me.height * me.translateZ - me.innerHeight;
-					}
-					if (me.translateX > 0) {
-						me.translateX = 0;
-					}
-					if (me.translateY > 0) {
-						me.translateY = 0;
-					}
-					if (me.translateZ < 1) {
-						me.translateZ = 1;
-					}
-					me.applyZoomPosition();
-				};
-				me.moveZoom=function(){
-					//me.left=-me.translateX;
-					//me.top=-me.translateY;
-					//me.zoom=me.translateZ;
-					//console.log('moveZoom',me.left,me.top,me.zoom);
-					me.applyZoomPosition();
-				};
-				me.queueTiles=function(){
-					//
-				};
-				me.click=function(){
-					//alert('click svg');
-					me.clicked = true;
-				};
-				me.maxZoom=function(){
-					return 99;
-				};
-				me.rakeMouseDown = function (mouseEvent) {
-					mouseEvent.preventDefault();
-					me.svg.addEventListener('mousemove', me.rakeMouseMove, true);
-					me.svg.addEventListener('mouseup', me.rakeMouseUp, false);
-					me.startMouseScreenX = mouseEvent.offsetX;
-					me.startMouseScreenY = mouseEvent.offsetY;
-					me.clickX = me.startMouseScreenX;
-					me.clickY = me.startMouseScreenY;
-					//console.log('rakeMouseDown',me.startMouseScreenX,me.startMouseScreenY);
-					me.clicked = false;
-				};
-				me.rakeMouseMove = function (mouseEvent) {
-					mouseEvent.preventDefault();
-					var dX = mouseEvent.offsetX - me.startMouseScreenX;
-					var dY = mouseEvent.offsetY - me.startMouseScreenY;
-					me.translateX = me.translateX + dX * me.translateZ;
-					me.translateY = me.translateY + dY * me.translateZ;
-					me.startMouseScreenX = mouseEvent.offsetX;
-					me.startMouseScreenY = mouseEvent.offsetY;
-					me.moveZoom();
-				};
-				me.rakeMouseUp = function (mouseEvent) {
-					mouseEvent.preventDefault();
-					me.svg.removeEventListener('mousemove', me.rakeMouseMove, true);
-					if (Math.abs(me.clickX - mouseEvent.offsetX) < me.translateZ * me.tapSize / 8 //
-						 && Math.abs(me.clickY - mouseEvent.offsetY) < me.translateZ * me.tapSize / 8) {
-						me.click();
-					}
-					me.adjustContentPosition();
-					me.queueTiles();
-				};
-				me.vectorDistance = function (xy1, xy2) {
-					var xy = me.vectorSubstract(xy1, xy2);
-					var n = me.vectorNorm(xy);
-					return n;
-				};
-				me.vectorSubstract = function (xy1, xy2) {
-					return {
-						x: xy1.x - xy2.x,
-						y: xy1.y - xy2.y
-					};
-				};
-				me.vectorNorm = function (xy) {
-					return Math.sqrt(me.vectorNormSquared(xy));
-				};
-				me.vectorNormSquared = function (xy) {
-					return xy.x * xy.x + xy.y * xy.y;
-				};
-				me.vectorFromTouch = function (touch) {
-					return {
-						x: touch.clientX,
-						y: touch.clientY
-					};
-				};
-				me.vectorFindCenter = function (xy1, xy2) {
-					var xy = me.vectorAdd(xy1, xy2);
-					return me.vectorScale(xy, 0.5);
-				};
-				me.vectorAdd = function (xy1, xy2) {
-					return {
-						x: xy1.x + xy2.x,
-						y: xy1.y + xy2.y
-					};
-				};
-				me.vectorScale = function (xy, coef) {
-					return {
-						x: xy.x * coef,
-						y: xy.y * coef
-					};
-				};
-				me.startTouchZoom = function (touchEvent) {
-					me.twoZoom = true;
-					var p1 = me.vectorFromTouch(touchEvent.touches[0]);
-					var p2 = me.vectorFromTouch(touchEvent.touches[1]);
-					me.twocenter = me.vectorFindCenter(p1, p2);
-					var d = me.vectorDistance(p1, p2);
-					if (d <= 0) {
-						d = 1;
-					}
-					me.twodistance = d;
-				};
-				me.rakeTouchStart = function (touchEvent) {
-					touchEvent.preventDefault();
-					me.startedTouch = true;
-					if (touchEvent.touches.length < 2) {
-						me.twoZoom = false;
-						me.startMouseScreenX = touchEvent.touches[0].clientX;
-						me.startMouseScreenY = touchEvent.touches[0].clientY;
-						me.clickX = me.startMouseScreenX;
-						me.clickY = me.startMouseScreenY;
-						me.twodistance = 0;
-						return;
-					} else {
-						me.startTouchZoom(touchEvent);
-					}
-					me.clicked = false;
-				};
-				me.rakeTouchMove = function (touchEvent) {
-					touchEvent.preventDefault();
-					if (touchEvent.touches.length < 2) {
-						if (me.twoZoom) {
-							//
-						} else {
-							var dX = touchEvent.touches[0].clientX - me.startMouseScreenX;
-							var dY = touchEvent.touches[0].clientY - me.startMouseScreenY;
-							me.translateX = me.translateX + dX * me.translateZ;
-							me.translateY = me.translateY + dY * me.translateZ;
-							me.startMouseScreenX = touchEvent.touches[0].clientX;
-							me.startMouseScreenY = touchEvent.touches[0].clientY;
-							me.moveZoom();
-							return;
-						}
-					} else {
-						if (!me.twoZoom) {
-							me.startTouchZoom(touchEvent);
-						} else {
-							var p1 = me.vectorFromTouch(touchEvent.touches[0]);
-							var p2 = me.vectorFromTouch(touchEvent.touches[1]);
-							var d = me.vectorDistance(p1, p2);
-							if (d <= 0) {
-								d = 1;
-							}
-							var ratio = d / me.twodistance;
-							me.twodistance = d;
-							var zoom = me.translateZ / ratio;
-							if (zoom < 1) {
-								zoom = 1;
-							}
-							if (zoom > me.maxZoom()) {
-								zoom = me.maxZoom();
-							}
-							me.translateX = me.translateX - (me.translateZ - zoom) * me.twocenter.x;
-							me.translateY = me.translateY - (me.translateZ - zoom) * me.twocenter.y;
-							me.translateZ = zoom;
-							me.adjustContentPosition();
-						}
-					}
-				};
-				me.rakeTouchEnd = function (touchEvent) {
-					touchEvent.preventDefault();
-					me.queueTiles();
-					if (!me.twoZoom) {
-						if (touchEvent.touches.length < 2) {
-							if (me.startedTouch) {
-								if (Math.abs(me.clickX - me.startMouseScreenX) < me.translateZ * me.tapSize / 8 //
-									 && Math.abs(me.clickY - me.startMouseScreenY) < me.translateZ * me.tapSize / 8) {
-									me.click();
-								}
-							} else {
-								//console.log('touch ended already');
-							}
-							me.adjustContentPosition();
-							return;
-						}
-					}
-					me.twoZoom = false;
-					me.startedTouch = false;
-					me.adjustContentPosition();
-				};
-				me.rakeMouseWheel = function (e) {
-					e.preventDefault();
-					var wheelVal = e.wheelDelta || -e.detail;
-					var min = Math.min(1, wheelVal);
-					var delta = Math.max(-1, min);
-					var zoom = me.translateZ + delta * (me.translateZ) * 0.077;
-					if (zoom < 1) {
-						zoom = 1;
-					}
-					if (zoom > me.maxZoom()) {
-						zoom = me.maxZoom();
-					}
-					me.translateX = me.translateX - (me.translateZ - zoom) * e.offsetX;
-					me.translateY = me.translateY - (me.translateZ - zoom) * e.offsetY;
-					me.translateZ = zoom;
-					me.moveZoom();
-					me.adjustContentPosition();
-					me.queueTiles();
-					return false;
-				};
-				me.msEdgeHook = function (g) {
-					if (g.childNodes && (!(g.children))) {
-						g.children = g.childNodes;
-					}
-				};
-				me.clearUselessDetails = function (){//x, y, w, h) {
-
-					//levelEngine.clearUselessDetails(-levelEngine.translateX,-levelEngine.translateY,levelEngine.svg.clientWidth*levelEngine.translateZ,levelEngine.svg.clientHeight*levelEngine.translateZ);
-					var x = -me.translateX;
-					var y = -me.translateY;
-					var w = me.svg.clientWidth * me.translateZ;
-					var h = me.svg.clientHeight * me.translateZ;
-					me.msEdgeHook(me.group);
-					for (var i = 0; i < me.group.children.length; i++) {
-						//var group = me.g.children[i];
-						//me.clearUselessNodes(x, y, w, h, group);
-						if (me.group.children[i].nodeName == 'g') {
-							var group = me.group.children[i];
-							//console.log('group', group);
-							me.msEdgeHook(group);
-							for (var n = 0; n < group.children.length; n++) {
-								var child = group.children[n];
-								if (me.outOfView(child, x, y, w, h)) {
-									//console.log('remove child', child);
-									group.removeChild(child);
-									n--;
-								}
-							}
-						}
-					}
-				};
-				/*me.clearUselessNodes = function (x, y, w, h,group) {
-					me.msEdgeHook(group);
-					console.log('check',group);
-					if (me.outOfView(group, x, y, w, h)) {
-						//me.g.removeChild(group);						
-					}
-				};*/
-				me.outOfView = function (child, x, y, w, h) {
-					var tbb = child.getBBox();
-					return !(me.collision(tbb.x, tbb.y, tbb.width, tbb.height, x, y, w, h));
-				};
-				me.collision = function (x1, y1, w1, h1, x2, y2, w2, h2) {
-					if (this.collision2(x1, w1, x2, w2) && this.collision2(y1, h1, y2, h2)) {
-						return true;
-					} else {
-						return false;
-
-					}
-				};
-				me.collision2 = function (x, w, left, width) {
-					if (x + w < left || x > left + width) {
-						return false;
-					} else {
-						return true;
-
-					}
-				};
-				me.svg.addEventListener('mousedown', me.rakeMouseDown, false);
-				me.svg.addEventListener("mousewheel", me.rakeMouseWheel, false);
-				me.svg.addEventListener("DOMMouseScroll", me.rakeMouseWheel, false);
-				me.svg.addEventListener("touchstart", me.rakeTouchStart, false);
-				me.svg.addEventListener("touchmove", me.rakeTouchMove, false);
-				me.svg.addEventListener("touchend", me.rakeTouchEnd, false);
-				
-				return me;
-			}
-		</script>
+		<script src='tilelevel2.js'></script>
 		<style>
 			.onecm {background-color: #557799;width:1cm; height:1cm;}			
 			.test {background-color: #4fe;width:480px; height:550px; overflow: scroll;}		
@@ -338,10 +16,11 @@
 				}
 			.bgRect {fill: #cc7799;}
 			.bgBlur {fill: #998833;filter: url(#pictureFilter);}
+			.cell {fill: #337766;}
 		</style>
 	</head>
 	<body class='spectrum4'>
-		<h1>Test v1.06</h1>
+		<h1>Test v1.08</h1>
 		<p id='stat' >State</p>
 		<p>
 			<a href='#' onclick='reset();'>reset</a>
@@ -354,7 +33,7 @@
 				</filter>
 				
 				<g id='maingroup'>
-					<g>
+					
 						<rect id='rb' class='bgRect' x="0px" y="0px" width="70cm" height="90cm"/>
 						<ellipse cx="10cm" cy="20cm" rx="10cm" ry="20cm" style="fill:#639;" />
 						<ellipse cx="15cm" cy="10cm" rx="15cm" ry="10cm" style="fill:#9fc;" />
@@ -368,7 +47,7 @@
 							
 						</g>
 						<rect id='rctn'; x="0px" y="0px" width="1cm" height="1cm" style="fill:rgba(255,0,0,0.2)" />
-					</g>
+					
 				</g>
 				<g id='no'><text x="20" y="35" class="small">Myaer aer aer ar arbv </text></g>
 			</svg>
@@ -376,9 +55,9 @@
 		
 		<script>
 			console.log('start');
-			var levelEngine = new LevelEngine(document.getElementById('contentSVG'),document.getElementById('maingroup'));
-			levelEngine.innerWidth = 70*levelEngine.tapSize;
-			levelEngine.innerHeight = 90*levelEngine.tapSize;
+			var levelEngine = new LevelEngine(document.getElementById('contentSVG'), document.getElementById('maingroup'));
+			levelEngine.innerWidth = 70 * levelEngine.tapSize;
+			levelEngine.innerHeight = 90 * levelEngine.tapSize;
 			//reset();
 			levelEngine.applyZoomPosition();
 			//console.log(document.getElementById('maingroup'));
@@ -428,8 +107,27 @@
 				rctn.setAttribute("y", ''+(-levelEngine.translateY)+"px");
 				rctn.setAttribute("width", ''+(levelEngine.svg.clientWidth*levelEngine.translateZ)+"px");
 				rctn.setAttribute("height", ''+(levelEngine.svg.clientHeight*levelEngine.translateZ)+"px");
-				*/
-				levelEngine.clearUselessDetails();//-levelEngine.translateX,-levelEngine.translateY,levelEngine.svg.clientWidth*levelEngine.translateZ,levelEngine.svg.clientHeight*levelEngine.translateZ);
+				 */
+				//console.log(levelEngine.translateX,levelEngine.translateY,levelEngine.translateZ);
+				//console.log(1,levelEngine.childExists('tstscell') );
+				console.log(new Date());
+				levelEngine.clearUselessDetails(); //-levelEngine.translateX,-levelEngine.translateY,levelEngine.svg.clientWidth*levelEngine.translateZ,levelEngine.svg.clientHeight*levelEngine.translateZ);
+				//console.log(2,levelEngine.childExists('tstscell') );
+				console.log('start',new Date());
+				var cm = levelEngine.tapSize;
+				var cntr=0;
+				for (var x = 0; x < 70; x++) {
+					for (var y = 0; y < 90; y++) {
+						var g = levelEngine.rakeGroup('t'+x+'x'+y, x * cm, y * cm, 0.5 * cm, 0.5 * cm);
+						//console.log(3,levelEngine.childExists('tstscell') );
+						//console.log(g, levelEngine.childExists('tstscell') );
+						if (g) {
+							levelEngine.tileRectangle(g, x+'cm', y+'cm', '0.5cm', '0.5cm', 'cell');
+							cntr++;
+						}
+					}
+				}
+				console.log(cntr,new Date());
 			}
 			
 		</script>
