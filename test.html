@@ -4,10 +4,10 @@
 		<meta name="viewport" content="initial-scale=1.0, width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 		<script src='tilelevel2.js'></script>
 		<style>
-			.onecm {background-color: #557799;width:1cm; height:1cm;}			
-			.test {background-color: #4fe;width:480px; height:550px; overflow: scroll;}		
+			.onecm1 {background-color: #557799;width:1cm; height:1cm;}			
+			.test1 {background-color: #4fe;width:480px; height:550px; overflow: scroll;}		
 			.levelSVG {width:300px; height:400px; border-style:solid; border-color:#00f; border-width:1px;}
-			.spectrum4 {
+			.spectrum41 {
 				background:
 					linear-gradient(#00f, transparent),
 					linear-gradient(to top left, #0f0, transparent),
@@ -15,23 +15,25 @@
 				background-blend-mode: screen;
 				}
 			.bgRect {fill: #cc7799;}
-			.bgBlur {fill: #998833;filter: url(#pictureFilter);}
+			.bgBlur1 {fill: #998833;filter: url(#pictureFilter);}
 			.cell {fill: #337766;}
 		</style>
 	</head>
-	<body class='spectrum4'>
-		<h1>Test v1.08</h1>
+	<body>
+		<h1>Test v1.09</h1>
 		<p id='stat' >State</p>
 		<p>
 			<a href='#' onclick='reset();'>reset</a>
 		</p>
+		<!--
 		<div class='onecm'></div>
-		<div class='test'>
+		<div class='test'-->
 			<svg id="contentSVG" class='levelSVG' viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
+				<!--
 				<filter id="pictureFilter" >
 					<feGaussianBlur stdDeviation="5" />
 				</filter>
-				
+				-->
 				<g id='maingroup'>
 					
 						<rect id='rb' class='bgRect' x="0px" y="0px" width="70cm" height="90cm"/>
@@ -51,8 +53,9 @@
 				</g>
 				<g id='no'><text x="20" y="35" class="small">Myaer aer aer ar arbv </text></g>
 			</svg>
+			<!--
 		</div>
-		
+		-->
 		<script>
 			console.log('start');
 			var levelEngine = new LevelEngine(document.getElementById('contentSVG'), document.getElementById('maingroup'));
