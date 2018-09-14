@@ -24,6 +24,7 @@ function LevelEngine(svg, group) {
 	me.translateZ = 1;
 	me.twodistance = 0;
 	me.startedTouch = false;
+	me.mx = 100;
 	var rect = document.createElementNS(this.svgns, 'rect');
 	rect.setAttributeNS(null, 'height', '1cm');
 	rect.setAttributeNS(null, 'width', '1cm');
@@ -72,7 +73,7 @@ function LevelEngine(svg, group) {
 		me.clicked = true;
 	};
 	me.maxZoom = function () {
-		return 99;
+		return me.mx;
 	};
 	me.rakeMouseDown = function (mouseEvent) {
 		mouseEvent.preventDefault();
@@ -258,17 +259,101 @@ function LevelEngine(svg, group) {
 			g.children = g.childNodes;
 		}
 	};
-	me.tileRectangle = function (g, x, y, w, h, className) {
-		var rect = document.createElementNS(this.svgns, 'rect');
+	me.tileGroup = function (g) {
+		var gg = document.createElementNS(me.svgns, 'g');
+		g.appendChild(gg);
+		return gg;
+	};
+	me.tileFromArray = function (arr) {
+		for (var i = 0; i < arr.length; i++) {
+			var a = arr[i];
+			//console.log(arr[i]);
+			var g = me.rakeGroup(a.id, a.x, a.y, a.w, a.h);
+			//console.log(a.id);
+			if (g) {
+				for (var n = 0; n < a.l.length; n++) {
+					var o = a.l[n];
+					//console.log(o.o[0]);
+					for (var k = 0; k < o.o.length; k++) {
+						var d = o.o[k];
+						//console.log(d);
+						if(d.kind=='r'){
+							me.tileRectangle(g, d.x, d.y, d.w, d.h, d.rx, d.ry,d.css);
+						}
+						if(d.kind=='t'){
+							me.tileText(g, d.x, d.y, d.t,d.css);
+						}
+						if(d.kind=='p'){
+							me.tilePath(g, d.x, d.y, d.z,d.l,d.css);
+						}
+						if(d.kind=='l'){
+							me.tileLine(g, d.x1, d.y1, d.x2, d.y2,d.css);
+						}
+					}
+				}
+			}
+		}
+	};
+	me.tilePath = function (g, x, y, z, data, cssClass) {
+		var path = document.createElementNS(this.svgns, 'path');
+		path.setAttributeNS(null, 'd', data);
+		var t = "";
+		if ((x) || (y)) {
+			t = 'translate(' + x + ',' + y + ')';
+		}
+		if (z) {
+			t = t + ' scale(' + z + ')';
+		}
+		if (t.length > 0) {
+			path.setAttributeNS(null, 'transform', t);
+		}
+		if (cssClass) {
+			path.classList.add(cssClass);
+		}
+		g.appendChild(path);
+		return path;
+	};
+	me.tileRectangle = function (g, x, y, w, h, rx, ry, cssClass) {
+		var rect = document.createElementNS(me.svgns, 'rect');
 		rect.setAttributeNS(null, 'x', x);
 		rect.setAttributeNS(null, 'y', y);
 		rect.setAttributeNS(null, 'height', h);
 		rect.setAttributeNS(null, 'width', w);
-		if (className) {
-			rect.classList.add(className);
+		if (rx) {
+			rect.setAttributeNS(null, 'rx', rx);
+		}
+		if (ry) {
+			rect.setAttributeNS(null, 'ry', ry);
+		}
+		if (cssClass) {
+			rect.classList.add(cssClass);
 		}
 		g.appendChild(rect);
 		return rect;
+	};
+	me.tileLine = function (g, x1, y1, x2, y2, cssClass) {
+		var line = document.createElementNS(me.svgns, 'line');
+		line.setAttributeNS(null, 'x1', x1);
+		line.setAttributeNS(null, 'y1', y1);
+		line.setAttributeNS(null, 'x2', x2);
+		line.setAttributeNS(null, 'y2', y2);
+		if (cssClass) {
+			line.classList.add(cssClass);
+		}
+		g.appendChild(line);
+		return line;
+	};
+	me.tileText = function (g, x, y, html, cssClass) {
+		//console.log('tileSongName',html);
+		var txt = document.createElementNS(this.svgns, 'text');
+		txt.setAttributeNS(null, 'x', x);
+		txt.setAttributeNS(null, 'y', y);
+		if (cssClass) {
+			txt.setAttributeNS(null, 'class', cssClass);
+		}
+		txt.innerHTML = html;
+		g.appendChild(txt);
+		return txt;
 	};
 	me.addRakeDetails = function () {
 		var x = -me.translateX;
@@ -296,6 +381,13 @@ function LevelEngine(svg, group) {
 			}
 		}
 		return false;
+	};
+	me.clearAllDetails = function () {
+		me.msEdgeHook(me.group);
+		while (me.group.children.length) {
+			//console.log(me.group.children[0]);
+			me.group.removeChild(me.group.children[0]);
+		}
 	};
 	me.clearUselessDetails = function () {
 		var x = -me.translateX;
