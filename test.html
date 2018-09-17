@@ -3,6 +3,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="initial-scale=1.0, width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 		<script src='tilelevel2.js'></script>
+		<script src='test.js'></script>
 		<style>
 			.onecm1 {background-color: #557799;width:1cm; height:1cm;}			
 			.test1 {background-color: #4fe;width:480px; height:550px; overflow: scroll;}		
@@ -18,6 +19,7 @@
 			.bgBlur1 {fill: #998833;filter: url(#pictureFilter);}
 			.cell {fill: #337766;}
 			.ln {stroke:red; stroke-width:0.25cm; stroke-linecap:round;}
+			.ln2 {stroke:yellow; stroke-width:0.25cm; stroke-linecap:round;}
 			.tx {font-size: 0.3cm;}
 		</style>
 	</head>
@@ -37,7 +39,8 @@
 				</filter>
 				-->
 				<rect id='rb' class='bgRect' x="0px" y="0px" width="70cm" height="90cm"/>
-				<g id='maingroup'>
+				<g id='bggroup'></g>
+				<g id='cntntgroup'>
 					
 						<!--
 						<ellipse cx="10cm" cy="20cm" rx="10cm" ry="20cm" style="fill:#639;" />
@@ -61,226 +64,7 @@
 		</div>
 		-->
 		<script>
-			console.log('start');
-			var levelEngine = new LevelEngine(document.getElementById('contentSVG'), document.getElementById('maingroup'));
-			levelEngine.innerWidth = 70 * levelEngine.tapSize;
-			levelEngine.innerHeight = 90 * levelEngine.tapSize;
-			levelEngine.mx=333;
-			//reset();
-			levelEngine.applyZoomPosition();
-			//console.log(document.getElementById('maingroup'));
-			/*console.log('window.devicePixelRatio', window.devicePixelRatio);
-			console.log('test');
-			var rctn = document.getElementById("rctn");
-			var tbb = rctn.getBBox();
-			console.log(tbb);*/
-			/*bgell.setAttributeNS(null, 'cx', '2.5cm');
-			bgell.setAttributeNS(null, 'rx', '1.75cm');
-			tbb = bgell.getBBox();
-			console.log(tbb);*/
-			function clicked(e) {
-				e.stopPropagation();
-				if (levelEngine.clicked) {
-					document.getElementById('stat').innerText = 'one clicked ' + (new Date());
-					console.log('1', levelEngine.clickX * levelEngine.translateZ, levelEngine.clickY * levelEngine.translateZ);
-				}
-			}
-			function clicked2(e) {
-				e.stopPropagation();
-				//alert('two click');
-				if (levelEngine.clicked) {
-					document.getElementById('stat').innerText = 'two clicked ' + (new Date());
-					console.log('2', levelEngine.clickX * levelEngine.translateZ, levelEngine.clickY * levelEngine.translateZ);
-				}
-			}
-			function reset() {
-				var cm = levelEngine.tapSize;
-				var data = [{
-						id: 'a1',
-						x: 2 * cm,
-						y: 4 * cm,
-						w: 1 * cm,
-						h: 3 * cm,
-						l: [{
-								z: levelEngine.mx,
-								o: [{
-										kind: 'r',
-										x: 2 * cm,
-										y: 4 * cm,
-										w: 1 * cm,
-										h: 3 * cm,
-										css: 'cell'
-									}
-								]
-							}
-						]
-					}, {
-						id: 'a2',
-						x: 11 * cm,
-						y: 21 * cm,
-						w: 22 * cm,
-						h: 12 * cm,
-						l: [{
-								z: levelEngine.mx,
-								o: [{
-										kind: 'l',
-										x1: 33 * cm,
-										y1: 24 * cm,
-										x2: 11 * cm,
-										y2: 33 * cm,
-										css: 'ln'
-									}, {
-										kind: 'l',
-										x1: 23 * cm,
-										y1: 21 * cm,
-										x2: 16 * cm,
-										y2: 25 * cm,
-										css: 'ln'
-									}
-								]
-							}
-						]
-					}, {
-						id: 'a3',
-						x: 21 * cm,
-						y: 14 * cm,
-						w: 11 * cm,
-						h: 11 * cm,
-						l: [{
-								z: levelEngine.mx,
-								o: [{
-										kind: 'p',
-										x: 21 * cm,
-										y: 14 * cm,
-										z:1,
-										css: 'cell',
-										l: "M16.822,284.968h39.667v158.667c0,9.35,7.65,17,17,17h116.167c9.35,0,17-7.65,17-17V327.468h70.833v116.167    c0,9.35,7.65,17,17,17h110.5c9.35,0,17-7.65,17-17V284.968h48.167c6.8,0,13.033-4.25,15.583-10.483    c2.55-6.233,1.133-13.6-3.683-18.417L260.489,31.385c-6.517-6.517-17.283-6.8-23.8-0.283L5.206,255.785    c-5.1,4.817-6.517,12.183-3.967,18.7C3.789,281.001,10.022,284.968,16.822,284.968z M248.022,67.368l181.333,183.6h-24.367    c-9.35,0-17,7.65-17,17v158.667h-76.5V310.468c0-9.35-7.65-17-17-17H189.656c-9.35,0-17,7.65-17,17v116.167H90.489V267.968    c0-9.35-7.65-17-17-17H58.756L248.022,67.368z"
-									}
-								]
-							}
-						]
-					}, {
-						id: 'a4',
-						x: 33 * cm,
-						y: 42 * cm,
-						w: 7 * cm,
-						h: 1 * cm,
-						l: [{
-								z: levelEngine.mx,
-								o: [{
-										kind: 't',
-										x: 33 * cm,
-										y: 42 * cm,
-										t:'Qwerty',
-										css: 'cell'
-									}
-								]
-							}
-						]
-					}, {
-						id: 'a5',
-						x: 59 * cm,
-						y: 33 * cm,
-						w: 11 * cm,
-						h: 3 * cm,
-						l: [{
-								z: levelEngine.mx,
-								o: [{
-										kind: 'r',
-										x: 59 * cm,
-										y: 33 * cm,
-										w: 11 * cm,
-										h: 3 * cm,
-										css: 'cell'
-									}
-								]
-							}
-						]
-					}
-				];
-				/*var data = [
-					{
-						id:'a1', mn:0, mc:0, x:2, y:4, w:1, h:3, o:[
-							{kind: 'r', x:2, y:4, width:1, height:3, css:'cell'}]
-					}, {
-						id:'a2', name: 'g', fromZ:0, toZ:0, children:[
-							{name: 'l', x1:33, y1:24, x2:11, y2:33, css:'ln'}
-						    ,{name: 'l', x1:23, y1:21, x2:16, y2:25, css:'ln'}
-						]
-					}, {
-						id:'a3', name: 'p', x:21, y:14, z:1, css:'cell',l:"M16.822,284.968h39.667v158.667c0,9.35,7.65,17,17,17h116.167c9.35,0,17-7.65,17-17V327.468h70.833v116.167    c0,9.35,7.65,17,17,17h110.5c9.35,0,17-7.65,17-17V284.968h48.167c6.8,0,13.033-4.25,15.583-10.483    c2.55-6.233,1.133-13.6-3.683-18.417L260.489,31.385c-6.517-6.517-17.283-6.8-23.8-0.283L5.206,255.785    c-5.1,4.817-6.517,12.183-3.967,18.7C3.789,281.001,10.022,284.968,16.822,284.968z M248.022,67.368l181.333,183.6h-24.367    c-9.35,0-17,7.65-17,17v158.667h-76.5V310.468c0-9.35-7.65-17-17-17H189.656c-9.35,0-17,7.65-17,17v116.167H90.489V267.968    c0-9.35-7.65-17-17-17H58.756L248.022,67.368z"
-					}, {
-						id:'a4', name: 't', x:33, y:42, text:'Qwerty', css:'tx'
-					}, {
-						id:'a5', name: 'r', x:59, y:33, width:10, height:3, css:'cell'
-					}
-				];*/
-				//var tbb = document.getElementById('contentSVG').getBBox();
-				//console.log(tbb);
-				//levelEngine.translateX=0;
-				//levelEngine.translateY=0;
-				//levelEngine.translateZ=1;
-				//levelEngine.left = 0;
-				//levelEngine.top = 0;
-				//levelEngine.width = 600;
-				//levelEngine.height = 400;
-				//levelEngine.zoom = 1;
-				//levelEngine.applyZoomPosition();
-				/*
-				var tbb = levelEngine.svg.getBBox();
-				console.log(levelEngine.svg.clientHeight);
-				var rctn = document.getElementById("rctn");
-				var tbb = rctn.getBBox();
-				console.log(levelEngine.translateX,levelEngine.translateY,levelEngine.translateZ,' - ');
-				rctn.setAttribute("x", ''+(-levelEngine.translateX)+"px");
-				rctn.setAttribute("y", ''+(-levelEngine.translateY)+"px");
-				rctn.setAttribute("width", ''+(levelEngine.svg.clientWidth*levelEngine.translateZ)+"px");
-				rctn.setAttribute("height", ''+(levelEngine.svg.clientHeight*levelEngine.translateZ)+"px");
-				 */
-				console.log(levelEngine.translateX,levelEngine.translateY,levelEngine.translateZ);
-				//console.log(1,levelEngine.childExists('tstscell') );
-				//console.log(new Date());
-				levelEngine.clearUselessDetails(); //-levelEngine.translateX,-levelEngine.translateY,levelEngine.svg.clientWidth*levelEngine.translateZ,levelEngine.svg.clientHeight*levelEngine.translateZ);
-				//console.log(2,levelEngine.childExists('tstscell') );
-				//console.log('start',new Date());
-				/*
-				var cm = levelEngine.tapSize;
-				var cntr=0;
-				for (var x = 0; x < 70; x=x+7) {
-					for (var y = 0; y < 90; y=y+9) {
-						var g = levelEngine.rakeGroup('t'+x+'x'+y, x * cm, y * cm, 0.5 * cm, 0.5 * cm);
-						//console.log(3,levelEngine.childExists('tstscell') );
-						//console.log(g, levelEngine.childExists('tstscell') );
-						if (g) {
-							//levelEngine.tileRectangle(g, x+'cm', y+'cm', '0.8cm', '0.6cm', '0.4cm', '0.3cm','cell');
-							levelEngine.tileRectangle(g, x+'cm', y+'cm', '0.8cm', '0.6cm', null, null,'cell');
-							
-							cntr++;
-						}
-						
-						g = levelEngine.rakeGroup('ll'+x+'x'+y, x * cm, y * cm, 0.5 * cm, 0.5 * cm);
-						if (g) {
-							levelEngine.tileLine(g, x+'cm', y+'cm', (x+0.2)+'cm', (y+0.15)+'cm','ln');
-						}
-						
-						g = levelEngine.rakeGroup('kk'+x+'x'+y, x * cm, y * cm, 0.5 * cm, 0.5 * cm);
-						if (g) {
-							levelEngine.tileText(g, x+'cm', y+'cm', ''+x+'x'+y,'tx');
-						}
-					}
-				}
-				var g = levelEngine.rakeGroup('ttt', 0 * cm, 0 * cm, 30 * cm, 55 * cm);
-				if(g){
-					levelEngine.tilePath(g, 0*cm, 0*cm, 0.3 //
-					, "M16.822,284.968h39.667v158.667c0,9.35,7.65,17,17,17h116.167c9.35,0,17-7.65,17-17V327.468h70.833v116.167    c0,9.35,7.65,17,17,17h110.5c9.35,0,17-7.65,17-17V284.968h48.167c6.8,0,13.033-4.25,15.583-10.483    c2.55-6.233,1.133-13.6-3.683-18.417L260.489,31.385c-6.517-6.517-17.283-6.8-23.8-0.283L5.206,255.785    c-5.1,4.817-6.517,12.183-3.967,18.7C3.789,281.001,10.022,284.968,16.822,284.968z M248.022,67.368l181.333,183.6h-24.367    c-9.35,0-17,7.65-17,17v158.667h-76.5V310.468c0-9.35-7.65-17-17-17H189.656c-9.35,0-17,7.65-17,17v116.167H90.489V267.968    c0-9.35-7.65-17-17-17H58.756L248.022,67.368z" //
-					, 'cell');
-				}
-				*/
-				//console.log(cntr,new Date());
-				//levelEngine.clearAllDetails();
-				levelEngine.tileFromArray(data);
-			}
-			
+			start();
 		</script>
 	</body>
 </html>
