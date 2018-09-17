@@ -311,25 +311,29 @@ function LevelEngine(svg) {
 				for (var i = 0; i < arr.length; i++) {
 					var a = arr[i];
 					//console.log(arr[i]);
-					var g = me.rakeGroup(group, a.id, a.x*me.tapSize, a.y*me.tapSize, a.w*me.tapSize, a.h*me.tapSize);
-					//console.log(a.id);
-					if (g) {
-						for (var n = 0; n < a.l.length; n++) {
-							var d = a.l[n];
-							//console.log(d);
-							if (d.kind == 'r') {
-								me.tileRectangle(g, d.x*me.tapSize, d.y*me.tapSize, d.w*me.tapSize, d.h*me.tapSize, d.rx*me.tapSize, d.ry*me.tapSize, d.css);
+					if (a.z[0] <= me.translateZ && a.z[1] > me.translateZ) {
+						var g = me.rakeGroup(group, a.id, a.x * me.tapSize, a.y * me.tapSize, a.w * me.tapSize, a.h * me.tapSize);
+						//console.log(a.id);
+						if (g) {
+							g.minZoom=a.z[0];
+							g.maxZoom=a.z[1];
+							//console.log(g.minZoom,g.maxZoom,g);
+							for (var n = 0; n < a.l.length; n++) {
+								var d = a.l[n];
+								//console.log(d);
+								if (d.kind == 'r') {
+									me.tileRectangle(g, d.x * me.tapSize, d.y * me.tapSize, d.w * me.tapSize, d.h * me.tapSize, d.rx * me.tapSize, d.ry * me.tapSize, d.css);
+								}
+								if (d.kind == 't') {
+									me.tileText(g, d.x * me.tapSize, d.y * me.tapSize, d.t, d.css);
+								}
+								if (d.kind == 'p') {
+									me.tilePath(g, d.x * me.tapSize, d.y * me.tapSize, d.z, d.l, d.css);
+								}
+								if (d.kind == 'l') {
+									me.tileLine(g, d.x1 * me.tapSize, d.y1 * me.tapSize, d.x2 * me.tapSize, d.y2 * me.tapSize, d.css);
+								}
 							}
-							if (d.kind == 't') {
-								me.tileText(g, d.x*me.tapSize, d.y*me.tapSize, d.t, d.css);
-							}
-							if (d.kind == 'p') {
-								me.tilePath(g, d.x*me.tapSize, d.y*me.tapSize, d.z, d.l, d.css);
-							}
-							if (d.kind == 'l') {
-								me.tileLine(g, d.x1*me.tapSize, d.y1*me.tapSize, d.x2*me.tapSize, d.y2*me.tapSize, d.css);
-							}
-
 						}
 					}
 				}
@@ -449,7 +453,7 @@ function LevelEngine(svg) {
 				for (var i = 0; i < group.children.length; i++) {
 					var child = group.children[i];
 					//console.log('check child', child, x, y, w, h);
-					if (me.outOfView(child, x, y, w, h)) {
+					if (me.outOfView(child, x, y, w, h) || child.minZoom>=me.translateZ || child.maxZoom<me.translateZ) {
 						//console.log('remove child', child);
 						group.removeChild(child);
 						i--;
@@ -486,12 +490,12 @@ function LevelEngine(svg) {
 
 		}
 	};
-	me.startLoop=function(){
+	me.startLoop = function () {
 		var last = new Date().getTime();
-		var step=function(timestamp){			
+		var step = function (timestamp) {
 			var now = new Date().getTime();
 			//console.log(last,now);
-			if(last+222<now){
+			if (last + 222 < now) {
 				//console.log('letsgo',last);
 				me.queueTiles();
 				last = new Date().getTime();
@@ -506,7 +510,7 @@ function LevelEngine(svg) {
 	me.svg.addEventListener("touchstart", me.rakeTouchStart, false);
 	me.svg.addEventListener("touchmove", me.rakeTouchMove, false);
 	me.svg.addEventListener("touchend", me.rakeTouchEnd, false);
-	
+
 	me.startLoop();
 
 	return me;

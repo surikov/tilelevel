@@ -28,14 +28,14 @@ function clicked2(e) {
 function reset() {
 	//var cm = levelEngine.tapSize;
 	console.log('current xyz',levelEngine.translateX, levelEngine.translateY, levelEngine.translateZ);
-	//levelEngine.clearUselessDetails(); //-levelEngine.translateX,-levelEngine.translateY,levelEngine.svg.clientWidth*levelEngine.translateZ,levelEngine.svg.clientHeight*levelEngine.translateZ);
+	levelEngine.clearUselessDetails(); //-levelEngine.translateX,-levelEngine.translateY,levelEngine.svg.clientWidth*levelEngine.translateZ,levelEngine.svg.clientHeight*levelEngine.translateZ);
 	var m1 = [{
 			id: 'a1',
 			x: 2,
 			y: 4,
 			w: 1,
 			h: 3,
-			z: [0, 1000],
+			z: [1, 1000],
 			l: [{
 					kind: 'r',
 					x: 2,
@@ -52,7 +52,7 @@ function reset() {
 			y: 21,
 			w: 22,
 			h: 12,
-			z: [0, 1000],
+			z: [5, 999],
 			l: [{
 					kind: 'l',
 					x1: 33,
@@ -76,7 +76,7 @@ function reset() {
 			y: 14,
 			w: 11,
 			h: 11,
-			z: [0, 1000],
+			z: [1, 1000],
 			l: [{
 					kind: 'p',
 					x: 21,
@@ -93,7 +93,7 @@ function reset() {
 			y: 42,
 			w: 7,
 			h: 1,
-			z: [0, 1000],
+			z: [1, 1000],
 			l: [{
 					kind: 't',
 					x: 33,
@@ -109,7 +109,7 @@ function reset() {
 			y: 33,
 			w: 11,
 			h: 3,
-			z: [0, 1000],
+			z: [1, 1000],
 			l: [{
 					kind: 'r',
 					x: 59,
@@ -127,7 +127,7 @@ function reset() {
 			y: 21,
 			w: 22,
 			h: 12,
-			z: [0, 1000],
+			z: [1, 5],
 			l: [{
 					kind: 'l',
 					x1: 11,
