@@ -310,28 +310,45 @@ function LevelEngine(svg) {
 				//console.log(group);
 				for (var i = 0; i < arr.length; i++) {
 					var a = arr[i];
-					//console.log(arr[i]);
+					//console.log(me.translateZ,a);
 					if (a.z[0] <= me.translateZ && a.z[1] > me.translateZ) {
 						var g = me.rakeGroup(group, a.id, a.x * me.tapSize, a.y * me.tapSize, a.w * me.tapSize, a.h * me.tapSize);
-						//console.log(a.id);
+						//console.log(a.id,a.x * me.tapSize, a.y * me.tapSize, a.w * me.tapSize, a.h * me.tapSize);
 						if (g) {
-							g.minZoom=a.z[0];
-							g.maxZoom=a.z[1];
+							g.minZoom = a.z[0];
+							g.maxZoom = a.z[1];
 							//console.log(g.minZoom,g.maxZoom,g);
 							for (var n = 0; n < a.l.length; n++) {
 								var d = a.l[n];
 								//console.log(d);
+								var element = null;
 								if (d.kind == 'r') {
-									me.tileRectangle(g, d.x * me.tapSize, d.y * me.tapSize, d.w * me.tapSize, d.h * me.tapSize, d.rx * me.tapSize, d.ry * me.tapSize, d.css);
+									element = me.tileRectangle(g, d.x * me.tapSize, d.y * me.tapSize, d.w * me.tapSize, d.h * me.tapSize, d.rx * me.tapSize, d.ry * me.tapSize, d.css);
 								}
 								if (d.kind == 't') {
-									me.tileText(g, d.x * me.tapSize, d.y * me.tapSize, d.t, d.css);
+									element = me.tileText(g, d.x * me.tapSize, d.y * me.tapSize, d.t, d.css);
 								}
 								if (d.kind == 'p') {
-									me.tilePath(g, d.x * me.tapSize, d.y * me.tapSize, d.z, d.l, d.css);
+									element = me.tilePath(g, d.x * me.tapSize, d.y * me.tapSize, d.z, d.l, d.css);
 								}
 								if (d.kind == 'l') {
-									me.tileLine(g, d.x1 * me.tapSize, d.y1 * me.tapSize, d.x2 * me.tapSize, d.y2 * me.tapSize, d.css);
+									element = me.tileLine(g, d.x1 * me.tapSize, d.y1 * me.tapSize, d.x2 * me.tapSize, d.y2 * me.tapSize, d.css);
+								}
+								if (element) {
+									if (d.a) {
+										//console.log(d.a);
+										element.onClickFunction=d.a;
+										element.onclick = function () {
+											if (me.clicked) {
+												if(element){
+													if(element.onClickFunction){
+														element.onClickFunction();
+													}
+												}
+											}
+										}
+										element.ontouchend = element.onclick
+									}
 								}
 							}
 						}
@@ -453,8 +470,8 @@ function LevelEngine(svg) {
 				for (var i = 0; i < group.children.length; i++) {
 					var child = group.children[i];
 					//console.log('check child', child, x, y, w, h);
-					if (me.outOfView(child, x, y, w, h) || child.minZoom>=me.translateZ || child.maxZoom<me.translateZ) {
-						//console.log('remove child', child);
+					if (me.outOfView(child, x, y, w, h) || child.minZoom > me.translateZ || child.maxZoom <= me.translateZ) {
+						//console.log('remove child', child, x, y, w, h,child.minZoom, child.maxZoom ,me.translateZ);
 						group.removeChild(child);
 						i--;
 					}
