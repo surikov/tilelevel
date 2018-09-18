@@ -71,13 +71,13 @@ function LevelEngine(svg) {
 		me.applyZoomPosition();
 	};
 	me.queueTiles = function () {
-		var now = new Date().getTime();
-		console.log('queueTiles',new Date());
+		//var now = new Date().getTime();
+		//console.log('queueTiles',new Date());
 		me.clearUselessDetails();
-		console.log('removed',(new Date().getTime()-now)/1000,'sec');
+		//console.log('removed',(new Date().getTime()-now)/1000,'sec');
 		now = new Date().getTime();
 		me.tileFromModel();
-		console.log('added',(new Date().getTime()-now)/1000,'sec');
+		//console.log('added',(new Date().getTime()-now)/1000,'sec');
 	};
 	me.click = function () {
 		//alert('click svg');
@@ -312,7 +312,9 @@ function LevelEngine(svg) {
 	};*/
 	me.clearUselessDetails = function () {
 		//console.log('clearUselessDetails');
+		var now = new Date().getTime();
 		var cntr=0;
+		var cntr2=0;
 		if (me.model) {
 			for (var k = 0; k < me.model.length; k++) {
 				var group = me.model[k].g;
@@ -322,6 +324,7 @@ function LevelEngine(svg) {
 				var h = me.svg.clientHeight * me.translateZ;
 				me.msEdgeHook(group);
 				for (var i = 0; i < group.children.length; i++) {
+					cntr2++;
 					var child = group.children[i];
 					//console.log('check child', child, x, y, w, h);
 					//if (me.outOfView(child, x, y, w, h) || child.minZoom > me.translateZ || child.maxZoom <= me.translateZ) {
@@ -334,11 +337,13 @@ function LevelEngine(svg) {
 				}
 			}
 		}
-		console.log('removed',cntr,'objects');
+		console.log('removed',cntr,'objects','of',cntr2,'for',(new Date().getTime()-now)/1000,'sec');
 	};
 	me.tileFromModel = function () {
 		//console.log(me.model);
+		var now = new Date().getTime();
 		var cntr=0;
+		var cntr2=2;
 		if (me.model) {
 			for (var k = 0; k < me.model.length; k++) {
 				//console.log('model',k);
@@ -347,6 +352,7 @@ function LevelEngine(svg) {
 				//console.log(group);
 				for (var i = 0; i < arr.length; i++) {
 					var a = arr[i];
+					cntr2++;
 					//console.log(me.translateZ,a);
 					if (a.z[0] <= me.translateZ && a.z[1] > me.translateZ) {
 						var g = me.rakeGroup(group, a.id, a.x * me.tapSize, a.y * me.tapSize, a.w * me.tapSize, a.h * me.tapSize);
@@ -395,7 +401,8 @@ function LevelEngine(svg) {
 			}
 		}
 		me.valid = true;
-		console.log('added',cntr,'objects');
+		//console.log('added',cntr,'objects');
+		console.log('added',cntr,'objects','of',cntr2,'for',(new Date().getTime()-now)/1000,'sec');
 	};
 	me.tilePath = function (g, x, y, z, data, cssClass) {
 		var path = document.createElementNS(this.svgns, 'path');
