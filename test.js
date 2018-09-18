@@ -231,8 +231,8 @@ function reset() {
 			});
 		}
 	}
-
-	//console.log(m2);
+	//console.log(m1.length);
+	console.log(m2.length);
 	levelEngine.setModel([{
 				g: document.getElementById('bggroup'),
 				m: m2
