@@ -75,7 +75,7 @@ function LevelEngine(svg) {
 		console.log('queueTiles',new Date());
 		me.clearUselessDetails();
 		me.tileFromModel();
-		console.log(new Date().getTime()-now);
+		console.log('delay',(new Date().getTime()-now)/1000,'sec');
 	};
 	me.click = function () {
 		//alert('click svg');
@@ -308,8 +308,35 @@ function LevelEngine(svg) {
 	}
 	}
 	};*/
+	me.clearUselessDetails = function () {
+		//console.log('clearUselessDetails');
+		var cntr=0;
+		if (me.model) {
+			for (var k = 0; k < me.model.length; k++) {
+				var group = me.model[k].g;
+				var x = -me.translateX;
+				var y = -me.translateY;
+				var w = me.svg.clientWidth * me.translateZ;
+				var h = me.svg.clientHeight * me.translateZ;
+				me.msEdgeHook(group);
+				for (var i = 0; i < group.children.length; i++) {
+					var child = group.children[i];
+					//console.log('check child', child, x, y, w, h);
+					//if (me.outOfView(child, x, y, w, h) || child.minZoom > me.translateZ || child.maxZoom <= me.translateZ) {
+					if (me.outOfWatch(child, x, y, w, h) || child.minZoom > me.translateZ || child.maxZoom <= me.translateZ) {	
+						//console.log('remove child', child, x, y, w, h, me.outOfWatch(child, x, y, w, h),child.getBoundingClientRect());
+						group.removeChild(child);
+						cntr++;
+						i--;
+					}
+				}
+			}
+		}
+		console.log('removed',cntr,'objects');
+	};
 	me.tileFromModel = function () {
 		//console.log(me.model);
+		var cntr=0;
 		if (me.model) {
 			for (var k = 0; k < me.model.length; k++) {
 				//console.log('model',k);
@@ -359,12 +386,14 @@ function LevelEngine(svg) {
 									}
 								}
 							}
+							cntr++;
 						}
 					}
 				}
 			}
 		}
 		me.valid = true;
+		console.log('added',cntr,'objects');
 	};
 	me.tilePath = function (g, x, y, z, data, cssClass) {
 		var path = document.createElementNS(this.svgns, 'path');
@@ -438,6 +467,10 @@ function LevelEngine(svg) {
 			if (!me.childExists(group, id)) {
 				var g = document.createElementNS(me.svgns, 'g');
 				g.id = id;
+				g.watchX=x;
+				g.watchY=y;
+				g.watchW=w;
+				g.watchH=h;
 				group.appendChild(g);
 				return g;
 			}
@@ -466,28 +499,7 @@ function LevelEngine(svg) {
 			}
 		}
 	};
-	me.clearUselessDetails = function () {
-		//console.log('clearUselessDetails');
-		if (me.model) {
-			for (var k = 0; k < me.model.length; k++) {
-				var group = me.model[k].g;
-				var x = -me.translateX;
-				var y = -me.translateY;
-				var w = me.svg.clientWidth * me.translateZ;
-				var h = me.svg.clientHeight * me.translateZ;
-				me.msEdgeHook(group);
-				for (var i = 0; i < group.children.length; i++) {
-					var child = group.children[i];
-					//console.log('check child', child, x, y, w, h);
-					if (me.outOfView(child, x, y, w, h) || child.minZoom > me.translateZ || child.maxZoom <= me.translateZ) {
-						//console.log('remove child', child, x, y, w, h,child.minZoom, child.maxZoom ,me.translateZ);
-						group.removeChild(child);
-						i--;
-					}
-				}
-			}
-		}
-	};
+	
 	/*me.clearUselessNodes = function (x, y, w, h,group) {
 	me.msEdgeHook(group);
 	console.log('check',group);
@@ -499,6 +511,11 @@ function LevelEngine(svg) {
 		var tbb = child.getBBox();
 		//console.log('check', tbb);
 		return !(me.collision(tbb.x, tbb.y, tbb.width, tbb.height, x, y, w, h));
+	};
+	me.outOfWatch = function (g, x, y, w, h) {
+		//var tbb = child.getBBox();
+		//console.log('check', tbb);
+		return !(me.collision(g.watchX, g.watchY, g.watchW, g.watchH, x, y, w, h));
 	};
 	me.collision = function (x1, y1, w1, h1, x2, y2, w2, h2) {
 		if (this.collision2(x1, w1, x2, w2) && this.collision2(y1, h1, y2, h2)) {

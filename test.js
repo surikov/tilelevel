@@ -232,7 +232,7 @@ function reset() {
 		}
 	}
 	//console.log(m1.length);
-	console.log(m2.length);
+	//console.log(m2.length);
 	levelEngine.setModel([{
 				g: document.getElementById('bggroup'),
 				m: m2
