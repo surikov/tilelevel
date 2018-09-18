@@ -237,6 +237,7 @@ function LevelEngine(svg) {
 					//console.log('touch ended already');
 				}
 				me.adjustContentPosition();
+				me.valid = false;
 				return;
 			}
 		}
