@@ -168,19 +168,40 @@ function reset() {
 
 		}
 	];
+	for (var x = 0; x < 30000; x = x + 1000) {
+		for (var y = 0; y < 500; y = y + 500) {
+			m2.push({
+				id: 'r0x' + x + 'x' + y,
+				x: x,
+				y: y,
+				w: 1000,
+				h: 500,
+				z: [250, 1000],
+				l: [{
+						kind: 'r',
+						x: x + 5,
+						y: y + 200,
+						w: 888,
+						h: 144,
+						css: 'dbg'
+					}
+				]
+			});
+		}
+	}
 	for (var x = 0; x < 30000; x = x + 500) {
 		for (var y = 0; y < 500; y = y + 500) {
 			m2.push({
 				id: 'r1x' + x + 'x' + y,
-				x: x ,
-				y: y ,
+				x: x,
+				y: y,
 				w: 500,
 				h: 500,
-				z: [100, 1000],
+				z: [30, 250],
 				l: [{
 						kind: 'r',
-						x: x  + 5,
-						y: y  + 9,
+						x: x + 5,
+						y: y + 9,
 						w: 444,
 						h: 333,
 						css: 'dbg'
@@ -193,42 +214,64 @@ function reset() {
 		for (var y = 0; y < 500; y = y + 100) {
 			m2.push({
 				id: 'r2x' + x + 'x' + y,
-				x: x ,
-				y: y ,
+				x: x,
+				y: y,
 				w: 100,
 				h: 100,
-				z: [20, 100],
+				z: [5, 30],
 				l: [{
 						kind: 'r',
-						x: x  + 5,
-						y: y  + 9,
+						x: x + 5,
+						y: y + 9,
 						w: 44,
-						h: 33,
+						h: 9,
 						css: 'dbg'
 					}
 				]
 			});
 		}
 	}
-	for (var x = 0; x < 30000; x = x + 10) {
-		for (var y = 0; y < 500; y = y + 10) {
-			m2.push({
+	for (var x = 0; x < 30000; x = x + 100) {
+		for (var y = 0; y < 500; y = y + 100) {
+			var gg = {
 				id: 'r3x' + x + 'x' + y,
-				x: x ,
-				y: y ,
-				w: 10,
-				h: 10,
-				z: [1, 20],
-				l: [{
+				x: x,
+				y: y,
+				w: 100,
+				h: 100,
+				z: [1, 5],
+				l: []
+			};
+			for (var xx = 0; xx < 10; xx++) {
+				for (var yy = 0; yy < 10; yy++) {
+					gg.l.push({
 						kind: 'r',
-						x: x  + 1,
-						y: y  + 1,
-						w: 5,
+						x: x + 1 + xx * 10,
+						y: y + 1 + yy * 10,
+						w: 2,
 						h: 7,
 						css: 'dbg'
-					}
-				]
-			});
+					});
+				}
+			}
+			m2.push(gg);
+			/*m2.push({
+			id: 'r3x' + x + 'x' + y,
+			x: x ,
+			y: y ,
+			w: 10,
+			h: 10,
+			z: [1, 5],
+			l: [{
+			kind: 'r',
+			x: x  + 1,
+			y: y  + 1,
+			w: 2,
+			h: 7,
+			css: 'dbg'
+			}
+			]
+			});*/
 		}
 	}
 	//console.log(m1.length);

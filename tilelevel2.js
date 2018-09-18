@@ -74,8 +74,10 @@ function LevelEngine(svg) {
 		var now = new Date().getTime();
 		console.log('queueTiles',new Date());
 		me.clearUselessDetails();
+		console.log('removed',(new Date().getTime()-now)/1000,'sec');
+		now = new Date().getTime();
 		me.tileFromModel();
-		console.log('delay',(new Date().getTime()-now)/1000,'sec');
+		console.log('added',(new Date().getTime()-now)/1000,'sec');
 	};
 	me.click = function () {
 		//alert('click svg');
