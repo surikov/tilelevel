@@ -360,18 +360,18 @@ function reset() {
 	];
 	//console.log(m1.length);
 	//console.log(m2.length);
-	levelEngine.setModel([{
+	levelEngine.setModel([/*{
 				g: document.getElementById('bggroup'),
 				m: m2
-			}, {
+			}, */{
 				g: document.getElementById('cntntgroup'),
 				m: m1
 			}, {
 				g: document.getElementById('over'),
 				m: m3,
 				lockX: true,
-				lockY: true,
-				lockZ2: true
+				lockY2: true,
+				lockZ: true
 			}
 		]);
 	//levelEngine.tileFromModel();

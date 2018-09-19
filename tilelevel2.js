@@ -43,7 +43,7 @@ function LevelEngine(svg) {
 				if(m.lockY){
 					ty=-me.translateY;
 				}
-				if(m.lockX){
+				if(m.lockZ){
 					tz=me.translateZ;
 				}
 				m.g.setAttribute('transform', 'translate(' + tx + ',' + ty + ') scale(' + tz + ',' + tz + ')');
@@ -284,23 +284,33 @@ function LevelEngine(svg) {
 				var w = me.svg.clientWidth * me.translateZ;
 				var h = me.svg.clientHeight * me.translateZ;
 				var z = me.translateZ;
-				if(me.model[k].lockX){
+				/*if(me.model[k].lockX){
 					x=0;
 				}
 				if(me.model[k].lockY){
 					y=0;
 				}
 				if(me.model[k].lockZ){
-					w = me.svg.clientWidth;
-					h = me.svg.clientHeight;
 					z=1;
-				}
+					if(me.model[k].lockX){
+						w = me.svg.clientWidth;
+					}
+					if(me.model[k].lockY){
+						h = me.svg.clientHeight;
+					}else{
+						y = -me.translateY* me.translateZ;
+					}
+					console.log(x,y,w,h,z,group);
+				}*/
 				me.clearUselessGroups(group,x,y,w,h,z);
 			}
 		}
 	};
-	me.clearUselessGroups = function (group,x,y,w,h,z) {
-		
+	me.clearUselessGroups = function (group,lx,ly,lz) {
+		var x = -me.translateX;
+		var y = -me.translateY;
+		var w = me.svg.clientWidth * me.translateZ;
+		var h = me.svg.clientHeight * me.translateZ;
 		me.msEdgeHook(group);
 		for (var i = 0; i < group.children.length; i++) {
 			var child = group.children[i];
@@ -309,7 +319,7 @@ function LevelEngine(svg) {
 				i--;
 			} else {
 				if(child.localName=='g'){
-					me.clearUselessGroups(child,x,y,w,h,z);
+					me.clearUselessGroups(child,lx,ly,lz);
 				}
 			}
 		}
