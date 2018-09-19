@@ -45,7 +45,79 @@ function reset() {
 					css: 'cell'
 				}
 			]
+		}, {
+			id: 'a5',
+			x: 12,
+			y: 3,
+			w: 7.5,
+			h: 1,
+			z: [1, 1000],
+			l: [{
+					kind: 'r',
+					x: 12,
+					y: 3,
+					w: 7.5,
+					h: 1,
+					css: 'cell'
+				}
 
+			]
+		}, {
+			id: 'a4',
+			x: 12,
+			y: 3,
+			w: 7.5,
+			h: 1,
+			z: [1, 1000],
+			l: [{
+					kind: 't',
+					x: 12,
+					y: 4,
+					t: 'Qwerty asdfg zxcv',
+					css: 'tx'
+				}
+
+			]
+		}, {
+			id: 'a6',
+			x: 4,
+			y: 3,
+			w: 9,
+			h: 9,
+			z: [1, 1000],
+			l: [{
+					kind: 'r',
+					x: 4,
+					y: 3,
+					w: 9,
+					h: 9,
+					css: 'dbg'
+				}, {
+					kind: 'g',
+					id: 'a7',
+					x: 7,
+					y: 5,
+					w: 2,
+					h: 1,
+					z: [1, 1000],
+					l: [{
+							kind: 'r',
+							x: 7,
+							y: 5,
+							w: 2,
+							h: 1,
+							css: 'cell'
+						}, {
+							kind: 't',
+							x: 7,
+							y: 6,
+							t: 'Test',
+							css: 'tx'
+						}
+
+					]
+				}
+			]
 		}, {
 			id: 'a2',
 			x: 11,
@@ -91,22 +163,7 @@ function reset() {
 				}
 
 			]
-		}, {
-			id: 'a4',
-			x: 33,
-			y: 42,
-			w: 7,
-			h: 1,
-			z: [1, 1000],
-			l: [{
-					kind: 't',
-					x: 33,
-					y: 42,
-					t: 'Qwerty',
-					css: 'cell'
-				}
 
-			]
 		}, {
 			id: 'a5',
 			x: 59,

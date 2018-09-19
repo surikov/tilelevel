@@ -1,17 +1,13 @@
-﻿console.log('tilelevel.js v2.07');
+﻿console.log('tilelevel.js v2.08');
 
 function LevelEngine(svg) {
 	var me = this;
 	me.svgns = "http://www.w3.org/2000/svg";
 	me.svg = svg;
-
-	//me.left = 0;
-	//me.top = 0;
 	me.width = me.svg.clientWidth;
 	me.height = me.svg.clientHeight;
 	me.innerWidth = me.width;
 	me.innerHeight = me.height;
-	//me.zoom = 1;
 	me.pxCmRatio = 1;
 	me.twoZoom = false;
 	me.startMouseScreenX = 0;
@@ -32,7 +28,6 @@ function LevelEngine(svg) {
 	me.svg.appendChild(rect);
 	var tbb = rect.getBBox();
 	me.tapSize = tbb.width;
-	//console.dir(me.tapSize);
 	me.svg.removeChild(rect);
 	me.applyZoomPosition = function () {
 		me.svg.setAttribute('viewBox', '' + (-me.translateX) + ' ' + (-me.translateY) + ' ' + me.width * me.translateZ + ' ' + me.height * me.translateZ);
@@ -42,10 +37,6 @@ function LevelEngine(svg) {
 		me.valid = false;
 	}
 	me.adjustContentPosition = function () {
-		//me.left=-me.translateX;
-		//me.top=-me.translateY;
-		//me.zoom=me.translateZ;
-		//console.log('adjustContentPosition', me.translateX, me.translateY, me.translateZ, '/', me.width, me.height, '/', me.innerWidth, me.innerHeight);
 		if (me.width - me.translateX / me.translateZ > me.innerWidth / me.translateZ) {
 			me.translateX = me.width * me.translateZ - me.innerWidth;
 		}
@@ -64,23 +55,14 @@ function LevelEngine(svg) {
 		me.applyZoomPosition();
 	};
 	me.moveZoom = function () {
-		//me.left=-me.translateX;
-		//me.top=-me.translateY;
-		//me.zoom=me.translateZ;
-		//console.log('moveZoom',me.left,me.top,me.zoom);
 		me.applyZoomPosition();
 	};
 	me.queueTiles = function () {
-		//var now = new Date().getTime();
-		//console.log('queueTiles',new Date());
 		me.clearUselessDetails();
-		//console.log('removed',(new Date().getTime()-now)/1000,'sec');
 		now = new Date().getTime();
 		me.tileFromModel();
-		//console.log('added',(new Date().getTime()-now)/1000,'sec');
 	};
 	me.click = function () {
-		//alert('click svg');
 		me.clicked = true;
 	};
 	me.maxZoom = function () {
@@ -94,7 +76,6 @@ function LevelEngine(svg) {
 		me.startMouseScreenY = mouseEvent.offsetY;
 		me.clickX = me.startMouseScreenX;
 		me.clickY = me.startMouseScreenY;
-		//console.log('rakeMouseDown',me.startMouseScreenX,me.startMouseScreenY);
 		me.clicked = false;
 	};
 	me.rakeMouseMove = function (mouseEvent) {
@@ -115,7 +96,6 @@ function LevelEngine(svg) {
 			me.click();
 		}
 		me.adjustContentPosition();
-		//me.queueTiles();
 		me.valid = false;
 	};
 	me.vectorDistance = function (xy1, xy2) {
@@ -227,7 +207,6 @@ function LevelEngine(svg) {
 	};
 	me.rakeTouchEnd = function (touchEvent) {
 		touchEvent.preventDefault();
-		//me.queueTiles();
 		if (!me.twoZoom) {
 			if (touchEvent.touches.length < 2) {
 				if (me.startedTouch) {
@@ -265,7 +244,6 @@ function LevelEngine(svg) {
 		me.translateZ = zoom;
 		me.moveZoom();
 		me.adjustContentPosition();
-		//me.queueTiles();
 		me.valid = false;
 		return false;
 	};
@@ -279,130 +257,132 @@ function LevelEngine(svg) {
 		g.appendChild(gg);
 		return gg;
 	};
-
-	/*me.tileFromArray = function (arr) {
-	for (var i = 0; i < arr.length; i++) {
-	var a = arr[i];
-	//console.log(arr[i]);
-	var g = me.rakeGroup(a.id, a.x, a.y, a.w, a.h);
-	//console.log(a.id);
-	if (g) {
-	for (var n = 0; n < a.l.length; n++) {
-	var o = a.l[n];
-	//console.log(o.o[0]);
-	for (var k = 0; k < o.o.length; k++) {
-	var d = o.o[k];
-	//console.log(d);
-	if(d.kind=='r'){
-	me.tileRectangle(g, d.x, d.y, d.w, d.h, d.rx, d.ry,d.css);
-	}
-	if(d.kind=='t'){
-	me.tileText(g, d.x, d.y, d.t,d.css);
-	}
-	if(d.kind=='p'){
-	me.tilePath(g, d.x, d.y, d.z,d.l,d.css);
-	}
-	if(d.kind=='l'){
-	me.tileLine(g, d.x1, d.y1, d.x2, d.y2,d.css);
-	}
-	}
-	}
-	}
-	}
-	};*/
 	me.clearUselessDetails = function () {
-		//console.log('clearUselessDetails');
-		var now = new Date().getTime();
-		var cntr=0;
-		var cntr2=0;
+		//var now = new Date().getTime();
+		//var cntr = 0;
+		//var cntr2 = 0;
 		if (me.model) {
 			for (var k = 0; k < me.model.length; k++) {
 				var group = me.model[k].g;
-				var x = -me.translateX;
-				var y = -me.translateY;
-				var w = me.svg.clientWidth * me.translateZ;
-				var h = me.svg.clientHeight * me.translateZ;
-				me.msEdgeHook(group);
-				for (var i = 0; i < group.children.length; i++) {
-					cntr2++;
-					var child = group.children[i];
-					//console.log('check child', child, x, y, w, h);
-					//if (me.outOfView(child, x, y, w, h) || child.minZoom > me.translateZ || child.maxZoom <= me.translateZ) {
-					if (me.outOfWatch(child, x, y, w, h) || child.minZoom > me.translateZ || child.maxZoom <= me.translateZ) {	
-						//console.log('remove child', child, x, y, w, h, me.outOfWatch(child, x, y, w, h),child.getBoundingClientRect());
-						group.removeChild(child);
-						cntr++;
-						i--;
-					}
-				}
+				me.clearUselessGroups(group);
 			}
 		}
-		console.log('removed',cntr,'objects','of',cntr2,'for',(new Date().getTime()-now)/1000,'sec');
+		//console.log('removed', cntr, 'groups', 'of', cntr2, 'for', (new Date().getTime() - now) / 1000, 'sec');
 	};
-	me.tileFromModel = function () {
-		//console.log(me.model);
-		var now = new Date().getTime();
-		var cntr=0;
-		var cntr2=2;
-		if (me.model) {
-			for (var k = 0; k < me.model.length; k++) {
-				//console.log('model',k);
-				var group = me.model[k].g;
-				var arr = me.model[k].m;
-				//console.log(group);
-				for (var i = 0; i < arr.length; i++) {
-					var a = arr[i];
-					cntr2++;
-					//console.log(me.translateZ,a);
-					if (a.z[0] <= me.translateZ && a.z[1] > me.translateZ) {
-						var g = me.rakeGroup(group, a.id, a.x * me.tapSize, a.y * me.tapSize, a.w * me.tapSize, a.h * me.tapSize);
-						//console.log(a.id,a.x * me.tapSize, a.y * me.tapSize, a.w * me.tapSize, a.h * me.tapSize);
-						if (g) {
-							g.minZoom = a.z[0];
-							g.maxZoom = a.z[1];
-							//console.log(g.minZoom,g.maxZoom,g);
-							for (var n = 0; n < a.l.length; n++) {
-								var d = a.l[n];
-								//console.log(d);
-								var element = null;
-								if (d.kind == 'r') {
-									element = me.tileRectangle(g, d.x * me.tapSize, d.y * me.tapSize, d.w * me.tapSize, d.h * me.tapSize, d.rx * me.tapSize, d.ry * me.tapSize, d.css);
-								}
-								if (d.kind == 't') {
-									element = me.tileText(g, d.x * me.tapSize, d.y * me.tapSize, d.t, d.css);
-								}
-								if (d.kind == 'p') {
-									element = me.tilePath(g, d.x * me.tapSize, d.y * me.tapSize, d.z, d.l, d.css);
-								}
-								if (d.kind == 'l') {
-									element = me.tileLine(g, d.x1 * me.tapSize, d.y1 * me.tapSize, d.x2 * me.tapSize, d.y2 * me.tapSize, d.css);
-								}
-								if (element) {
-									if (d.a) {
-										//console.log(d.a);
-										element.onClickFunction = d.a;
-										element.onclick = function () {
-											if (me.clicked) {
-												if (element) {
-													if (element.onClickFunction) {
-														element.onClickFunction();
-													}
-												}
-											}
-										}
-										element.ontouchend = element.onclick
-									}
-								}
-							}
-							cntr++;
+	me.clearUselessGroups = function (group) {
+		var x = -me.translateX;
+		var y = -me.translateY;
+		var w = me.svg.clientWidth * me.translateZ;
+		var h = me.svg.clientHeight * me.translateZ;
+		me.msEdgeHook(group);
+		for (var i = 0; i < group.children.length; i++) {
+			//cntr2++;
+			var child = group.children[i];
+			//console.log('check',child);
+			if (me.outOfWatch(child, x, y, w, h) || child.minZoom > me.translateZ || child.maxZoom <= me.translateZ) {
+				//console.log('remove',child);
+				group.removeChild(child);
+				//cntr++;
+				i--;
+			} else {
+				if(child.localName=='g'){
+					//console.dir(child);
+					me.clearUselessGroups(child);
+				}
+				
+				/*
+				if(child.localName=='g'){
+					for(var n=0;n<child.children.length;n++){
+						var s=child.children[n];
+						if(s.localName=='g'){
+							me.clearUselessGroups(s);
 						}
 					}
+				}*/
+			}
+		}
+	};
+	me.tileFromModel = function () {
+		//var now = new Date().getTime();
+		//var cntr = 0;
+		//var cntr2 = 0;
+		//var cntr3 = 0;
+		if (me.model) {
+			for (var k = 0; k < me.model.length; k++) {
+				var group = me.model[k].g;
+				var arr = me.model[k].m;
+				for (var i = 0; i < arr.length; i++) {
+					var a = arr[i];
+					//cntr2++;
+					me.addGroupTile(group, a);
 				}
 			}
 		}
 		me.valid = true;
-		//console.log('added',cntr,'objects');
-		console.log('added',cntr,'objects','of',cntr2,'for',(new Date().getTime()-now)/1000,'sec');
+		//console.log('+', cntr, 'groups', 'of', cntr2, 'for', (new Date().getTime() - now) / 1000, 'sec and ', cntr3, 'shapes');
+	};
+	me.addGroupTile = function (parentGroup, definitions) {
+		if (definitions.z[0] <= me.translateZ && definitions.z[1] > me.translateZ) {
+			if (me.collision(definitions.x * me.tapSize, definitions.y * me.tapSize, definitions.w * me.tapSize, definitions.h * me.tapSize //
+				, -me.translateX, -me.translateY, me.svg.clientWidth * me.translateZ, me.svg.clientHeight * me.translateZ)) {
+				var xg = me.childExists(parentGroup, definitions.id);
+				if (xg) {
+					for (var n = 0; n < definitions.l.length; n++) {
+						var d = definitions.l[n];
+						if (d.kind == 'g') {
+							me.addElement(xg, d);
+						}
+					}
+				} else {
+					var g = document.createElementNS(me.svgns, 'g');
+					g.id = definitions.id;
+					g.watchX = definitions.x * me.tapSize;
+					g.watchY = definitions.y * me.tapSize;
+					g.watchW = definitions.w * me.tapSize;
+					g.watchH = definitions.h * me.tapSize;
+					parentGroup.appendChild(g);
+					g.minZoom = definitions.z[0];
+					g.maxZoom = definitions.z[1];
+					for (var n = 0; n < definitions.l.length; n++) {
+						var d = definitions.l[n];
+						me.addElement(g, d);
+					}
+				}
+			}
+		}
+	};
+	me.addElement = function (g, d) {
+		var element = null;
+		if (d.kind == 'r') {
+			element = me.tileRectangle(g, d.x * me.tapSize, d.y * me.tapSize, d.w * me.tapSize, d.h * me.tapSize, d.rx * me.tapSize, d.ry * me.tapSize, d.css);
+		}
+		if (d.kind == 't') {
+			element = me.tileText(g, d.x * me.tapSize, d.y * me.tapSize, d.t, d.css);
+		}
+		if (d.kind == 'p') {
+			element = me.tilePath(g, d.x * me.tapSize, d.y * me.tapSize, d.z, d.l, d.css);
+		}
+		if (d.kind == 'l') {
+			element = me.tileLine(g, d.x1 * me.tapSize, d.y1 * me.tapSize, d.x2 * me.tapSize, d.y2 * me.tapSize, d.css);
+		}
+		if (d.kind == 'g') {
+			me.addGroupTile(g, d);
+		}
+		if (element) {
+			if (d.a) {
+				element.onClickFunction = d.a;
+				element.onclick = function () {
+					if (me.clicked) {
+						if (element) {
+							if (element.onClickFunction) {
+								element.onClickFunction();
+							}
+						}
+					}
+				}
+				element.ontouchend = element.onclick
+			}
+		}
 	};
 	me.tilePath = function (g, x, y, z, data, cssClass) {
 		var path = document.createElementNS(this.svgns, 'path');
@@ -454,7 +434,6 @@ function LevelEngine(svg) {
 		return line;
 	};
 	me.tileText = function (g, x, y, html, cssClass) {
-		//console.log('tileSongName',html);
 		var txt = document.createElementNS(this.svgns, 'text');
 		txt.setAttributeNS(null, 'x', x);
 		txt.setAttributeNS(null, 'y', y);
@@ -471,30 +450,16 @@ function LevelEngine(svg) {
 		var w = me.svg.clientWidth * me.translateZ;
 		var h = me.svg.clientHeight * me.translateZ;
 	};
-	me.rakeGroup = function (group, id, x, y, w, h) {
-		if (me.collision(x, y, w, h, -me.translateX, -me.translateY, me.svg.clientWidth * me.translateZ, me.svg.clientHeight * me.translateZ)) {
-			if (!me.childExists(group, id)) {
-				var g = document.createElementNS(me.svgns, 'g');
-				g.id = id;
-				g.watchX=x;
-				g.watchY=y;
-				g.watchW=w;
-				g.watchH=h;
-				group.appendChild(g);
-				return g;
-			}
-		}
-		return null;
-	};
+
 	me.childExists = function (group, id) {
 		me.msEdgeHook(group);
 		for (var i = 0; i < group.children.length; i++) {
 			var child = group.children[i];
 			if (child.id == id) {
-				return true;
+				return child;
 			}
 		}
-		return false;
+		return null;
 	};
 	me.clearAllDetails = function () {
 		if (me.model) {
@@ -502,28 +467,16 @@ function LevelEngine(svg) {
 				var group = me.model[i].g;
 				me.msEdgeHook(group);
 				while (me.group.children.length) {
-					//console.log(me.group.children[0]);
 					me.group.removeChild(group.children[0]);
 				}
 			}
 		}
 	};
-	
-	/*me.clearUselessNodes = function (x, y, w, h,group) {
-	me.msEdgeHook(group);
-	console.log('check',group);
-	if (me.outOfView(group, x, y, w, h)) {
-	//me.g.removeChild(group);
-	}
-	};*/
 	me.outOfView = function (child, x, y, w, h) {
 		var tbb = child.getBBox();
-		//console.log('check', tbb);
 		return !(me.collision(tbb.x, tbb.y, tbb.width, tbb.height, x, y, w, h));
 	};
 	me.outOfWatch = function (g, x, y, w, h) {
-		//var tbb = child.getBBox();
-		//console.log('check', tbb);
 		return !(me.collision(g.watchX, g.watchY, g.watchW, g.watchH, x, y, w, h));
 	};
 	me.collision = function (x1, y1, w1, h1, x2, y2, w2, h2) {
@@ -546,10 +499,8 @@ function LevelEngine(svg) {
 		var last = new Date().getTime();
 		var step = function (timestamp) {
 			var now = new Date().getTime();
-			//console.log(last,now);
 			if (last + 222 < now) {
-				//console.log('letsgo',last);
-				if(!(me.valid)){
+				if (!(me.valid)) {
 					me.queueTiles();
 				}
 				last = new Date().getTime();
@@ -564,8 +515,6 @@ function LevelEngine(svg) {
 	me.svg.addEventListener("touchstart", me.rakeTouchStart, false);
 	me.svg.addEventListener("touchmove", me.rakeTouchMove, false);
 	me.svg.addEventListener("touchend", me.rakeTouchEnd, false);
-
 	me.startLoop();
-
 	return me;
 }
