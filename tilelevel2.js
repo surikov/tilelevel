@@ -31,6 +31,24 @@ function LevelEngine(svg) {
 	me.svg.removeChild(rect);
 	me.applyZoomPosition = function () {
 		me.svg.setAttribute('viewBox', '' + (-me.translateX) + ' ' + (-me.translateY) + ' ' + me.width * me.translateZ + ' ' + me.height * me.translateZ);
+		if (me.model) {
+			for (var k = 0; k < me.model.length; k++) {
+				var m=me.model[k];
+				var tx=0;
+				var ty=0;
+				var tz=1;
+				if(m.lockX){
+					tx=-me.translateX;
+				}
+				if(m.lockY){
+					ty=-me.translateY;
+				}
+				if(m.lockX){
+					tz=me.translateZ;
+				}
+				m.g.setAttribute('transform', 'translate(' + tx + ',' + ty + ') scale(' + tz + ',' + tz + ')');
+			}
+		}
 	};
 	me.setModel = function (model) {
 		me.model = model;
@@ -258,68 +276,56 @@ function LevelEngine(svg) {
 		return gg;
 	};
 	me.clearUselessDetails = function () {
-		//var now = new Date().getTime();
-		//var cntr = 0;
-		//var cntr2 = 0;
 		if (me.model) {
 			for (var k = 0; k < me.model.length; k++) {
 				var group = me.model[k].g;
-				me.clearUselessGroups(group);
+				var x = -me.translateX;
+				var y = -me.translateY;
+				var w = me.svg.clientWidth * me.translateZ;
+				var h = me.svg.clientHeight * me.translateZ;
+				var z = me.translateZ;
+				if(me.model[k].lockX){
+					x=0;
+				}
+				if(me.model[k].lockY){
+					y=0;
+				}
+				if(me.model[k].lockZ){
+					w = me.svg.clientWidth;
+					h = me.svg.clientHeight;
+					z=1;
+				}
+				me.clearUselessGroups(group,x,y,w,h,z);
 			}
 		}
-		//console.log('removed', cntr, 'groups', 'of', cntr2, 'for', (new Date().getTime() - now) / 1000, 'sec');
 	};
-	me.clearUselessGroups = function (group) {
-		var x = -me.translateX;
-		var y = -me.translateY;
-		var w = me.svg.clientWidth * me.translateZ;
-		var h = me.svg.clientHeight * me.translateZ;
+	me.clearUselessGroups = function (group,x,y,w,h,z) {
+		
 		me.msEdgeHook(group);
 		for (var i = 0; i < group.children.length; i++) {
-			//cntr2++;
 			var child = group.children[i];
-			//console.log('check',child);
 			if (me.outOfWatch(child, x, y, w, h) || child.minZoom > me.translateZ || child.maxZoom <= me.translateZ) {
-				//console.log('remove',child);
 				group.removeChild(child);
-				//cntr++;
 				i--;
 			} else {
 				if(child.localName=='g'){
-					//console.dir(child);
-					me.clearUselessGroups(child);
+					me.clearUselessGroups(child,x,y,w,h,z);
 				}
-				
-				/*
-				if(child.localName=='g'){
-					for(var n=0;n<child.children.length;n++){
-						var s=child.children[n];
-						if(s.localName=='g'){
-							me.clearUselessGroups(s);
-						}
-					}
-				}*/
 			}
 		}
 	};
 	me.tileFromModel = function () {
-		//var now = new Date().getTime();
-		//var cntr = 0;
-		//var cntr2 = 0;
-		//var cntr3 = 0;
 		if (me.model) {
 			for (var k = 0; k < me.model.length; k++) {
 				var group = me.model[k].g;
 				var arr = me.model[k].m;
 				for (var i = 0; i < arr.length; i++) {
 					var a = arr[i];
-					//cntr2++;
 					me.addGroupTile(group, a);
 				}
 			}
 		}
 		me.valid = true;
-		//console.log('+', cntr, 'groups', 'of', cntr2, 'for', (new Date().getTime() - now) / 1000, 'sec and ', cntr3, 'shapes');
 	};
 	me.addGroupTile = function (parentGroup, definitions) {
 		if (definitions.z[0] <= me.translateZ && definitions.z[1] > me.translateZ) {

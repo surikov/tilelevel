@@ -290,6 +290,7 @@ function reset() {
 	}
 	for (var x = 0; x < 30000; x = x + 100) {
 		for (var y = 0; y < 500; y = y + 100) {
+
 			var gg = {
 				id: 'r3x' + x + 'x' + y,
 				x: x,
@@ -299,6 +300,7 @@ function reset() {
 				z: [1, 5],
 				l: []
 			};
+
 			for (var xx = 0; xx < 10; xx++) {
 				for (var yy = 0; yy < 10; yy++) {
 					gg.l.push({
@@ -312,6 +314,7 @@ function reset() {
 				}
 			}
 			m2.push(gg);
+
 			/*m2.push({
 			id: 'r3x' + x + 'x' + y,
 			x: x ,
@@ -330,7 +333,31 @@ function reset() {
 			]
 			});*/
 		}
-	}
+	};
+	var m3 = [{
+			id: 'a99',
+			x: 3.5,
+			y: 4,
+			w: 3,
+			h: 2,
+			z: [1, 1000],
+			l: [{
+					kind: 'r',
+					x: 3.5,
+					y: 4,
+					w: 3,
+					h: 2,
+					rx: 0.2,
+					ry: 0.2,
+					css: 'redtra'
+					,a: function () {
+						console.log('clicked');
+						alert('Anchor');
+					}
+				}
+			]
+		}
+	];
 	//console.log(m1.length);
 	//console.log(m2.length);
 	levelEngine.setModel([{
@@ -339,6 +366,12 @@ function reset() {
 			}, {
 				g: document.getElementById('cntntgroup'),
 				m: m1
+			}, {
+				g: document.getElementById('over'),
+				m: m3,
+				lockX: true,
+				lockY: true,
+				lockZ2: true
 			}
 		]);
 	//levelEngine.tileFromModel();
