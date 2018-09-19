@@ -33,18 +33,18 @@ function LevelEngine(svg) {
 		me.svg.setAttribute('viewBox', '' + (-me.translateX) + ' ' + (-me.translateY) + ' ' + me.width * me.translateZ + ' ' + me.height * me.translateZ);
 		if (me.model) {
 			for (var k = 0; k < me.model.length; k++) {
-				var m=me.model[k];
-				var tx=0;
-				var ty=0;
-				var tz=1;
-				if(m.lockX){
-					tx=-me.translateX;
+				var m = me.model[k];
+				var tx = 0;
+				var ty = 0;
+				var tz = 1;
+				if (m.lockX) {
+					tx = -me.translateX;
 				}
-				if(m.lockY){
-					ty=-me.translateY;
+				if (m.lockY) {
+					ty = -me.translateY;
 				}
-				if(m.lockZ){
-					tz=me.translateZ;
+				if (m.lockZ) {
+					tz = me.translateZ;
 				}
 				m.g.setAttribute('transform', 'translate(' + tx + ',' + ty + ') scale(' + tz + ',' + tz + ')');
 			}
@@ -110,7 +110,7 @@ function LevelEngine(svg) {
 		mouseEvent.preventDefault();
 		me.svg.removeEventListener('mousemove', me.rakeMouseMove, true);
 		if (Math.abs(me.clickX - mouseEvent.offsetX) < me.translateZ * me.tapSize / 8 //
-			 && Math.abs(me.clickY - mouseEvent.offsetY) < me.translateZ * me.tapSize / 8) {
+			&& Math.abs(me.clickY - mouseEvent.offsetY) < me.translateZ * me.tapSize / 8) {
 			me.click();
 		}
 		me.adjustContentPosition();
@@ -229,7 +229,7 @@ function LevelEngine(svg) {
 			if (touchEvent.touches.length < 2) {
 				if (me.startedTouch) {
 					if (Math.abs(me.clickX - me.startMouseScreenX) < me.translateZ * me.tapSize / 8 //
-						 && Math.abs(me.clickY - me.startMouseScreenY) < me.translateZ * me.tapSize / 8) {
+						&& Math.abs(me.clickY - me.startMouseScreenY) < me.translateZ * me.tapSize / 8) {
 						me.click();
 					}
 				} else {
@@ -279,11 +279,11 @@ function LevelEngine(svg) {
 		if (me.model) {
 			for (var k = 0; k < me.model.length; k++) {
 				var group = me.model[k].g;
-				var x = -me.translateX;
+				/*var x = -me.translateX;
 				var y = -me.translateY;
 				var w = me.svg.clientWidth * me.translateZ;
 				var h = me.svg.clientHeight * me.translateZ;
-				var z = me.translateZ;
+				var z = me.translateZ;*/
 				/*if(me.model[k].lockX){
 					x=0;
 				}
@@ -302,24 +302,49 @@ function LevelEngine(svg) {
 					}
 					console.log(x,y,w,h,z,group);
 				}*/
-				me.clearUselessGroups(group,x,y,w,h,z);
+				me.clearUselessGroups(group, me.model[k].lockX, me.model[k].lockY, me.model[k].lockZ);
 			}
 		}
 	};
-	me.clearUselessGroups = function (group,lx,ly,lz) {
+	me.clearUselessGroups = function (group, lx, ly, lz) {
 		var x = -me.translateX;
 		var y = -me.translateY;
 		var w = me.svg.clientWidth * me.translateZ;
 		var h = me.svg.clientHeight * me.translateZ;
+		if (lx) {
+			x = 0;
+		}
+		if (ly) {
+			y = 0;
+		}
+		if (lz) {
+			if (!(lx)) {
+				x = -me.translateX / me.translateZ;
+				w = me.svg.clientWidth;
+			}
+			if (!(ly)) {
+				y = -me.translateY / me.translateZ;
+				h = me.svg.clientHeight;
+			}
+		}
+
 		me.msEdgeHook(group);
 		for (var i = 0; i < group.children.length; i++) {
 			var child = group.children[i];
+			
+			/*
+			if (lx && child.watchX) {
+				console.log(child.watchX, child.watchY, child.watchW, child.watchH);
+				console.log('hole', x, y, w, h);
+				console.log('z', me.translateZ);
+			}
+*/
 			if (me.outOfWatch(child, x, y, w, h) || child.minZoom > me.translateZ || child.maxZoom <= me.translateZ) {
 				group.removeChild(child);
 				i--;
 			} else {
-				if(child.localName=='g'){
-					me.clearUselessGroups(child,lx,ly,lz);
+				if (child.localName == 'g') {
+					me.clearUselessGroups(child, lx, ly, lz);
 				}
 			}
 		}
@@ -331,22 +356,45 @@ function LevelEngine(svg) {
 				var arr = me.model[k].m;
 				for (var i = 0; i < arr.length; i++) {
 					var a = arr[i];
-					me.addGroupTile(group, a);
+					me.addGroupTile(group, a, me.model[k].lockX, me.model[k].lockY, me.model[k].lockZ);
 				}
 			}
 		}
 		me.valid = true;
 	};
-	me.addGroupTile = function (parentGroup, definitions) {
+	me.addGroupTile = function (parentGroup, definitions, lx, ly, lz) {
+		var x = -me.translateX;
+		var y = -me.translateY;
+		var w = me.svg.clientWidth * me.translateZ;
+		var h = me.svg.clientHeight * me.translateZ;
+		if (lx) {
+			x = 0;
+		}
+		if (ly) {
+			y = 0;
+		}
+		if (lz) {
+			if (!(lx)) {
+				x = -me.translateX / me.translateZ;
+				w = me.svg.clientWidth;
+			}
+			if (!(ly)) {
+				y = -me.translateY / me.translateZ;
+				h = me.svg.clientHeight;
+			}
+		}
 		if (definitions.z[0] <= me.translateZ && definitions.z[1] > me.translateZ) {
-			if (me.collision(definitions.x * me.tapSize, definitions.y * me.tapSize, definitions.w * me.tapSize, definitions.h * me.tapSize //
-				, -me.translateX, -me.translateY, me.svg.clientWidth * me.translateZ, me.svg.clientHeight * me.translateZ)) {
+			if (me.collision(definitions.x * me.tapSize, definitions.y * me.tapSize
+				, definitions.w * me.tapSize, definitions.h * me.tapSize //
+				,x,y,w,h)){
+				//, -me.translateX, -me.translateY
+				//, me.svg.clientWidth * me.translateZ, me.svg.clientHeight * me.translateZ)) {
 				var xg = me.childExists(parentGroup, definitions.id);
 				if (xg) {
 					for (var n = 0; n < definitions.l.length; n++) {
 						var d = definitions.l[n];
 						if (d.kind == 'g') {
-							me.addElement(xg, d);
+							me.addElement(xg, d, lx, ly, lz);
 						}
 					}
 				} else {
@@ -361,13 +409,13 @@ function LevelEngine(svg) {
 					g.maxZoom = definitions.z[1];
 					for (var n = 0; n < definitions.l.length; n++) {
 						var d = definitions.l[n];
-						me.addElement(g, d);
+						me.addElement(g, d, lx, ly, lz);
 					}
 				}
 			}
 		}
 	};
-	me.addElement = function (g, d) {
+	me.addElement = function (g, d, lx, ly, lz) {
 		var element = null;
 		if (d.kind == 'r') {
 			element = me.tileRectangle(g, d.x * me.tapSize, d.y * me.tapSize, d.w * me.tapSize, d.h * me.tapSize, d.rx * me.tapSize, d.ry * me.tapSize, d.css);
@@ -382,7 +430,7 @@ function LevelEngine(svg) {
 			element = me.tileLine(g, d.x1 * me.tapSize, d.y1 * me.tapSize, d.x2 * me.tapSize, d.y2 * me.tapSize, d.css);
 		}
 		if (d.kind == 'g') {
-			me.addGroupTile(g, d);
+			me.addGroupTile(g, d, lx, ly, lz);
 		}
 		if (element) {
 			if (d.a) {
