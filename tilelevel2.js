@@ -110,7 +110,7 @@ function LevelEngine(svg) {
 		mouseEvent.preventDefault();
 		me.svg.removeEventListener('mousemove', me.rakeMouseMove, true);
 		if (Math.abs(me.clickX - mouseEvent.offsetX) < me.translateZ * me.tapSize / 8 //
-			&& Math.abs(me.clickY - mouseEvent.offsetY) < me.translateZ * me.tapSize / 8) {
+			 && Math.abs(me.clickY - mouseEvent.offsetY) < me.translateZ * me.tapSize / 8) {
 			me.click();
 		}
 		me.adjustContentPosition();
@@ -229,7 +229,7 @@ function LevelEngine(svg) {
 			if (touchEvent.touches.length < 2) {
 				if (me.startedTouch) {
 					if (Math.abs(me.clickX - me.startMouseScreenX) < me.translateZ * me.tapSize / 8 //
-						&& Math.abs(me.clickY - me.startMouseScreenY) < me.translateZ * me.tapSize / 8) {
+						 && Math.abs(me.clickY - me.startMouseScreenY) < me.translateZ * me.tapSize / 8) {
 						me.click();
 					}
 				} else {
@@ -285,22 +285,22 @@ function LevelEngine(svg) {
 				var h = me.svg.clientHeight * me.translateZ;
 				var z = me.translateZ;*/
 				/*if(me.model[k].lockX){
-					x=0;
+				x=0;
 				}
 				if(me.model[k].lockY){
-					y=0;
+				y=0;
 				}
 				if(me.model[k].lockZ){
-					z=1;
-					if(me.model[k].lockX){
-						w = me.svg.clientWidth;
-					}
-					if(me.model[k].lockY){
-						h = me.svg.clientHeight;
-					}else{
-						y = -me.translateY* me.translateZ;
-					}
-					console.log(x,y,w,h,z,group);
+				z=1;
+				if(me.model[k].lockX){
+				w = me.svg.clientWidth;
+				}
+				if(me.model[k].lockY){
+				h = me.svg.clientHeight;
+				}else{
+				y = -me.translateY* me.translateZ;
+				}
+				console.log(x,y,w,h,z,group);
 				}*/
 				me.clearUselessGroups(group, me.model[k].lockX, me.model[k].lockY, me.model[k].lockZ);
 			}
@@ -331,14 +331,14 @@ function LevelEngine(svg) {
 		me.msEdgeHook(group);
 		for (var i = 0; i < group.children.length; i++) {
 			var child = group.children[i];
-			
+
 			/*
 			if (lx && child.watchX) {
-				console.log(child.watchX, child.watchY, child.watchW, child.watchH);
-				console.log('hole', x, y, w, h);
-				console.log('z', me.translateZ);
+			console.log(child.watchX, child.watchY, child.watchW, child.watchH);
+			console.log('hole', x, y, w, h);
+			console.log('z', me.translateZ);
 			}
-*/
+			 */
 			if (me.outOfWatch(child, x, y, w, h) || child.minZoom > me.translateZ || child.maxZoom <= me.translateZ) {
 				group.removeChild(child);
 				i--;
@@ -384,9 +384,8 @@ function LevelEngine(svg) {
 			}
 		}
 		if (definitions.z[0] <= me.translateZ && definitions.z[1] > me.translateZ) {
-			if (me.collision(definitions.x * me.tapSize, definitions.y * me.tapSize
-				, definitions.w * me.tapSize, definitions.h * me.tapSize //
-				,x,y,w,h)){
+			if (me.collision(definitions.x * me.tapSize, definitions.y * me.tapSize, definitions.w * me.tapSize, definitions.h * me.tapSize //
+				, x, y, w, h)) {
 				//, -me.translateX, -me.translateY
 				//, me.svg.clientWidth * me.translateZ, me.svg.clientHeight * me.translateZ)) {
 				var xg = me.childExists(parentGroup, definitions.id);
@@ -439,7 +438,9 @@ function LevelEngine(svg) {
 					if (me.clicked) {
 						if (element) {
 							if (element.onClickFunction) {
-								element.onClickFunction();
+								var xx = element.getBoundingClientRect().x - me.svg.getBoundingClientRect().x;
+								var yy = element.getBoundingClientRect().y - me.svg.getBoundingClientRect().y;
+								element.onClickFunction(me.translateZ * (me.clickX - xx) / me.tapSize, me.translateZ * (me.clickY - yy) / me.tapSize);
 							}
 						}
 					}
