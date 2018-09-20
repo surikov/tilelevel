@@ -233,7 +233,7 @@ function reset() {
 				y: y,
 				w: 1000,
 				h: 500,
-				z: [250, 1000],
+				z: [200, 1000],
 				l: [{
 						kind: 'r',
 						x: x + 5,
@@ -241,7 +241,13 @@ function reset() {
 						w: 888,
 						h: 144,
 						css: 'dbg'
-					}
+					},{
+							kind: 't',
+							x: x ,
+							y: y + 300,
+							t: ''+x+'x'+y,
+							css: 'tx1000'
+						}
 				]
 			});
 		}
@@ -254,7 +260,7 @@ function reset() {
 				y: y,
 				w: 500,
 				h: 500,
-				z: [30, 250],
+				z: [20, 300],
 				l: [{
 						kind: 'r',
 						x: x + 5,
@@ -262,7 +268,13 @@ function reset() {
 						w: 444,
 						h: 333,
 						css: 'dbg'
-					}
+					},{
+							kind: 't',
+							x: x ,
+							y: y + 300,
+							t: ''+x+'x'+y,
+							css: 'tx500'
+						}
 				]
 			});
 		}
@@ -275,7 +287,7 @@ function reset() {
 				y: y,
 				w: 100,
 				h: 100,
-				z: [5, 30],
+				z: [4, 50],
 				l: [{
 						kind: 'r',
 						x: x + 5,
@@ -283,7 +295,13 @@ function reset() {
 						w: 44,
 						h: 9,
 						css: 'dbg'
-					}
+					},{
+							kind: 't',
+							x: x ,
+							y: y + 20,
+							t: ''+x+'x'+y,
+							css: 'tx100'
+						}
 				]
 			});
 		}
@@ -311,6 +329,13 @@ function reset() {
 						h: 7,
 						css: 'dbg'
 					});
+					gg.l.push({
+							kind: 't',
+							x: x + 1 + xx * 10 ,
+							y: y + 1 + yy * 10+2,
+							t: ''+(x+xx)+'x'+(y+yy),
+							css: 'tx2'
+						});
 				}
 			}
 			m2.push(gg);
