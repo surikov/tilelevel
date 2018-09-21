@@ -1,4 +1,4 @@
-﻿console.log('tilelevel.js v2.08');
+﻿console.log('tilelevel.js v2.09');
 
 function LevelEngine(svg) {
 	var me = this;
@@ -70,16 +70,52 @@ function LevelEngine(svg) {
 		if (me.translateZ < 1) {
 			me.translateZ = 1;
 		}
+		if (me.translateZ >me.mx) {
+			me.translateZ = me.mx;
+		}
 		me.applyZoomPosition();
+	};
+	me.slidetContentPosition = function () {
+		var validTranslate={
+			x:me.translateX,y:me.translateY,z:me.translateZ
+		};
+		var wrong=false;
+		if (me.width - me.translateX / me.translateZ > me.innerWidth / me.translateZ) {
+			validTranslate.x = me.width * me.translateZ - me.innerWidth;
+			wrong=true;
+		}
+		if (me.height - me.translateY / me.translateZ > me.innerHeight / me.translateZ) {
+			validTranslate.y = me.height * me.translateZ - me.innerHeight;
+			wrong=true;
+		}
+		if (me.translateX > 0) {
+			validTranslate.x = 0;
+			wrong=true;
+		}
+		if (me.translateY > 0) {
+			validTranslate.y = 0;
+			wrong=true;
+		}
+		if (me.translateZ < 1) {
+			validTranslate.z = 1;
+			wrong=true;
+		}
+		if (me.translateZ >me.mx) {
+			validTranslate.z = me.mx;
+			wrong=true;
+		}		
+		if(wrong){
+			me.startSlideTo(validTranslate.x,validTranslate.y,validTranslate.z);
+		}
 	};
 	me.moveZoom = function () {
 		me.applyZoomPosition();
 	};
 	me.queueTiles = function () {
 		me.clearUselessDetails();
-		now = new Date().getTime();
 		me.tileFromModel();
 	};
+	
 	me.click = function () {
 		me.clicked = true;
 	};
@@ -104,7 +140,8 @@ function LevelEngine(svg) {
 		me.translateY = me.translateY + dY * me.translateZ;
 		me.startMouseScreenX = mouseEvent.offsetX;
 		me.startMouseScreenY = mouseEvent.offsetY;
-		me.moveZoom();
+		//me.moveZoom();
+		me.applyZoomPosition();
 	};
 	me.rakeMouseUp = function (mouseEvent) {
 		mouseEvent.preventDefault();
@@ -113,7 +150,8 @@ function LevelEngine(svg) {
 			 && Math.abs(me.clickY - mouseEvent.offsetY) < me.translateZ * me.tapSize / 8) {
 			me.click();
 		}
-		me.adjustContentPosition();
+		//me.adjustContentPosition();
+		me.slidetContentPosition();
 		me.valid = false;
 	};
 	me.vectorDistance = function (xy1, xy2) {
@@ -194,7 +232,8 @@ function LevelEngine(svg) {
 				me.translateY = me.translateY + dY * me.translateZ;
 				me.startMouseScreenX = touchEvent.touches[0].clientX;
 				me.startMouseScreenY = touchEvent.touches[0].clientY;
-				me.moveZoom();
+				//me.moveZoom();
+				me.applyZoomPosition();
 				return;
 			}
 		} else {
@@ -219,12 +258,14 @@ function LevelEngine(svg) {
 				me.translateX = me.translateX - (me.translateZ - zoom) * me.twocenter.x;
 				me.translateY = me.translateY - (me.translateZ - zoom) * me.twocenter.y;
 				me.translateZ = zoom;
-				me.adjustContentPosition();
+				//me.adjustContentPosition();
+				me.applyZoomPosition();
 			}
 		}
 	};
 	me.rakeTouchEnd = function (touchEvent) {
 		touchEvent.preventDefault();
+		me.valid = false;
 		if (!me.twoZoom) {
 			if (touchEvent.touches.length < 2) {
 				if (me.startedTouch) {
@@ -235,15 +276,17 @@ function LevelEngine(svg) {
 				} else {
 					//console.log('touch ended already');
 				}
-				me.adjustContentPosition();
-				me.valid = false;
+				//me.adjustContentPosition();
+				me.slidetContentPosition();
+				//me.valid = false;
 				return;
 			}
 		}
 		me.twoZoom = false;
 		me.startedTouch = false;
-		me.adjustContentPosition();
-		me.valid = false;
+		//me.adjustContentPosition();
+		me.slidetContentPosition();
+		//me.valid = false;
 	};
 	me.rakeMouseWheel = function (e) {
 		e.preventDefault();
@@ -279,29 +322,6 @@ function LevelEngine(svg) {
 		if (me.model) {
 			for (var k = 0; k < me.model.length; k++) {
 				var group = me.model[k].g;
-				/*var x = -me.translateX;
-				var y = -me.translateY;
-				var w = me.svg.clientWidth * me.translateZ;
-				var h = me.svg.clientHeight * me.translateZ;
-				var z = me.translateZ;*/
-				/*if(me.model[k].lockX){
-				x=0;
-				}
-				if(me.model[k].lockY){
-				y=0;
-				}
-				if(me.model[k].lockZ){
-				z=1;
-				if(me.model[k].lockX){
-				w = me.svg.clientWidth;
-				}
-				if(me.model[k].lockY){
-				h = me.svg.clientHeight;
-				}else{
-				y = -me.translateY* me.translateZ;
-				}
-				console.log(x,y,w,h,z,group);
-				}*/
 				me.clearUselessGroups(group, me.model[k].lockX, me.model[k].lockY, me.model[k].lockZ);
 			}
 		}
@@ -327,18 +347,9 @@ function LevelEngine(svg) {
 				h = me.svg.clientHeight;
 			}
 		}
-
 		me.msEdgeHook(group);
 		for (var i = 0; i < group.children.length; i++) {
 			var child = group.children[i];
-
-			/*
-			if (lx && child.watchX) {
-			console.log(child.watchX, child.watchY, child.watchW, child.watchH);
-			console.log('hole', x, y, w, h);
-			console.log('z', me.translateZ);
-			}
-			 */
 			if (me.outOfWatch(child, x, y, w, h) || child.minZoom > me.translateZ || child.maxZoom <= me.translateZ) {
 				group.removeChild(child);
 				i--;
@@ -386,8 +397,6 @@ function LevelEngine(svg) {
 		if (definitions.z[0] <= me.translateZ && definitions.z[1] > me.translateZ) {
 			if (me.collision(definitions.x * me.tapSize, definitions.y * me.tapSize, definitions.w * me.tapSize, definitions.h * me.tapSize //
 				, x, y, w, h)) {
-				//, -me.translateX, -me.translateY
-				//, me.svg.clientWidth * me.translateZ, me.svg.clientHeight * me.translateZ)) {
 				var xg = me.childExists(parentGroup, definitions.id);
 				if (xg) {
 					for (var n = 0; n < definitions.l.length; n++) {
@@ -550,6 +559,45 @@ function LevelEngine(svg) {
 		} else {
 			return false;
 
+		}
+	};
+	me.startSlideTo = function (x, y, z) {
+		//console.log(x, y, z);
+		var stepCount = 10;
+		var dx = (x - me.translateX) / stepCount;
+		var dy = (y - me.translateY) / stepCount;
+		var dz = (z - me.translateZ) / stepCount;
+		var xyz = [];
+		for (var i = 0; i < stepCount; i++) {
+			xyz.push({
+				x: me.translateX + dx * i,
+				y: me.translateY + dy * i,
+				z: me.translateZ + dz * i
+			});
+		}
+		xyz.push({
+			x: x,
+			y: y,
+			z: z
+		});
+		me.stepSlideTo(xyz);
+	};
+	me.stepSlideTo = function (xyz) {
+		var n = xyz.shift();
+		if (n) {
+			me.translateX = n.x;
+			me.translateY = n.y;
+			me.translateZ = n.z;
+			//me.adjustContentPosition();
+			me.applyZoomPosition();
+			var main = me;
+			setTimeout(function () {
+				main.stepSlideTo(xyz);
+			}, 20);
+		} else {
+			me.adjustContentPosition();
+			me.valid = true;
+			me.queueTiles();
 		}
 	};
 	me.collision2 = function (x, w, left, width) {
