@@ -70,42 +70,48 @@ function LevelEngine(svg) {
 		if (me.translateZ < 1) {
 			me.translateZ = 1;
 		}
-		if (me.translateZ >me.mx) {
+		if (me.translateZ > me.mx) {
 			me.translateZ = me.mx;
 		}
 		me.applyZoomPosition();
 	};
 	me.slidetContentPosition = function () {
-		var validTranslate={
-			x:me.translateX,y:me.translateY,z:me.translateZ
-		};
-		var wrong=false;
-		if (me.width - me.translateX / me.translateZ > me.innerWidth / me.translateZ) {
-			validTranslate.x = me.width * me.translateZ - me.innerWidth;
-			wrong=true;
-		}
-		if (me.height - me.translateY / me.translateZ > me.innerHeight / me.translateZ) {
-			validTranslate.y = me.height * me.translateZ - me.innerHeight;
-			wrong=true;
-		}
+		var vX = me.translateX;
+		var vY = me.translateY;
+		var vZ = me.translateZ;
+		var wrong = 0;
+
 		if (me.translateX > 0) {
-			validTranslate.x = 0;
-			wrong=true;
+			vX = 0;
+			wrong = 1;
+		} else {
+			if (me.width - me.translateX / me.translateZ > me.innerWidth / me.translateZ && me.width <=me.innerWidth / me.translateZ) {
+				vX = me.width * me.translateZ - me.innerWidth;
+				wrong = 2;
+			}
 		}
 		if (me.translateY > 0) {
-			validTranslate.y = 0;
-			wrong=true;
+			vY = 0;
+			wrong = 3;
+		} else {
+			//console.log(me.height - me.translateY / me.translateZ , me.innerHeight / me.translateZ,me.height ,me.innerHeight / me.translateZ);
+			if (me.height - me.translateY / me.translateZ > me.innerHeight / me.translateZ && me.height <=me.innerHeight / me.translateZ) {
+				
+				vY = me.height * me.translateZ - me.innerHeight;
+				wrong = 4;
+			}
 		}
 		if (me.translateZ < 1) {
-			validTranslate.z = 1;
-			wrong=true;
+			vZ = 1;
+			wrong = 5;
 		}
-		if (me.translateZ >me.mx) {
-			validTranslate.z = me.mx;
-			wrong=true;
-		}		
-		if(wrong){
-			me.startSlideTo(validTranslate.x,validTranslate.y,validTranslate.z);
+		if (me.translateZ > me.mx) {
+			vZ = me.mx;
+			wrong = 6;
+		}
+		if (wrong) {
+			//console.log(wrong,'startSlideTo', vX, vY, vZ, 'from', me.translateX, me.translateY, me.translateZ);
+			me.startSlideTo(vX, vY, vZ);
 		}
 	};
 	me.moveZoom = function () {
@@ -115,7 +121,7 @@ function LevelEngine(svg) {
 		me.clearUselessDetails();
 		me.tileFromModel();
 	};
-	
+
 	me.click = function () {
 		me.clicked = true;
 	};
@@ -562,7 +568,7 @@ function LevelEngine(svg) {
 		}
 	};
 	me.startSlideTo = function (x, y, z) {
-		//console.log(x, y, z);
+
 		var stepCount = 10;
 		var dx = (x - me.translateX) / stepCount;
 		var dy = (y - me.translateY) / stepCount;
