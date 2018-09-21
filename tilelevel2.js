@@ -59,15 +59,24 @@ function LevelEngine(svg) {
 		if (me.translateX > 0) {
 			me.translateX = 0;
 		} else {
-			if (me.width - me.translateX / me.translateZ > me.innerWidth / me.translateZ && me.width <= me.innerWidth / me.translateZ) {
-				me.translateX = me.width * me.translateZ - me.innerWidth;
+			if (me.width - me.translateX / me.translateZ > me.innerWidth / me.translateZ && me.width) {
+				if (me.innerWidth / me.translateZ) {
+					me.translateX = me.width * me.translateZ - me.innerWidth;
+				} else {
+					me.translateX = 0;
+				}
+
 			}
 		}
 		if (me.translateY > 0) {
 			me.translateY = 0;
 		} else {
-			if (me.height - me.translateY / me.translateZ > me.innerHeight / me.translateZ && me.height <= me.innerHeight / me.translateZ) {
-				me.translateY = me.height * me.translateZ - me.innerHeight;
+			if (me.height - me.translateY / me.translateZ > me.innerHeight / me.translateZ) {
+				if (me.height <= me.innerHeight / me.translateZ) {
+					me.translateY = me.height * me.translateZ - me.innerHeight;
+				} else {
+					me.translateY = 0;
+				}
 			}
 		}
 		if (me.translateZ < 1) {
@@ -83,40 +92,47 @@ function LevelEngine(svg) {
 		var vX = me.translateX;
 		var vY = me.translateY;
 		var vZ = me.translateZ;
-		var wrong = 0;
+		//var wrong = 0;
 
 		if (me.translateX > 0) {
 			vX = 0;
-			wrong = 1;
+			//wrong = 1;
 		} else {
-			if (me.width - me.translateX / me.translateZ > me.innerWidth / me.translateZ && me.width <= me.innerWidth / me.translateZ) {
-				vX = me.width * me.translateZ - me.innerWidth;
-				wrong = 2;
+			if (me.width - me.translateX / me.translateZ > me.innerWidth / me.translateZ) {
+				if (me.width * me.translateZ - me.innerWidth <= 0) {
+					vX = me.width * me.translateZ - me.innerWidth;
+					//wrong = 2;
+				} else {
+					vX = 0;
+				}
 			}
 		}
 		if (me.translateY > 0) {
 			vY = 0;
-			wrong = 3;
+			//wrong = 3;
 		} else {
 			//console.log(me.height - me.translateY / me.translateZ , me.innerHeight / me.translateZ,me.height ,me.innerHeight / me.translateZ);
-			if (me.height - me.translateY / me.translateZ > me.innerHeight / me.translateZ && me.height <= me.innerHeight / me.translateZ) {
-
-				vY = me.height * me.translateZ - me.innerHeight;
-				wrong = 4;
+			if (me.height - me.translateY / me.translateZ > me.innerHeight / me.translateZ) {
+				if (me.height * me.translateZ - me.innerHeight <= 0) {
+					vY = me.height * me.translateZ - me.innerHeight;
+					//wrong = 4;
+				} else {
+					vY = 0;
+				}
 			}
 		}
 		if (me.translateZ < 1) {
 			vZ = 1;
-			wrong = 5;
-		} else {
-			if (me.translateZ > me.mx) {
-				vZ = me.mx;
-				wrong = 6;
-			}
+			//wrong = 5;
+		} //else {
+		if (me.translateZ > me.mx) {
+			vZ = me.mx;
+			//wrong = 6;
 		}
-
-		if (wrong) {
-			//console.log(wrong,'startSlideTo', vX, vY, vZ, 'from', me.translateX, me.translateY, me.translateZ);
+		//}
+		console.log(me.translateX, me.translateY, me.translateZ, '=>', vX, vY, vZ);
+		if (vX != me.translateX || vY != me.translateY || vZ != me.translateZ) {
+			console.log('startSlideTo');
 			me.startSlideTo(vX, vY, vZ);
 		}
 	};
