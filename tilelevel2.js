@@ -55,23 +55,27 @@ function LevelEngine(svg) {
 		me.valid = false;
 	}
 	me.adjustContentPosition = function () {
-		if (me.width - me.translateX / me.translateZ > me.innerWidth / me.translateZ) {
-			me.translateX = me.width * me.translateZ - me.innerWidth;
-		}
-		if (me.height - me.translateY / me.translateZ > me.innerHeight / me.translateZ) {
-			me.translateY = me.height * me.translateZ - me.innerHeight;
-		}
+
 		if (me.translateX > 0) {
 			me.translateX = 0;
+		} else {
+			if (me.width - me.translateX / me.translateZ > me.innerWidth / me.translateZ && me.width <= me.innerWidth / me.translateZ) {
+				me.translateX = me.width * me.translateZ - me.innerWidth;
+			}
 		}
 		if (me.translateY > 0) {
 			me.translateY = 0;
+		} else {
+			if (me.height - me.translateY / me.translateZ > me.innerHeight / me.translateZ && me.height <= me.innerHeight / me.translateZ) {
+				me.translateY = me.height * me.translateZ - me.innerHeight;
+			}
 		}
 		if (me.translateZ < 1) {
 			me.translateZ = 1;
-		}
-		if (me.translateZ > me.mx) {
-			me.translateZ = me.mx;
+		} else {
+			if (me.translateZ > me.mx) {
+				me.translateZ = me.mx;
+			}
 		}
 		me.applyZoomPosition();
 	};
@@ -85,7 +89,7 @@ function LevelEngine(svg) {
 			vX = 0;
 			wrong = 1;
 		} else {
-			if (me.width - me.translateX / me.translateZ > me.innerWidth / me.translateZ && me.width <=me.innerWidth / me.translateZ) {
+			if (me.width - me.translateX / me.translateZ > me.innerWidth / me.translateZ && me.width <= me.innerWidth / me.translateZ) {
 				vX = me.width * me.translateZ - me.innerWidth;
 				wrong = 2;
 			}
@@ -95,8 +99,8 @@ function LevelEngine(svg) {
 			wrong = 3;
 		} else {
 			//console.log(me.height - me.translateY / me.translateZ , me.innerHeight / me.translateZ,me.height ,me.innerHeight / me.translateZ);
-			if (me.height - me.translateY / me.translateZ > me.innerHeight / me.translateZ && me.height <=me.innerHeight / me.translateZ) {
-				
+			if (me.height - me.translateY / me.translateZ > me.innerHeight / me.translateZ && me.height <= me.innerHeight / me.translateZ) {
+
 				vY = me.height * me.translateZ - me.innerHeight;
 				wrong = 4;
 			}
@@ -104,11 +108,13 @@ function LevelEngine(svg) {
 		if (me.translateZ < 1) {
 			vZ = 1;
 			wrong = 5;
+		} else {
+			if (me.translateZ > me.mx) {
+				vZ = me.mx;
+				wrong = 6;
+			}
 		}
-		if (me.translateZ > me.mx) {
-			vZ = me.mx;
-			wrong = 6;
-		}
+
 		if (wrong) {
 			//console.log(wrong,'startSlideTo', vX, vY, vZ, 'from', me.translateX, me.translateY, me.translateZ);
 			me.startSlideTo(vX, vY, vZ);
