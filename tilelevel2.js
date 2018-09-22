@@ -4,10 +4,10 @@ function LevelEngine(svg) {
 	var me = this;
 	me.svgns = "http://www.w3.org/2000/svg";
 	me.svg = svg;
-	me.width = me.svg.clientWidth;
-	me.height = me.svg.clientHeight;
-	me.innerWidth = me.width;
-	me.innerHeight = me.height;
+	me.viewWidth = me.svg.clientWidth;
+	me.viewHeight = me.svg.clientHeight;
+	me.innerWidth = me.viewWidth;
+	me.innerHeight = me.viewHeight;
 	me.pxCmRatio = 1;
 	me.twoZoom = false;
 	me.startMouseScreenX = 0;
@@ -30,23 +30,38 @@ function LevelEngine(svg) {
 	me.tapSize = tbb.width;
 	me.svg.removeChild(rect);
 	me.applyZoomPosition = function () {
-		me.svg.setAttribute('viewBox', '' + (-me.translateX) + ' ' + (-me.translateY) + ' ' + me.width * me.translateZ + ' ' + me.height * me.translateZ);
+		me.svg.setAttribute('viewBox', '' + (-me.translateX) + ' ' + (-me.translateY)
+			+ ' ' + me.viewWidth * me.translateZ + ' ' + me.viewHeight * me.translateZ);
 		if (me.model) {
 			for (var k = 0; k < me.model.length; k++) {
 				var m = me.model[k];
 				var tx = 0;
 				var ty = 0;
 				var tz = 1;
+
+				var shiftX = 0;
+				var shiftY = 0;
+
+				if (me.viewWidth * me.translateZ > me.innerWidth) {
+					shiftX = (me.viewWidth * me.translateZ - me.innerWidth) / 2;
+				}
+				if (me.viewHeight * me.translateZ > me.innerHeight) {
+					shiftY = (me.viewHeight * me.translateZ - me.innerHeight) / 2;
+				}
+
 				if (m.lockX) {
 					tx = -me.translateX;
+					shiftX=0;
 				}
 				if (m.lockY) {
 					ty = -me.translateY;
+					shiftY=0;
 				}
 				if (m.lockZ) {
 					tz = me.translateZ;
 				}
-				m.g.setAttribute('transform', 'translate(' + tx + ',' + ty + ') scale(' + tz + ',' + tz + ')');
+				
+				m.g.setAttribute('transform', 'translate(' + (tx + shiftX) + ',' + (ty + shiftY) + ') scale(' + tz + ',' + tz + ')');
 			}
 		}
 	};
@@ -55,49 +70,44 @@ function LevelEngine(svg) {
 		me.valid = false;
 	}
 	me.adjustContentPosition = function () {
-
-		if (me.translateX > 0) {
-			me.translateX = 0;
-		} else {
-			if (me.width - me.translateX / me.translateZ > me.innerWidth / me.translateZ && me.width) {
-				if (me.innerWidth / me.translateZ) {
-					me.translateX = me.width * me.translateZ - me.innerWidth;
-				} else {
-					me.translateX = 0;
-				}
-
-			}
+		var a = me.adjusted();
+		if (a.x != me.translateX || a.y != me.translateY || a.z != me.translateZ) {
+			/*console.log('adjust');
+			console.log('translateX',me.translateX);
+			console.log('a.x',a.x);
+			console.log('translateY',me.translateY);
+			console.log('a.y',a.y);
+			console.log('translateZ',me.translateZ);
+			console.log('a.z',a.z);*/
+			me.translateX = a.x;
+			me.translateY = a.y;
+			me.translateZ = a.z;
+			me.applyZoomPosition();
 		}
-		if (me.translateY > 0) {
-			me.translateY = 0;
-		} else {
-			if (me.height - me.translateY / me.translateZ > me.innerHeight / me.translateZ) {
-				if (me.height <= me.innerHeight / me.translateZ) {
-					me.translateY = me.height * me.translateZ - me.innerHeight;
-				} else {
-					me.translateY = 0;
-				}
-			}
-		}
-		if (me.translateZ < 1) {
-			me.translateZ = 1;
-		} else {
-			if (me.translateZ > me.mx) {
-				me.translateZ = me.mx;
-			}
-		}
-		me.applyZoomPosition();
 	};
-	me.slidetContentPosition = function () {
+	me.slideToContentPosition = function () {
+		var a = me.adjusted();
+		if (a.x != me.translateX || a.y != me.translateY || a.z != me.translateZ) {
+			/*console.log('startSlideTo');
+			console.log('translateX',me.translateX);
+			console.log('a.x',a.x);
+			console.log('translateY',me.translateY);
+			console.log('a.y',a.y);
+			console.log('translateZ',me.translateZ);
+			console.log('a.z',a.z);*/
+			me.startSlideTo(a.x, a.y, a.z);
+		}
+	};
+	me.adjusted = function () {
 		var vX = me.translateX;
 		var vY = me.translateY;
 		var vZ = me.translateZ;
 		if (me.translateX > 0) {
 			vX = 0;
 		} else {
-			if (me.width - me.translateX / me.translateZ > me.innerWidth / me.translateZ) {
-				if (me.width * me.translateZ - me.innerWidth <= 0) {
-					vX = me.width * me.translateZ - me.innerWidth;
+			if (me.viewWidth - me.translateX / me.translateZ > me.innerWidth / me.translateZ) {
+				if (me.viewWidth * me.translateZ - me.innerWidth <= 0) {
+					vX = me.viewWidth * me.translateZ - me.innerWidth;
 				} else {
 					vX = 0;
 				}
@@ -106,9 +116,9 @@ function LevelEngine(svg) {
 		if (me.translateY > 0) {
 			vY = 0;
 		} else {
-			if (me.height - me.translateY / me.translateZ > me.innerHeight / me.translateZ) {
-				if (me.height * me.translateZ - me.innerHeight <= 0) {
-					vY = me.height * me.translateZ - me.innerHeight;
+			if (me.viewHeight - me.translateY / me.translateZ > me.innerHeight / me.translateZ) {
+				if (me.viewHeight * me.translateZ - me.innerHeight <= 0) {
+					vY = me.viewHeight * me.translateZ - me.innerHeight;
 				} else {
 					vY = 0;
 				}
@@ -121,9 +131,7 @@ function LevelEngine(svg) {
 				vZ = me.mx;
 			}
 		}
-		if (vX != me.translateX || vY != me.translateY || vZ != me.translateZ) {
-			me.startSlideTo(vX, vY, vZ);
-		}
+		return { x: vX, y: vY, z: vZ };
 	};
 	me.moveZoom = function () {
 		me.applyZoomPosition();
@@ -164,11 +172,11 @@ function LevelEngine(svg) {
 		mouseEvent.preventDefault();
 		me.svg.removeEventListener('mousemove', me.rakeMouseMove, true);
 		if (Math.abs(me.clickX - mouseEvent.offsetX) < me.translateZ * me.tapSize / 8 //
-			 && Math.abs(me.clickY - mouseEvent.offsetY) < me.translateZ * me.tapSize / 8) {
+			&& Math.abs(me.clickY - mouseEvent.offsetY) < me.translateZ * me.tapSize / 8) {
 			me.click();
 		}
 		//me.adjustContentPosition();
-		me.slidetContentPosition();
+		me.slideToContentPosition();
 		me.valid = false;
 	};
 	me.vectorDistance = function (xy1, xy2) {
@@ -287,14 +295,14 @@ function LevelEngine(svg) {
 			if (touchEvent.touches.length < 2) {
 				if (me.startedTouch) {
 					if (Math.abs(me.clickX - me.startMouseScreenX) < me.translateZ * me.tapSize / 8 //
-						 && Math.abs(me.clickY - me.startMouseScreenY) < me.translateZ * me.tapSize / 8) {
+						&& Math.abs(me.clickY - me.startMouseScreenY) < me.translateZ * me.tapSize / 8) {
 						me.click();
 					}
 				} else {
 					//console.log('touch ended already');
 				}
 				//me.adjustContentPosition();
-				me.slidetContentPosition();
+				me.slideToContentPosition();
 				//me.valid = false;
 				return;
 			}
@@ -302,7 +310,7 @@ function LevelEngine(svg) {
 		me.twoZoom = false;
 		me.startedTouch = false;
 		//me.adjustContentPosition();
-		me.slidetContentPosition();
+		me.slideToContentPosition();
 		//me.valid = false;
 	};
 	me.rakeMouseWheel = function (e) {
