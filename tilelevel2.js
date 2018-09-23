@@ -1,5 +1,4 @@
-﻿console.log('tilelevel.js v2.10');
-
+﻿console.log('tilelevel.js v2.11');
 function LevelEngine(svg) {
 	var me = this;
 	me.svgns = "http://www.w3.org/2000/svg";
@@ -51,16 +50,15 @@ function LevelEngine(svg) {
 
 				if (m.lockX) {
 					tx = -me.translateX;
-					shiftX=0;
+					shiftX = 0;
 				}
 				if (m.lockY) {
 					ty = -me.translateY;
-					shiftY=0;
+					shiftY = 0;
 				}
 				if (m.lockZ) {
 					tz = me.translateZ;
 				}
-				
 				m.g.setAttribute('transform', 'translate(' + (tx + shiftX) + ',' + (ty + shiftY) + ') scale(' + tz + ',' + tz + ')');
 			}
 		}
@@ -72,13 +70,6 @@ function LevelEngine(svg) {
 	me.adjustContentPosition = function () {
 		var a = me.adjusted();
 		if (a.x != me.translateX || a.y != me.translateY || a.z != me.translateZ) {
-			/*console.log('adjust');
-			console.log('translateX',me.translateX);
-			console.log('a.x',a.x);
-			console.log('translateY',me.translateY);
-			console.log('a.y',a.y);
-			console.log('translateZ',me.translateZ);
-			console.log('a.z',a.z);*/
 			me.translateX = a.x;
 			me.translateY = a.y;
 			me.translateZ = a.z;
@@ -88,13 +79,6 @@ function LevelEngine(svg) {
 	me.slideToContentPosition = function () {
 		var a = me.adjusted();
 		if (a.x != me.translateX || a.y != me.translateY || a.z != me.translateZ) {
-			/*console.log('startSlideTo');
-			console.log('translateX',me.translateX);
-			console.log('a.x',a.x);
-			console.log('translateY',me.translateY);
-			console.log('a.y',a.y);
-			console.log('translateZ',me.translateZ);
-			console.log('a.z',a.z);*/
 			me.startSlideTo(a.x, a.y, a.z);
 		}
 	};
@@ -175,7 +159,6 @@ function LevelEngine(svg) {
 			&& Math.abs(me.clickY - mouseEvent.offsetY) < me.translateZ * me.tapSize / 8) {
 			me.click();
 		}
-		//me.adjustContentPosition();
 		me.slideToContentPosition();
 		me.valid = false;
 	};
@@ -283,7 +266,6 @@ function LevelEngine(svg) {
 				me.translateX = me.translateX - (me.translateZ - zoom) * me.twocenter.x;
 				me.translateY = me.translateY - (me.translateZ - zoom) * me.twocenter.y;
 				me.translateZ = zoom;
-				//me.adjustContentPosition();
 				me.applyZoomPosition();
 			}
 		}
@@ -301,17 +283,13 @@ function LevelEngine(svg) {
 				} else {
 					//console.log('touch ended already');
 				}
-				//me.adjustContentPosition();
 				me.slideToContentPosition();
-				//me.valid = false;
 				return;
 			}
 		}
 		me.twoZoom = false;
 		me.startedTouch = false;
-		//me.adjustContentPosition();
 		me.slideToContentPosition();
-		//me.valid = false;
 	};
 	me.rakeMouseWheel = function (e) {
 		e.preventDefault();
@@ -543,13 +521,6 @@ function LevelEngine(svg) {
 		g.appendChild(txt);
 		return txt;
 	};
-	/*me.addRakeDetails = function () {
-		var x = -me.translateX;
-		var y = -me.translateY;
-		var w = me.svg.clientWidth * me.translateZ;
-		var h = me.svg.clientHeight * me.translateZ;
-	};*/
-
 	me.childExists = function (group, id) {
 		me.msEdgeHook(group);
 		for (var i = 0; i < group.children.length; i++) {
@@ -583,11 +554,9 @@ function LevelEngine(svg) {
 			return true;
 		} else {
 			return false;
-
 		}
 	};
 	me.startSlideTo = function (x, y, z) {
-
 		var stepCount = 10;
 		var dx = (x - me.translateX) / stepCount;
 		var dy = (y - me.translateY) / stepCount;
@@ -613,7 +582,6 @@ function LevelEngine(svg) {
 			me.translateX = n.x;
 			me.translateY = n.y;
 			me.translateZ = n.z;
-			//me.adjustContentPosition();
 			me.applyZoomPosition();
 			var main = me;
 			setTimeout(function () {
