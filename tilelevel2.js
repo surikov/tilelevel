@@ -1,4 +1,4 @@
-﻿console.log('tilelevel.js v2.12');
+﻿console.log('tilelevel.js v2.13');
 function LevelEngine(svg) {
 	var me = this;
 	me.svgns = "http://www.w3.org/2000/svg";
@@ -69,9 +69,10 @@ function LevelEngine(svg) {
 		me.resetModel();
 	};
 	me.resetModel=function(){
-		levelEngine.applyZoomPosition();
-		levelEngine.adjustContentPosition();
-		levelEngine.slideToContentPosition();
+		me.clearAllDetails();
+		me.applyZoomPosition();
+		me.adjustContentPosition();
+		me.slideToContentPosition();
 		me.valid = false;
 	};
 	me.adjustContentPosition = function () {
