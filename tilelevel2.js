@@ -1,4 +1,4 @@
-﻿console.log('tilelevel.js v2.13');
+﻿console.log('tilelevel.js v2.14');
 function LevelEngine(svg) {
 	var me = this;
 	me.svgns = "http://www.w3.org/2000/svg";
@@ -21,6 +21,10 @@ function LevelEngine(svg) {
 	me.twodistance = 0;
 	me.startedTouch = false;
 	me.mx = 100;
+	me.layerNormal = 0;
+	me.layerOverlay = 1;
+	me.layerColumn = 2;
+	me.layerRow = 3;
 	var rect = document.createElementNS(this.svgns, 'rect');
 	rect.setAttributeNS(null, 'height', '1cm');
 	rect.setAttributeNS(null, 'width', '1cm');
@@ -33,42 +37,74 @@ function LevelEngine(svg) {
 			+ ' ' + me.viewWidth * me.translateZ + ' ' + me.viewHeight * me.translateZ);
 		if (me.model) {
 			for (var k = 0; k < me.model.length; k++) {
-				var m = me.model[k];
+				var layer = me.model[k];
 				var tx = 0;
 				var ty = 0;
 				var tz = 1;
 
-				var shiftX = 0;
-				var shiftY = 0;
+				var cX = 0;
+				var cY = 0;
+
+				var sX = 0;
+				var sY = 0;
 
 				if (me.viewWidth * me.translateZ > me.innerWidth) {
-					shiftX = (me.viewWidth * me.translateZ - me.innerWidth) / 2;
+					cX = (me.viewWidth * me.translateZ - me.innerWidth) / 2;
 				}
 				if (me.viewHeight * me.translateZ > me.innerHeight) {
-					shiftY = (me.viewHeight * me.translateZ - me.innerHeight) / 2;
+					cY = (me.viewHeight * me.translateZ - me.innerHeight) / 2;
 				}
 
-				if (m.lockX) {
-					tx = -me.translateX;
-					shiftX = 0;
-				}
-				if (m.lockY) {
-					ty = -me.translateY;
-					shiftY = 0;
-				}
-				if (m.lockZ) {
+				if (layer.kind == me.layerOverlay) {
 					tz = me.translateZ;
+					tx = -me.translateX;
+					ty = -me.translateY;
+					cX = 0;
+					cY = 0;
+				} else {
+					if (layer.kind == me.layerColumn) {
+						tx = -me.translateX;
+						cX = 0;
+					} else {
+						if (layer.kind == me.layerRow) {
+							ty = -me.translateY;
+							cY = 0;
+						}
+					}
 				}
-				m.g.setAttribute('transform', 'translate(' + (tx + shiftX) + ',' + (ty + shiftY) + ') scale(' + tz + ',' + tz + ')');
+
+				if (layer.shiftX) {
+					sX = layer.shiftX * me.tapSize * me.translateZ;
+					//console.log(sX);
+				}
+				if (layer.shiftY) {
+					sY = layer.shiftY * me.tapSize * me.translateZ;
+				}
+
+
+				/*
+								if (m.lockX) {
+									tx = -me.translateX;
+									shiftX = 0;
+								}
+								if (m.lockY) {
+									ty = -me.translateY;
+									shiftY = 0;
+								}
+								if (m.lockZ) {
+									tz = me.translateZ;
+								}*/
+				layer.g.setAttribute('transform', 'translate(' + (tx + cX + sX)
+					+ ',' + (ty + cY + sY) + ') scale(' + tz + ',' + tz + ')');
 			}
 		}
 	};
 	me.setModel = function (model) {
 		me.model = model;
-		
+
 		me.resetModel();
 	};
-	me.resetModel=function(){
+	me.resetModel = function () {
 		me.clearAllDetails();
 		me.applyZoomPosition();
 		me.adjustContentPosition();
@@ -125,17 +161,17 @@ function LevelEngine(svg) {
 		}
 		return { x: vX, y: vY, z: vZ };
 	};
-	me.moveZoom = function () {
+	/*me.moveZoom = function () {
 		me.applyZoomPosition();
-	};
+	};*/
 	me.queueTiles = function () {
 		me.clearUselessDetails();
 		me.tileFromModel();
 	};
-
-	me.click = function () {
-		me.clicked = true;
-	};
+	/*
+		me.click = function () {
+			me.clicked = true;
+		};*/
 	me.maxZoom = function () {
 		return me.mx;
 	};
@@ -165,7 +201,8 @@ function LevelEngine(svg) {
 		me.svg.removeEventListener('mousemove', me.rakeMouseMove, true);
 		if (Math.abs(me.clickX - mouseEvent.offsetX) < me.translateZ * me.tapSize / 8 //
 			&& Math.abs(me.clickY - mouseEvent.offsetY) < me.translateZ * me.tapSize / 8) {
-			me.click();
+			//me.click();
+			me.clicked = true;
 		}
 		me.slideToContentPosition();
 		me.valid = false;
@@ -286,7 +323,8 @@ function LevelEngine(svg) {
 				if (me.startedTouch) {
 					if (Math.abs(me.clickX - me.startMouseScreenX) < me.translateZ * me.tapSize / 8 //
 						&& Math.abs(me.clickY - me.startMouseScreenY) < me.translateZ * me.tapSize / 8) {
-						me.click();
+						//me.click();
+						me.clicked = true;
 					}
 				} else {
 					//console.log('touch ended already');
@@ -314,7 +352,8 @@ function LevelEngine(svg) {
 		me.translateX = me.translateX - (me.translateZ - zoom) * e.offsetX;
 		me.translateY = me.translateY - (me.translateZ - zoom) * e.offsetY;
 		me.translateZ = zoom;
-		me.moveZoom();
+		//me.moveZoom();
+		me.applyZoomPosition();
 		me.adjustContentPosition();
 		me.valid = false;
 		return false;
@@ -333,16 +372,18 @@ function LevelEngine(svg) {
 		if (me.model) {
 			for (var k = 0; k < me.model.length; k++) {
 				var group = me.model[k].g;
-				me.clearUselessGroups(group, me.model[k].lockX, me.model[k].lockY, me.model[k].lockZ);
+				//me.clearUselessGroups(group, me.model[k].lockX, me.model[k].lockY, me.model[k].lockZ);
+				me.clearUselessGroups(group, me.model[k].kind);
 			}
 		}
 	};
-	me.clearUselessGroups = function (group, lx, ly, lz) {
+	//me.clearUselessGroups = function (group, lx, ly, lz) {
+	me.clearUselessGroups = function (group, kind) {
 		var x = -me.translateX;
 		var y = -me.translateY;
 		var w = me.svg.clientWidth * me.translateZ;
 		var h = me.svg.clientHeight * me.translateZ;
-		if (lx) {
+		/*if (lx) {
 			x = 0;
 		}
 		if (ly) {
@@ -357,16 +398,36 @@ function LevelEngine(svg) {
 				y = -me.translateY / me.translateZ;
 				h = me.svg.clientHeight;
 			}
+		}*/
+		if (kind == me.layerOverlay) {
+			//console.log(x, y, w, h);
+			x = 0;
+			y = 0;
+			/*x = -me.translateX / me.translateZ;
+			w = me.svg.clientWidth;
+			y = -me.translateY / me.translateZ;
+			h = me.svg.clientHeight;*/
+			//console.log(x, y, w, h);
+		} else {
+			if (kind == me.layerColumn) {
+				x = 0;
+			} else {
+				if (kind == me.layerRow) {
+					y = 0;
+				}
+			}
 		}
 		me.msEdgeHook(group);
 		for (var i = 0; i < group.children.length; i++) {
 			var child = group.children[i];
 			if (me.outOfWatch(child, x, y, w, h) || child.minZoom > me.translateZ || child.maxZoom <= me.translateZ) {
 				group.removeChild(child);
+				//console.log(child.watchX,child.watchY,child.watchW,child.watchH, x, y, w, h);
 				i--;
 			} else {
 				if (child.localName == 'g') {
-					me.clearUselessGroups(child, lx, ly, lz);
+					//me.clearUselessGroups(child, lx, ly, lz);
+					me.clearUselessGroups(child, kind);
 				}
 			}
 		}
@@ -378,18 +439,21 @@ function LevelEngine(svg) {
 				var arr = me.model[k].m;
 				for (var i = 0; i < arr.length; i++) {
 					var a = arr[i];
-					me.addGroupTile(group, a, me.model[k].lockX, me.model[k].lockY, me.model[k].lockZ);
+					//me.addGroupTile(group, a, me.model[k].lockX, me.model[k].lockY, me.model[k].lockZ);
+					me.addGroupTile(group, a, me.model[k].kind);
 				}
 			}
 		}
 		me.valid = true;
 	};
-	me.addGroupTile = function (parentGroup, definitions, lx, ly, lz) {
+	//me.addGroupTile = function (parentGroup, definitions, lx, ly, lz) {
+	me.addGroupTile = function (parentGroup, definitions, kind) {
 		var x = -me.translateX;
 		var y = -me.translateY;
 		var w = me.svg.clientWidth * me.translateZ;
 		var h = me.svg.clientHeight * me.translateZ;
-		if (lx) {
+
+		/*if (lx) {
 			x = 0;
 		}
 		if (ly) {
@@ -405,15 +469,36 @@ function LevelEngine(svg) {
 				h = me.svg.clientHeight;
 			}
 		}
+		*/
+		if (kind == me.layerOverlay) {
+			/*x = -me.translateX / me.translateZ;
+			w = me.svg.clientWidth;
+			y = -me.translateY / me.translateZ;
+			h = me.svg.clientHeight;
+			*/
+			x = 0;
+			y = 0;
+		} else {
+			if (kind == me.layerColumn) {
+				x = 0;
+			} else {
+				if (kind == me.layerRow) {
+					y = 0;
+				}
+			}
+		}
 		if (definitions.z[0] <= me.translateZ && definitions.z[1] > me.translateZ) {
-			if (me.collision(definitions.x * me.tapSize, definitions.y * me.tapSize, definitions.w * me.tapSize, definitions.h * me.tapSize //
-				, x, y, w, h)) {
+			if (me.collision(definitions.x * me.tapSize, definitions.y * me.tapSize
+				, definitions.w * me.tapSize, definitions.h * me.tapSize //
+				, x, y
+				, w, h)) {
 				var xg = me.childExists(parentGroup, definitions.id);
 				if (xg) {
 					for (var n = 0; n < definitions.l.length; n++) {
 						var d = definitions.l[n];
 						if (d.kind == 'g') {
-							me.addElement(xg, d, lx, ly, lz);
+							//me.addElement(xg, d, lx, ly, lz);
+							me.addElement(xg, d, kind);
 						}
 					}
 				} else {
@@ -428,13 +513,15 @@ function LevelEngine(svg) {
 					g.maxZoom = definitions.z[1];
 					for (var n = 0; n < definitions.l.length; n++) {
 						var d = definitions.l[n];
-						me.addElement(g, d, lx, ly, lz);
+						//me.addElement(g, d, lx, ly, lz);
+						me.addElement(g, d, kind);
 					}
 				}
 			}
 		}
 	};
-	me.addElement = function (g, d, lx, ly, lz) {
+	//me.addElement = function (g, d, lx, ly, lz) {
+	me.addElement = function (g, d, kind) {
 		var element = null;
 		if (d.kind == 'r') {
 			element = me.tileRectangle(g, d.x * me.tapSize, d.y * me.tapSize, d.w * me.tapSize, d.h * me.tapSize, d.rx * me.tapSize, d.ry * me.tapSize, d.css);
@@ -449,7 +536,8 @@ function LevelEngine(svg) {
 			element = me.tileLine(g, d.x1 * me.tapSize, d.y1 * me.tapSize, d.x2 * me.tapSize, d.y2 * me.tapSize, d.css);
 		}
 		if (d.kind == 'g') {
-			me.addGroupTile(g, d, lx, ly, lz);
+			//me.addGroupTile(g, d, lx, ly, lz);
+			me.addGroupTile(g, d, kind);
 		}
 		if (element) {
 			if (d.a) {
