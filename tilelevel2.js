@@ -1,4 +1,4 @@
-﻿console.log('tilelevel.js v2.09');
+﻿console.log('tilelevel.js v2.10');
 
 function LevelEngine(svg) {
 	var me = this;
@@ -543,12 +543,12 @@ function LevelEngine(svg) {
 		g.appendChild(txt);
 		return txt;
 	};
-	me.addRakeDetails = function () {
+	/*me.addRakeDetails = function () {
 		var x = -me.translateX;
 		var y = -me.translateY;
 		var w = me.svg.clientWidth * me.translateZ;
 		var h = me.svg.clientHeight * me.translateZ;
-	};
+	};*/
 
 	me.childExists = function (group, id) {
 		me.msEdgeHook(group);
@@ -565,8 +565,8 @@ function LevelEngine(svg) {
 			for (var i = 0; i < me.model.length; i++) {
 				var group = me.model[i].g;
 				me.msEdgeHook(group);
-				while (me.group.children.length) {
-					me.group.removeChild(group.children[0]);
+				while (group.children.length) {
+					group.removeChild(group.children[0]);
 				}
 			}
 		}
