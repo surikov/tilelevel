@@ -3,7 +3,7 @@ var levelEngine = null;
 function start() {
 	console.log('start');
 	levelEngine = new LevelEngine(document.getElementById('contentSVG'));
-	levelEngine.innerWidth = 3000 * levelEngine.tapSize;
+	levelEngine.innerWidth = 30000 * levelEngine.tapSize;
 	levelEngine.innerHeight = 500 * levelEngine.tapSize;
 	levelEngine.mx = 999;
 	//reset();
@@ -192,7 +192,7 @@ function reset() {
 			y: 0,
 			w: 3000,
 			h: 500,
-			z: [1, 999],
+			z: [1, 1000],
 			l: [{
 				kind: 'r',
 				x: 0,
@@ -381,7 +381,7 @@ function reset() {
 			ry: 0.2,
 			css: 'redtra'
 			, a: function (xx, yy) {
-				console.log('clicked', xx, yy);
+				console.log('clicked', xx, yy,levelEngine.translateX,levelEngine.translateY,levelEngine.translateZ);
 				//alert('Anchor');
 			}
 		}
@@ -395,13 +395,11 @@ function reset() {
 		m: m2
 	}, {
 		g: document.getElementById('cntntgroup'),
-		m: m1
+		m: m1,shiftX:100
 	}, {
 		g: document.getElementById('over'),
 		m: m3,
-		lockX2: true,
-		lockY: true,
-		lockZ: true
+		kind: levelEngine.layerOverlay
 	}
 	]);
 	//levelEngine.tileFromModel();

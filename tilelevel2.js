@@ -1,4 +1,4 @@
-﻿console.log('tilelevel.js v2.14');
+﻿console.log('tilelevel.js v2.16');
 function LevelEngine(svg) {
 	var me = this;
 	me.svgns = "http://www.w3.org/2000/svg";
@@ -65,21 +65,23 @@ function LevelEngine(svg) {
 					if (layer.kind == me.layerColumn) {
 						tx = -me.translateX;
 						cX = 0;
+						if (layer.shiftX) {
+							sX = layer.shiftX * me.tapSize * me.translateZ;
+							//console.log(sX);
+						}
 					} else {
 						if (layer.kind == me.layerRow) {
 							ty = -me.translateY;
 							cY = 0;
+							if (layer.shiftY) {
+								sY = layer.shiftY * me.tapSize * me.translateZ;
+							}
 						}
 					}
 				}
 
-				if (layer.shiftX) {
-					sX = layer.shiftX * me.tapSize * me.translateZ;
-					//console.log(sX);
-				}
-				if (layer.shiftY) {
-					sY = layer.shiftY * me.tapSize * me.translateZ;
-				}
+				
+				
 
 
 				/*
