@@ -1,4 +1,4 @@
-﻿console.log('tilelevel.js v2.16');
+﻿console.log('tilelevel.js v2.17');
 function LevelEngine(svg) {
 	var me = this;
 	me.svgns = "http://www.w3.org/2000/svg";
@@ -34,7 +34,7 @@ function LevelEngine(svg) {
 	me.svg.removeChild(rect);
 	me.applyZoomPosition = function () {
 		me.svg.setAttribute('viewBox', '' + (-me.translateX) + ' ' + (-me.translateY)
-			+ ' ' + me.viewWidth * me.translateZ + ' ' + me.viewHeight * me.translateZ);
+			 + ' ' + me.viewWidth * me.translateZ + ' ' + me.viewHeight * me.translateZ);
 		if (me.model) {
 			for (var k = 0; k < me.model.length; k++) {
 				var layer = me.model[k];
@@ -80,24 +80,20 @@ function LevelEngine(svg) {
 					}
 				}
 
-				
-				
-
-
 				/*
-								if (m.lockX) {
-									tx = -me.translateX;
-									shiftX = 0;
-								}
-								if (m.lockY) {
-									ty = -me.translateY;
-									shiftY = 0;
-								}
-								if (m.lockZ) {
-									tz = me.translateZ;
-								}*/
+				if (m.lockX) {
+				tx = -me.translateX;
+				shiftX = 0;
+				}
+				if (m.lockY) {
+				ty = -me.translateY;
+				shiftY = 0;
+				}
+				if (m.lockZ) {
+				tz = me.translateZ;
+				}*/
 				layer.g.setAttribute('transform', 'translate(' + (tx + cX + sX)
-					+ ',' + (ty + cY + sY) + ') scale(' + tz + ',' + tz + ')');
+					 + ',' + (ty + cY + sY) + ') scale(' + tz + ',' + tz + ')');
 			}
 		}
 	};
@@ -161,19 +157,23 @@ function LevelEngine(svg) {
 				vZ = me.mx;
 			}
 		}
-		return { x: vX, y: vY, z: vZ };
+		return {
+			x: vX,
+			y: vY,
+			z: vZ
+		};
 	};
 	/*me.moveZoom = function () {
-		me.applyZoomPosition();
+	me.applyZoomPosition();
 	};*/
 	me.queueTiles = function () {
 		me.clearUselessDetails();
 		me.tileFromModel();
 	};
 	/*
-		me.click = function () {
-			me.clicked = true;
-		};*/
+	me.click = function () {
+	me.clicked = true;
+	};*/
 	me.maxZoom = function () {
 		return me.mx;
 	};
@@ -202,7 +202,7 @@ function LevelEngine(svg) {
 		mouseEvent.preventDefault();
 		me.svg.removeEventListener('mousemove', me.rakeMouseMove, true);
 		if (Math.abs(me.clickX - mouseEvent.offsetX) < me.translateZ * me.tapSize / 8 //
-			&& Math.abs(me.clickY - mouseEvent.offsetY) < me.translateZ * me.tapSize / 8) {
+			 && Math.abs(me.clickY - mouseEvent.offsetY) < me.translateZ * me.tapSize / 8) {
 			//me.click();
 			me.clicked = true;
 		}
@@ -324,7 +324,7 @@ function LevelEngine(svg) {
 			if (touchEvent.touches.length < 2) {
 				if (me.startedTouch) {
 					if (Math.abs(me.clickX - me.startMouseScreenX) < me.translateZ * me.tapSize / 8 //
-						&& Math.abs(me.clickY - me.startMouseScreenY) < me.translateZ * me.tapSize / 8) {
+						 && Math.abs(me.clickY - me.startMouseScreenY) < me.translateZ * me.tapSize / 8) {
 						//me.click();
 						me.clicked = true;
 					}
@@ -386,20 +386,20 @@ function LevelEngine(svg) {
 		var w = me.svg.clientWidth * me.translateZ;
 		var h = me.svg.clientHeight * me.translateZ;
 		/*if (lx) {
-			x = 0;
+		x = 0;
 		}
 		if (ly) {
-			y = 0;
+		y = 0;
 		}
 		if (lz) {
-			if (!(lx)) {
-				x = -me.translateX / me.translateZ;
-				w = me.svg.clientWidth;
-			}
-			if (!(ly)) {
-				y = -me.translateY / me.translateZ;
-				h = me.svg.clientHeight;
-			}
+		if (!(lx)) {
+		x = -me.translateX / me.translateZ;
+		w = me.svg.clientWidth;
+		}
+		if (!(ly)) {
+		y = -me.translateY / me.translateZ;
+		h = me.svg.clientHeight;
+		}
 		}*/
 		if (kind == me.layerOverlay) {
 			//console.log(x, y, w, h);
@@ -456,28 +456,28 @@ function LevelEngine(svg) {
 		var h = me.svg.clientHeight * me.translateZ;
 
 		/*if (lx) {
-			x = 0;
+		x = 0;
 		}
 		if (ly) {
-			y = 0;
+		y = 0;
 		}
 		if (lz) {
-			if (!(lx)) {
-				x = -me.translateX / me.translateZ;
-				w = me.svg.clientWidth;
-			}
-			if (!(ly)) {
-				y = -me.translateY / me.translateZ;
-				h = me.svg.clientHeight;
-			}
+		if (!(lx)) {
+		x = -me.translateX / me.translateZ;
+		w = me.svg.clientWidth;
 		}
-		*/
+		if (!(ly)) {
+		y = -me.translateY / me.translateZ;
+		h = me.svg.clientHeight;
+		}
+		}
+		 */
 		if (kind == me.layerOverlay) {
 			/*x = -me.translateX / me.translateZ;
 			w = me.svg.clientWidth;
 			y = -me.translateY / me.translateZ;
 			h = me.svg.clientHeight;
-			*/
+			 */
 			x = 0;
 			y = 0;
 		} else {
@@ -490,10 +490,8 @@ function LevelEngine(svg) {
 			}
 		}
 		if (definitions.z[0] <= me.translateZ && definitions.z[1] > me.translateZ) {
-			if (me.collision(definitions.x * me.tapSize, definitions.y * me.tapSize
-				, definitions.w * me.tapSize, definitions.h * me.tapSize //
-				, x, y
-				, w, h)) {
+			if (me.collision(definitions.x * me.tapSize, definitions.y * me.tapSize, definitions.w * me.tapSize, definitions.h * me.tapSize //
+				, x, y, w, h)) {
 				var xg = me.childExists(parentGroup, definitions.id);
 				if (xg) {
 					for (var n = 0; n < definitions.l.length; n++) {
@@ -655,7 +653,10 @@ function LevelEngine(svg) {
 		}
 	};
 	me.startSlideTo = function (x, y, z) {
-		var stepCount = 10;
+		me.startStepSlideTo(10, x, y, z);
+	}
+	me.startStepSlideTo = function (s, x, y, z) {
+		var stepCount = s;
 		var dx = (x - me.translateX) / stepCount;
 		var dy = (y - me.translateY) / stepCount;
 		var dz = (z - me.translateZ) / stepCount;
