@@ -1,4 +1,4 @@
-﻿console.log('tilelevel.js v2.17');
+﻿console.log('tilelevel.js v2.18');
 function LevelEngine(svg) {
 	var me = this;
 	me.svgns = "http://www.w3.org/2000/svg";
@@ -685,7 +685,7 @@ function LevelEngine(svg) {
 			var main = me;
 			setTimeout(function () {
 				main.stepSlideTo(xyz);
-			}, 20);
+			}, 55);
 		} else {
 			me.adjustContentPosition();
 			me.valid = true;
