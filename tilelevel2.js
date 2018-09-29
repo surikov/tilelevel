@@ -1,4 +1,5 @@
-﻿console.log('tilelevel.js v2.19');
+﻿console.log('tilelevel.js v2.20');
+
 function LevelEngine(svg) {
 	var me = this;
 	me.svgns = "http://www.w3.org/2000/svg";
@@ -32,9 +33,9 @@ function LevelEngine(svg) {
 	var tbb = rect.getBBox();
 	me.tapSize = tbb.width;
 	me.svg.removeChild(rect);
-	me.applyZoomPosition = function () {
-		me.svg.setAttribute('viewBox', '' + (-me.translateX) + ' ' + (-me.translateY)
-			 + ' ' + me.viewWidth * me.translateZ + ' ' + me.viewHeight * me.translateZ);
+	me.applyZoomPosition = function() {
+		me.svg.setAttribute('viewBox', '' + (-me.translateX) + ' ' + (-me.translateY) +
+			' ' + me.viewWidth * me.translateZ + ' ' + me.viewHeight * me.translateZ);
 		if (me.model) {
 			for (var k = 0; k < me.model.length; k++) {
 				var layer = me.model[k];
@@ -92,24 +93,24 @@ function LevelEngine(svg) {
 				if (m.lockZ) {
 				tz = me.translateZ;
 				}*/
-				layer.g.setAttribute('transform', 'translate(' + (tx + cX + sX)
-					 + ',' + (ty + cY + sY) + ') scale(' + tz + ',' + tz + ')');
+				layer.g.setAttribute('transform', 'translate(' + (tx + cX + sX) +
+					',' + (ty + cY + sY) + ') scale(' + tz + ',' + tz + ')');
 			}
 		}
 	};
-	me.setModel = function (model) {
+	me.setModel = function(model) {
 		me.model = model;
 
 		me.resetModel();
 	};
-	me.resetModel = function () {
+	me.resetModel = function() {
 		me.clearAllDetails();
 		me.applyZoomPosition();
 		me.adjustContentPosition();
 		me.slideToContentPosition();
 		me.valid = false;
 	};
-	me.adjustContentPosition = function () {
+	me.adjustContentPosition = function() {
 		var a = me.adjusted();
 		if (a.x != me.translateX || a.y != me.translateY || a.z != me.translateZ) {
 			me.translateX = a.x;
@@ -118,13 +119,13 @@ function LevelEngine(svg) {
 			me.applyZoomPosition();
 		}
 	};
-	me.slideToContentPosition = function () {
+	me.slideToContentPosition = function() {
 		var a = me.adjusted();
 		if (a.x != me.translateX || a.y != me.translateY || a.z != me.translateZ) {
 			me.startSlideTo(a.x, a.y, a.z);
 		}
 	};
-	me.adjusted = function () {
+	me.adjusted = function() {
 		var vX = me.translateX;
 		var vY = me.translateY;
 		var vZ = me.translateZ;
@@ -166,7 +167,7 @@ function LevelEngine(svg) {
 	/*me.moveZoom = function () {
 	me.applyZoomPosition();
 	};*/
-	me.queueTiles = function () {
+	me.queueTiles = function() {
 		me.clearUselessDetails();
 		me.tileFromModel();
 	};
@@ -174,10 +175,10 @@ function LevelEngine(svg) {
 	me.click = function () {
 	me.clicked = true;
 	};*/
-	me.maxZoom = function () {
+	me.maxZoom = function() {
 		return me.mx;
 	};
-	me.rakeMouseDown = function (mouseEvent) {
+	me.rakeMouseDown = function(mouseEvent) {
 		mouseEvent.preventDefault();
 		me.svg.addEventListener('mousemove', me.rakeMouseMove, true);
 		me.svg.addEventListener('mouseup', me.rakeMouseUp, false);
@@ -187,7 +188,7 @@ function LevelEngine(svg) {
 		me.clickY = me.startMouseScreenY;
 		me.clicked = false;
 	};
-	me.rakeMouseMove = function (mouseEvent) {
+	me.rakeMouseMove = function(mouseEvent) {
 		mouseEvent.preventDefault();
 		var dX = mouseEvent.offsetX - me.startMouseScreenX;
 		var dY = mouseEvent.offsetY - me.startMouseScreenY;
@@ -198,57 +199,58 @@ function LevelEngine(svg) {
 		//me.moveZoom();
 		me.applyZoomPosition();
 	};
-	me.rakeMouseUp = function (mouseEvent) {
+	me.rakeMouseUp = function(mouseEvent) {
 		mouseEvent.preventDefault();
 		me.svg.removeEventListener('mousemove', me.rakeMouseMove, true);
 		if (Math.abs(me.clickX - mouseEvent.offsetX) < me.translateZ * me.tapSize / 8 //
-			 && Math.abs(me.clickY - mouseEvent.offsetY) < me.translateZ * me.tapSize / 8) {
+			&&
+			Math.abs(me.clickY - mouseEvent.offsetY) < me.translateZ * me.tapSize / 8) {
 			//me.click();
 			me.clicked = true;
 		}
 		me.slideToContentPosition();
 		me.valid = false;
 	};
-	me.vectorDistance = function (xy1, xy2) {
+	me.vectorDistance = function(xy1, xy2) {
 		var xy = me.vectorSubstract(xy1, xy2);
 		var n = me.vectorNorm(xy);
 		return n;
 	};
-	me.vectorSubstract = function (xy1, xy2) {
+	me.vectorSubstract = function(xy1, xy2) {
 		return {
 			x: xy1.x - xy2.x,
 			y: xy1.y - xy2.y
 		};
 	};
-	me.vectorNorm = function (xy) {
+	me.vectorNorm = function(xy) {
 		return Math.sqrt(me.vectorNormSquared(xy));
 	};
-	me.vectorNormSquared = function (xy) {
+	me.vectorNormSquared = function(xy) {
 		return xy.x * xy.x + xy.y * xy.y;
 	};
-	me.vectorFromTouch = function (touch) {
+	me.vectorFromTouch = function(touch) {
 		return {
 			x: touch.clientX,
 			y: touch.clientY
 		};
 	};
-	me.vectorFindCenter = function (xy1, xy2) {
+	me.vectorFindCenter = function(xy1, xy2) {
 		var xy = me.vectorAdd(xy1, xy2);
 		return me.vectorScale(xy, 0.5);
 	};
-	me.vectorAdd = function (xy1, xy2) {
+	me.vectorAdd = function(xy1, xy2) {
 		return {
 			x: xy1.x + xy2.x,
 			y: xy1.y + xy2.y
 		};
 	};
-	me.vectorScale = function (xy, coef) {
+	me.vectorScale = function(xy, coef) {
 		return {
 			x: xy.x * coef,
 			y: xy.y * coef
 		};
 	};
-	me.startTouchZoom = function (touchEvent) {
+	me.startTouchZoom = function(touchEvent) {
 		me.twoZoom = true;
 		var p1 = me.vectorFromTouch(touchEvent.touches[0]);
 		var p2 = me.vectorFromTouch(touchEvent.touches[1]);
@@ -259,7 +261,7 @@ function LevelEngine(svg) {
 		}
 		me.twodistance = d;
 	};
-	me.rakeTouchStart = function (touchEvent) {
+	me.rakeTouchStart = function(touchEvent) {
 		touchEvent.preventDefault();
 		me.startedTouch = true;
 		if (touchEvent.touches.length < 2) {
@@ -275,7 +277,7 @@ function LevelEngine(svg) {
 		}
 		me.clicked = false;
 	};
-	me.rakeTouchMove = function (touchEvent) {
+	me.rakeTouchMove = function(touchEvent) {
 		touchEvent.preventDefault();
 		if (touchEvent.touches.length < 2) {
 			if (me.twoZoom) {
@@ -317,14 +319,15 @@ function LevelEngine(svg) {
 			}
 		}
 	};
-	me.rakeTouchEnd = function (touchEvent) {
+	me.rakeTouchEnd = function(touchEvent) {
 		touchEvent.preventDefault();
 		me.valid = false;
 		if (!me.twoZoom) {
 			if (touchEvent.touches.length < 2) {
 				if (me.startedTouch) {
 					if (Math.abs(me.clickX - me.startMouseScreenX) < me.translateZ * me.tapSize / 8 //
-						 && Math.abs(me.clickY - me.startMouseScreenY) < me.translateZ * me.tapSize / 8) {
+						&&
+						Math.abs(me.clickY - me.startMouseScreenY) < me.translateZ * me.tapSize / 8) {
 						//me.click();
 						me.clicked = true;
 					}
@@ -339,7 +342,7 @@ function LevelEngine(svg) {
 		me.startedTouch = false;
 		me.slideToContentPosition();
 	};
-	me.rakeMouseWheel = function (e) {
+	me.rakeMouseWheel = function(e) {
 		e.preventDefault();
 		var wheelVal = e.wheelDelta || -e.detail;
 		var min = Math.min(1, wheelVal);
@@ -360,17 +363,17 @@ function LevelEngine(svg) {
 		me.valid = false;
 		return false;
 	};
-	me.msEdgeHook = function (g) {
+	me.msEdgeHook = function(g) {
 		if (g.childNodes && (!(g.children))) {
 			g.children = g.childNodes;
 		}
 	};
-	me.tileGroup = function (g) {
+	me.tileGroup = function(g) {
 		var gg = document.createElementNS(me.svgns, 'g');
 		g.appendChild(gg);
 		return gg;
 	};
-	me.clearUselessDetails = function () {
+	me.clearUselessDetails = function() {
 		if (me.model) {
 			for (var k = 0; k < me.model.length; k++) {
 				var group = me.model[k].g;
@@ -380,7 +383,7 @@ function LevelEngine(svg) {
 		}
 	};
 	//me.clearUselessGroups = function (group, lx, ly, lz) {
-	me.clearUselessGroups = function (group, kind) {
+	me.clearUselessGroups = function(group, kind) {
 		var x = -me.translateX;
 		var y = -me.translateY;
 		var w = me.svg.clientWidth * me.translateZ;
@@ -434,7 +437,7 @@ function LevelEngine(svg) {
 			}
 		}
 	};
-	me.tileFromModel = function () {
+	me.tileFromModel = function() {
 		if (me.model) {
 			for (var k = 0; k < me.model.length; k++) {
 				var group = me.model[k].g;
@@ -449,7 +452,7 @@ function LevelEngine(svg) {
 		me.valid = true;
 	};
 	//me.addGroupTile = function (parentGroup, definitions, lx, ly, lz) {
-	me.addGroupTile = function (parentGroup, definitions, kind) {
+	me.addGroupTile = function(parentGroup, definitions, kind) {
 		var x = -me.translateX;
 		var y = -me.translateY;
 		var w = me.svg.clientWidth * me.translateZ;
@@ -491,7 +494,7 @@ function LevelEngine(svg) {
 		}
 		if (definitions.z[0] <= me.translateZ && definitions.z[1] > me.translateZ) {
 			if (me.collision(definitions.x * me.tapSize, definitions.y * me.tapSize, definitions.w * me.tapSize, definitions.h * me.tapSize //
-				, x, y, w, h)) {
+					, x, y, w, h)) {
 				var xg = me.childExists(parentGroup, definitions.id);
 				if (xg) {
 					for (var n = 0; n < definitions.l.length; n++) {
@@ -521,7 +524,7 @@ function LevelEngine(svg) {
 		}
 	};
 	//me.addElement = function (g, d, lx, ly, lz) {
-	me.addElement = function (g, d, kind) {
+	me.addElement = function(g, d, kind) {
 		var element = null;
 		if (d.kind == 'r') {
 			element = me.tileRectangle(g, d.x * me.tapSize, d.y * me.tapSize, d.w * me.tapSize, d.h * me.tapSize, d.rx * me.tapSize, d.ry * me.tapSize, d.css);
@@ -542,7 +545,7 @@ function LevelEngine(svg) {
 		if (element) {
 			if (d.a) {
 				element.onClickFunction = d.a;
-				element.onclick = function () {
+				element.onclick = function() {
 					if (me.clicked) {
 						if (element) {
 							if (element.onClickFunction) {
@@ -557,7 +560,7 @@ function LevelEngine(svg) {
 			}
 		}
 	};
-	me.tilePath = function (g, x, y, z, data, cssClass) {
+	me.tilePath = function(g, x, y, z, data, cssClass) {
 		var path = document.createElementNS(this.svgns, 'path');
 		path.setAttributeNS(null, 'd', data);
 		var t = "";
@@ -576,7 +579,7 @@ function LevelEngine(svg) {
 		g.appendChild(path);
 		return path;
 	};
-	me.tileRectangle = function (g, x, y, w, h, rx, ry, cssClass) {
+	me.tileRectangle = function(g, x, y, w, h, rx, ry, cssClass) {
 		var rect = document.createElementNS(me.svgns, 'rect');
 		rect.setAttributeNS(null, 'x', x);
 		rect.setAttributeNS(null, 'y', y);
@@ -594,7 +597,7 @@ function LevelEngine(svg) {
 		g.appendChild(rect);
 		return rect;
 	};
-	me.tileLine = function (g, x1, y1, x2, y2, cssClass) {
+	me.tileLine = function(g, x1, y1, x2, y2, cssClass) {
 		var line = document.createElementNS(me.svgns, 'line');
 		line.setAttributeNS(null, 'x1', x1);
 		line.setAttributeNS(null, 'y1', y1);
@@ -606,7 +609,7 @@ function LevelEngine(svg) {
 		g.appendChild(line);
 		return line;
 	};
-	me.tileText = function (g, x, y, html, cssClass) {
+	me.tileText = function(g, x, y, html, cssClass) {
 		var txt = document.createElementNS(this.svgns, 'text');
 		txt.setAttributeNS(null, 'x', x);
 		txt.setAttributeNS(null, 'y', y);
@@ -617,7 +620,7 @@ function LevelEngine(svg) {
 		g.appendChild(txt);
 		return txt;
 	};
-	me.childExists = function (group, id) {
+	me.childExists = function(group, id) {
 		me.msEdgeHook(group);
 		for (var i = 0; i < group.children.length; i++) {
 			var child = group.children[i];
@@ -627,35 +630,42 @@ function LevelEngine(svg) {
 		}
 		return null;
 	};
-	me.clearAllDetails = function () {
+	me.clearAllDetails = function() {
 		if (me.model) {
 			for (var i = 0; i < me.model.length; i++) {
-				var group = me.model[i].g;
+				me.clearGroupDetails(me.model[i].g);
+				/*var group = me.model[i].g;
 				me.msEdgeHook(group);
 				while (group.children.length) {
 					group.removeChild(group.children[0]);
-				}
+				}*/
 			}
 		}
 	};
-	me.outOfView = function (child, x, y, w, h) {
+	me.clearGroupDetails = function(group) {
+		me.msEdgeHook(group);
+		while (group.children.length) {
+			group.removeChild(group.children[0]);
+		}
+	};
+	me.outOfView = function(child, x, y, w, h) {
 		var tbb = child.getBBox();
 		return !(me.collision(tbb.x, tbb.y, tbb.width, tbb.height, x, y, w, h));
 	};
-	me.outOfWatch = function (g, x, y, w, h) {
+	me.outOfWatch = function(g, x, y, w, h) {
 		return !(me.collision(g.watchX, g.watchY, g.watchW, g.watchH, x, y, w, h));
 	};
-	me.collision = function (x1, y1, w1, h1, x2, y2, w2, h2) {
+	me.collision = function(x1, y1, w1, h1, x2, y2, w2, h2) {
 		if (this.collision2(x1, w1, x2, w2) && this.collision2(y1, h1, y2, h2)) {
 			return true;
 		} else {
 			return false;
 		}
 	};
-	me.startSlideTo = function (x, y, z) {
+	me.startSlideTo = function(x, y, z) {
 		me.startStepSlideTo(10, x, y, z);
 	}
-	me.startStepSlideTo = function (s, x, y, z) {
+	me.startStepSlideTo = function(s, x, y, z) {
 		var stepCount = s;
 		var dx = (x - me.translateX) / stepCount;
 		var dy = (y - me.translateY) / stepCount;
@@ -675,7 +685,7 @@ function LevelEngine(svg) {
 		});
 		me.stepSlideTo(xyz);
 	};
-	me.stepSlideTo = function (xyz) {
+	me.stepSlideTo = function(xyz) {
 		var n = xyz.shift();
 		if (n) {
 			me.translateX = n.x;
@@ -683,7 +693,7 @@ function LevelEngine(svg) {
 			me.translateZ = n.z;
 			me.applyZoomPosition();
 			var main = me;
-			setTimeout(function () {
+			setTimeout(function() {
 				main.stepSlideTo(xyz);
 			}, 33);
 		} else {
@@ -692,7 +702,7 @@ function LevelEngine(svg) {
 			me.queueTiles();
 		}
 	};
-	me.collision2 = function (x, w, left, width) {
+	me.collision2 = function(x, w, left, width) {
 		if (x + w <= left || x >= left + width) {
 			return false;
 		} else {
@@ -700,9 +710,9 @@ function LevelEngine(svg) {
 
 		}
 	};
-	me.startLoop = function () {
+	me.startLoop = function() {
 		var last = new Date().getTime();
-		var step = function (timestamp) {
+		var step = function(timestamp) {
 			var now = new Date().getTime();
 			if (last + 222 < now) {
 				if (!(me.valid)) {
