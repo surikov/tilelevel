@@ -1,0 +1,30 @@
+{
+  "name": "tilelevel",
+  "version": "1.0.0",
+  "description": "Levels of UI",
+  "main": "tilelevel.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/surikov/tilelevel.git"
+  },
+  "keywords": [
+    "svg",
+    "map",
+    "UI"
+  ],
+  "author": "Sergey Surikov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/surikov/tilelevel/issues"
+  },
+  "homepage": "https://github.com/surikov/tilelevel#readme",
+  "dependencies": {
+    "browserify": "^16.2.3"
+  },
+  "scripts": {
+	  "build": "browserify tilelevel2.js > npm/bundle.js && echo done"
+	}
+}
