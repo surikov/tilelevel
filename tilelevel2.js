@@ -1,4 +1,4 @@
-﻿console.log('tilelevel.js v2.24');
+﻿console.log('tilelevel.js v2.25');
 
 function TileLevel(svg) {
 	var me = this;
@@ -667,4 +667,10 @@ function TileLevel(svg) {
 	me.svg.addEventListener("touchend", me.rakeTouchEnd, false);
 	me.startLoop();
 	return me;
+}
+if (typeof module === 'object' && module.exports) {
+	module.exports = TileLevel;
+}
+if (typeof window !== 'undefined') {
+	window.TileLevel = TileLevel;
 }
