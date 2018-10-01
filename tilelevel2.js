@@ -1,4 +1,4 @@
-﻿console.log('tilelevel.js v2.25');
+﻿console.log('tilelevel.js v2.26');
 
 function TileLevel(svg) {
 	var me = this;
@@ -197,6 +197,7 @@ function TileLevel(svg) {
 	};
 	me.rakeMouseUp = function(mouseEvent) {
 		mouseEvent.preventDefault();
+		me.cancelDragZoom();
 		me.svg.removeEventListener('mousemove', me.rakeMouseMove, true);
 		if (Math.abs(me.clickX - mouseEvent.offsetX) < me.translateZ * me.clickLimit //
 			&&
@@ -204,8 +205,7 @@ function TileLevel(svg) {
 			me.clicked = true;
 		}
 		me.slideToContentPosition();
-		me.valid = false;
-		me.cancelDragZoom();
+		me.valid = false;		
 	};
 	me.vectorDistance = function(xy1, xy2) {
 		var xy = me.vectorSubstract(xy1, xy2);
@@ -317,6 +317,7 @@ function TileLevel(svg) {
 	};
 	me.rakeTouchEnd = function(touchEvent) {
 		touchEvent.preventDefault();
+		me.cancelDragZoom();
 		me.valid = false;
 		if (!me.twoZoom) {
 			if (touchEvent.touches.length < 2) {
@@ -334,8 +335,7 @@ function TileLevel(svg) {
 			}
 		}
 		me.twoZoom = false;
-		me.startedTouch = false;
-		me.cancelDragZoom();
+		me.startedTouch = false;		
 		me.slideToContentPosition();
 	};
 	me.rakeMouseWheel = function(e) {

@@ -1,5 +1,5 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-console.log('tilelevel.js v2.25');
+console.log('tilelevel.js v2.26');
 
 function TileLevel(svg) {
 	var me = this;
@@ -198,6 +198,7 @@ function TileLevel(svg) {
 	};
 	me.rakeMouseUp = function(mouseEvent) {
 		mouseEvent.preventDefault();
+		me.cancelDragZoom();
 		me.svg.removeEventListener('mousemove', me.rakeMouseMove, true);
 		if (Math.abs(me.clickX - mouseEvent.offsetX) < me.translateZ * me.clickLimit //
 			&&
@@ -205,8 +206,7 @@ function TileLevel(svg) {
 			me.clicked = true;
 		}
 		me.slideToContentPosition();
-		me.valid = false;
-		me.cancelDragZoom();
+		me.valid = false;		
 	};
 	me.vectorDistance = function(xy1, xy2) {
 		var xy = me.vectorSubstract(xy1, xy2);
@@ -318,6 +318,7 @@ function TileLevel(svg) {
 	};
 	me.rakeTouchEnd = function(touchEvent) {
 		touchEvent.preventDefault();
+		me.cancelDragZoom();
 		me.valid = false;
 		if (!me.twoZoom) {
 			if (touchEvent.touches.length < 2) {
@@ -335,8 +336,7 @@ function TileLevel(svg) {
 			}
 		}
 		me.twoZoom = false;
-		me.startedTouch = false;
-		me.cancelDragZoom();
+		me.startedTouch = false;		
 		me.slideToContentPosition();
 	};
 	me.rakeMouseWheel = function(e) {
