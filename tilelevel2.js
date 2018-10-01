@@ -1,4 +1,4 @@
-﻿console.log('tilelevel.js v2.26');
+﻿console.log('tilelevel.js v2.27');
 
 function TileLevel(svg) {
 	var me = this;
@@ -311,6 +311,7 @@ function TileLevel(svg) {
 				me.translateX = me.translateX - (me.translateZ - zoom) * me.twocenter.x;
 				me.translateY = me.translateY - (me.translateZ - zoom) * me.twocenter.y;
 				me.translateZ = zoom;
+				me.dragZoom = 1.0;
 				me.applyZoomPosition();
 			}
 		}

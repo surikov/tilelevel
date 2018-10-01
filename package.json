@@ -1,6 +1,6 @@
 {
   "name": "tilelevel",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Levels of UI",
   "main": "tilelevel.js",
   "scripts": {
