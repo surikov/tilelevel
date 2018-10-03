@@ -312,8 +312,8 @@ function TileLevel(svg) {
 				me.translateY = me.translateY - (me.translateZ - zoom) * me.twocenter.y;
 				me.translateZ = zoom;
 				me.dragZoom = 1.0;
-				me.applyZoomPosition();
-				me.adjustContentPosition();
+				//me.applyZoomPosition();
+				//me.adjustContentPosition();
 				//me.valid = false;
 			}
 		}
@@ -601,7 +601,7 @@ function TileLevel(svg) {
 		}
 	};
 	me.startSlideTo = function(x, y, z) {
-		me.startStepSlideTo(10, x, y, z);
+		me.startStepSlideTo(30, x, y, z);
 	}
 	me.startStepSlideTo = function(s, x, y, z) {
 		var stepCount = s;
