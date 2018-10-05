@@ -352,13 +352,13 @@ function TileLevel(svg) {
 					var cX=0;
 					var cY=0;
 					if (me.viewWidth * me.translateZ > me.innerWidth) {
-						//cX = (me.viewWidth  - me.innerWidth/me.translateZ)/2 ;
-						//me.translateX=me.translateX-cX;
+						cX = (me.viewWidth  - me.innerWidth/me.translateZ)/2 ;
+						me.translateX=me.translateX-cX;
 						//console.log('cX',cX,'/',me.translateX,p1,p2);
 					}
 					if (me.viewHeight * me.translateZ > me.innerHeight) {
-						//cY = (me.viewHeight  - me.innerHeight/me.translateZ)/2 ;
-						//me.translateY=me.translateY-cY;
+						cY = (me.viewHeight  - me.innerHeight/me.translateZ)/2 ;
+						me.translateY=me.translateY-cY;
 						//console.log('cY',cY,'/',me.translateY,p1,p2);
 					}
 					
