@@ -2,7 +2,7 @@ var levelEngine = null;
 
 function start() {
 	console.log('start');
-	levelEngine = new LevelEngine(document.getElementById('contentSVG'));
+	levelEngine = new TileLevel(document.getElementById('contentSVG'));
 	levelEngine.innerWidth = 30000 * levelEngine.tapSize;
 	levelEngine.innerHeight = 500 * levelEngine.tapSize;
 	levelEngine.mx = 999;
