@@ -293,7 +293,7 @@ function TileLevel(svg) {
 	};
 	me.rakeTouchStart = function(touchEvent) {
 		touchEvent.preventDefault();
-		console.log('rakeTouchStart count',touchEvent.touches.length,'at',touchEvent.touches[0].clientX,touchEvent.touches[0].clientY);
+		console.log('rakeTouchStart count',touchEvent.touches.length,'at',touchEvent.touches);
 		me.startedTouch = true;
 		if (touchEvent.touches.length < 2) {
 			me.twoZoom = false;
@@ -310,7 +310,7 @@ function TileLevel(svg) {
 		me.clicked = false;
 	};
 	me.rakeTouchMove = function(touchEvent) {
-		console.log('rakeTouchMove count',touchEvent.touches.length,'twoZoom',me.twoZoom);
+		console.log('rakeTouchMove count',touchEvent.touches,'twoZoom',me.twoZoom);
 		touchEvent.preventDefault();
 		if(me.startedTouch){
 			if (touchEvent.touches.length < 2) {
