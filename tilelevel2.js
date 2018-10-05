@@ -57,7 +57,7 @@ function TileLevel(svg) {
 		var 	rh = me.viewHeight * me.translateZ * me.dragZoom;
 		//console.log(Math.round(rx) ,Math.round(ry),Math.round(rw),Math.round( rh));
 		me.svg.setAttribute('viewBox', rx + ' ' + ry + ' ' + rw + ' ' + rh);
-		//console.log('applyZoomPosition',me.translateX,me.translateY,me.translateZ);
+		//console.log('viewBox', rx + ' ' + ry + ' ' + rw + ' ' + rh,'xyz',me.translateX,me.translateY,me.translateZ);
 		if (me.model) {
 			for (var k = 0; k < me.model.length; k++) {
 				var layer = me.model[k];
@@ -289,11 +289,11 @@ function TileLevel(svg) {
 			d = 1;
 		}
 		me.twodistance = d;
-		console.log('startTouchZoom',p1,me.twodistance,p2);
+		//console.log('startTouchZoom',p1,me.twodistance,p2,me.twocenter);
 	};
 	me.rakeTouchStart = function(touchEvent) {
 		touchEvent.preventDefault();
-		console.log('rakeTouchStart count',touchEvent.touches.length,'at',touchEvent.touches);
+		//console.log('rakeTouchStart count',touchEvent.touches.length,'at',touchEvent.touches,me.translateX,me.translateY,me.translateZ);
 		me.startedTouch = true;
 		if (touchEvent.touches.length < 2) {
 			me.twoZoom = false;
@@ -310,7 +310,7 @@ function TileLevel(svg) {
 		me.clicked = false;
 	};
 	me.rakeTouchMove = function(touchEvent) {
-		console.log('rakeTouchMove count',touchEvent.touches,'twoZoom',me.twoZoom);
+		console.log('rakeTouchMove count',touchEvent.touches,'twoZoom',me.twoZoom,me.translateX,me.translateY,me.translateZ);
 		touchEvent.preventDefault();
 		if(me.startedTouch){
 			if (touchEvent.touches.length < 2) {
@@ -339,7 +339,7 @@ function TileLevel(svg) {
 					}
 					var ratio = d / me.twodistance;
 					me.twodistance = d;
-					console.log('move',p1,me.twodistance,p2);
+					
 					var zoom = me.translateZ / ratio;
 					if (zoom < 1) {
 						zoom = 1;
@@ -347,8 +347,17 @@ function TileLevel(svg) {
 					if (zoom > me.maxZoom()) {
 						zoom = me.maxZoom();
 					}
-					me.translateX = me.translateX - (me.translateZ - zoom) * me.twocenter.x;
-					me.translateY = me.translateY - (me.translateZ - zoom) * me.twocenter.y;
+					var cX=0;
+					var cY=0;
+					if (me.viewWidth * me.translateZ > me.innerWidth) {
+						cX = (me.viewWidth  - me.innerWidth/me.translateZ)/2 ;
+					}
+					if (me.viewHeight * me.translateZ > me.innerHeight) {
+						cY = (me.viewHeight  - me.innerHeight/me.translateZ)/2 ;
+					}
+					//console.log('move',p1,me.twodistance,p2,zoom,cX,cY);
+					me.translateX = me.translateX - (me.translateZ - zoom) * (me.twocenter.x);
+					me.translateY = me.translateY - (me.translateZ - zoom) * (me.twocenter.y);
 					me.translateZ = zoom;
 					/*
 					var cX=0;
@@ -363,7 +372,7 @@ function TileLevel(svg) {
 						me.translateY=me.translateY-cY;
 						//console.log('cY',cY,'/',me.translateY,p1,p2);
 					}*/
-					
+					console.log('	to',me.translateX,me.translateY,me.translateZ);
 					me.dragZoom = 1.0;
 					me.applyZoomPosition();
 					//me.adjustContentPosition();
@@ -399,6 +408,7 @@ function TileLevel(svg) {
 		me.startedTouch = false;	
 me.cancelDragZoom();		
 		me.slideToContentPosition();
+		console.log('done zoom',me.translateX,me.translateY,me.translateZ);
 	};
 	me.msEdgeHook = function(g) {
 		if (g.childNodes && (!(g.children))) {
