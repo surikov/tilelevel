@@ -278,7 +278,7 @@ function TileLevel(svg) {
 		};
 	};
 	me.startTouchZoom = function(touchEvent) {
-		//console.log('startTouchZoom');
+		
 		me.twoZoom = true;
 		var p1 = me.vectorFromTouch(touchEvent.touches[0]);
 		var p2 = me.vectorFromTouch(touchEvent.touches[1]);
@@ -289,10 +289,11 @@ function TileLevel(svg) {
 			d = 1;
 		}
 		me.twodistance = d;
+		console.log('startTouchZoom',me.twodistance);
 	};
 	me.rakeTouchStart = function(touchEvent) {
 		touchEvent.preventDefault();
-		//console.log('rakeTouchStart count',touchEvent.touches.length,'at',touchEvent.touches[0].clientX,touchEvent.touches[0].clientY);
+		console.log('rakeTouchStart count',touchEvent.touches.length,'at',touchEvent.touches[0].clientX,touchEvent.touches[0].clientY);
 		me.startedTouch = true;
 		if (touchEvent.touches.length < 2) {
 			me.twoZoom = false;
@@ -309,7 +310,7 @@ function TileLevel(svg) {
 		me.clicked = false;
 	};
 	me.rakeTouchMove = function(touchEvent) {
-		//console.log('rakeTouchMove count',touchEvent.touches.length,'twoZoom',me.twoZoom);
+		console.log('rakeTouchMove count',touchEvent.touches.length,'twoZoom',me.twoZoom);
 		touchEvent.preventDefault();
 		if(me.startedTouch){
 			if (touchEvent.touches.length < 2) {
