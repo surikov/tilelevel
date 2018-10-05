@@ -1,4 +1,4 @@
-﻿console.log('tilelevel.js v2.40');
+﻿console.log('tilelevel.js v2.43');
 
 function TileLevel(svg) {
 	var me = this;
@@ -37,7 +37,7 @@ function TileLevel(svg) {
 	me.dragZoom = 1;
 	me.startDragZoom = function() {
 		//console.log('startDragZoom');
-		me.dragZoom = 1.01;
+		me.dragZoom = 1.00;
 		me.applyZoomPosition();
 	};
 	me.cancelDragZoom = function() {
@@ -68,9 +68,9 @@ function TileLevel(svg) {
 				var cY = 0;
 				var sX = 0;
 				var sY = 0;
-				if(me.twoZoom){
+				//if(me.twoZoom){
 					//
-				}else{
+				//}else{
 					if (me.viewWidth * me.translateZ > me.innerWidth) {
 						cX = (me.viewWidth * me.translateZ - me.innerWidth) / 2;
 						//console.log('cX',cX);
@@ -80,7 +80,7 @@ function TileLevel(svg) {
 						cY = (me.viewHeight * me.translateZ - me.innerHeight) / 2;
 						//console.log('cY',cY);
 					}
-				}
+				//}
 				if (layer.kind == me.layerOverlay) {
 					tz = me.translateZ;
 					tx = -me.translateX;
@@ -106,6 +106,8 @@ function TileLevel(svg) {
 				}
 				layer.g.setAttribute('transform', 'translate(' + (tx + cX + sX) +
 					',' + (ty + cY + sY) + ') scale(' + tz + ',' + tz + ')');
+				//console.log('translate(' + (tx + cX + sX) +
+				//	',' + (ty + cY + sY) + ') scale(' + tz + ',' + tz + ')');
 			}
 		}
 	};
@@ -310,7 +312,7 @@ function TileLevel(svg) {
 		me.clicked = false;
 	};
 	me.rakeTouchMove = function(touchEvent) {
-		console.log('rakeTouchMove count',touchEvent.touches,'twoZoom',me.twoZoom,me.translateX,me.translateY,me.translateZ);
+		//console.log('rakeTouchMove count',touchEvent.touches,'twoZoom',me.twoZoom,me.translateX,me.translateY,me.translateZ);
 		touchEvent.preventDefault();
 		if(me.startedTouch){
 			if (touchEvent.touches.length < 2) {
@@ -330,6 +332,8 @@ function TileLevel(svg) {
 				if (!me.twoZoom) {
 					me.startTouchZoom(touchEvent);
 				} else {
+					console.log('from',me.translateX,me.translateY,me.translateZ);
+
 					var p1 = me.vectorFromTouch(touchEvent.touches[0]);
 					var p2 = me.vectorFromTouch(touchEvent.touches[1]);
 					
@@ -355,9 +359,13 @@ function TileLevel(svg) {
 					if (me.viewHeight * me.translateZ > me.innerHeight) {
 						cY = (me.viewHeight  - me.innerHeight/me.translateZ)/2 ;
 					}
-					//console.log('move',p1,me.twodistance,p2,zoom,cX,cY);
+					console.log('move',p1,me.twodistance,p2,zoom,cX,cY);
+					if (me.viewWidth * me.translateZ < me.innerWidth) {
 					me.translateX = me.translateX - (me.translateZ - zoom) * (me.twocenter.x);
+				}
+				if (me.viewHeight * me.translateZ < me.innerHeight) {
 					me.translateY = me.translateY - (me.translateZ - zoom) * (me.twocenter.y);
+				}
 					me.translateZ = zoom;
 					/*
 					var cX=0;
