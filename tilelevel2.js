@@ -289,7 +289,7 @@ function TileLevel(svg) {
 			d = 1;
 		}
 		me.twodistance = d;
-		console.log('startTouchZoom',me.twodistance);
+		console.log('startTouchZoom',p1,me.twodistance,p2);
 	};
 	me.rakeTouchStart = function(touchEvent) {
 		touchEvent.preventDefault();
@@ -332,12 +332,14 @@ function TileLevel(svg) {
 				} else {
 					var p1 = me.vectorFromTouch(touchEvent.touches[0]);
 					var p2 = me.vectorFromTouch(touchEvent.touches[1]);
+					
 					var d = me.vectorDistance(p1, p2);
 					if (d <= 0) {
 						d = 1;
 					}
 					var ratio = d / me.twodistance;
 					me.twodistance = d;
+					console.log('move',p1,me.twodistance,p2);
 					var zoom = me.translateZ / ratio;
 					if (zoom < 1) {
 						zoom = 1;
@@ -348,7 +350,7 @@ function TileLevel(svg) {
 					me.translateX = me.translateX - (me.translateZ - zoom) * me.twocenter.x;
 					me.translateY = me.translateY - (me.translateZ - zoom) * me.twocenter.y;
 					me.translateZ = zoom;
-					
+					/*
 					var cX=0;
 					var cY=0;
 					if (me.viewWidth * me.translateZ > me.innerWidth) {
@@ -360,7 +362,7 @@ function TileLevel(svg) {
 						cY = (me.viewHeight  - me.innerHeight/me.translateZ)/2 ;
 						me.translateY=me.translateY-cY;
 						//console.log('cY',cY,'/',me.translateY,p1,p2);
-					}
+					}*/
 					
 					me.dragZoom = 1.0;
 					me.applyZoomPosition();
