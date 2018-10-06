@@ -1,4 +1,4 @@
-﻿console.log('tilelevel.js v2.44');
+﻿console.log('tilelevel.js v2.45');
 
 function TileLevel(svg) {
 	var me = this;
@@ -36,7 +36,7 @@ function TileLevel(svg) {
 	me.svg.removeChild(rect);
 	me.dragZoom = 1;
 	me.startDragZoom = function() {
-		me.dragZoom = 1.00;
+		me.dragZoom = 1.01;
 		me.applyZoomPosition();
 	};
 	me.cancelDragZoom = function() {
