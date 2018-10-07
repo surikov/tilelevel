@@ -1,4 +1,4 @@
-﻿console.log('tilelevel.js v2.45');
+﻿console.log('tilelevel.js v2.46');
 
 function TileLevel(svg) {
 	var me = this;
@@ -520,7 +520,7 @@ function TileLevel(svg) {
 						}
 					}
 				}
-				element.ontouchend = element.onclick
+				element.ontouchend = element.onclick;
 			}
 		}
 	};
