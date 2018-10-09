@@ -1,4 +1,4 @@
-﻿console.log('tilelevel.js v2.47');
+﻿console.log('tilelevel.js v2.48');
 
 function TileLevel(svg) {
 	var me = this;
@@ -652,7 +652,7 @@ function TileLevel(svg) {
 			me.applyZoomPosition();
 			var main = me;
 			setTimeout(function () {
-				main.stepSlideTo(xyz);
+				main.stepSlideTo(xyz, action);
 			}, 10);
 		} else {
 			if (action) {
