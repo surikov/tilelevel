@@ -4,7 +4,7 @@
   "description": "Levels of UI",
   "main": "tilelevel.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "browserify tilelevel2.js > npm/bundle.js && echo done"
   },
   "repository": {
     "type": "git",
@@ -22,9 +22,7 @@
   },
   "homepage": "https://github.com/surikov/tilelevel#readme",
   "dependencies": {
-    "browserify": "^16.2.3"
-  },
-  "scripts": {
-	  "build": "browserify tilelevel2.js > npm/bundle.js && echo done"
-	}
+    "browserify": "^16.2.3",
+    "typescript": "^3.4.5"
+  }
 }

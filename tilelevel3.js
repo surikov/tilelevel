@@ -190,7 +190,7 @@ function TileLevel(svg) {
 		mouseEvent.preventDefault();
 		me.svg.removeEventListener('mousemove', me.rakeMouseMove, true);
 		if (Math.abs(me.clickX - mouseEvent.offsetX) < me.clickLimit //
-			 &&
+			&&
 			Math.abs(me.clickY - mouseEvent.offsetY) < me.clickLimit) {
 			me.clicked = true;
 		}
@@ -348,7 +348,7 @@ function TileLevel(svg) {
 			if (touchEvent.touches.length < 2) {
 				if (me.startedTouch) {
 					if (Math.abs(me.clickX - me.startMouseScreenX) < me.translateZ * me.clickLimit //
-						 &&
+						&&
 						Math.abs(me.clickY - me.startMouseScreenY) < me.translateZ * me.clickLimit) {
 						me.clicked = true;
 					}
@@ -461,7 +461,7 @@ function TileLevel(svg) {
 		}
 		if (definitions.z[0] <= me.translateZ && definitions.z[1] > me.translateZ) {
 			if (me.collision(definitions.x * me.tapSize, definitions.y * me.tapSize, definitions.w * me.tapSize, definitions.h * me.tapSize //
-				, x, y, w, h)) {
+					, x, y, w, h)) {
 				var xg = me.childExists(parentGroup, definitions.id);
 				if (xg) {
 					for (var n = 0; n < definitions.l.length; n++) {

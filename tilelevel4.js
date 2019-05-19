@@ -1,767 +1,782 @@
-﻿console.log('tilelevel.js v3.48');
-function TileModelLayer(){
-	var g=null;//SVG group
-	var kind=me.layerNormal;// = 0;me.layerOverlay = 1;me.layerColumn = 2;me.layerRow = 3;
-	var shiftX=0;//
-	var shiftY=0;//
-	var m=[];//elements definitions
-	return this;
-}
-function TileElementRectangle(){
-	var kind='r';//
-	var x=0;//
-	var y=0;//
-	var w=0;//
-	var h=0;//
-	var rx=0;//
-	var ry=0;//
-	var css='';//
-	return this;
-}
-function TileElementText(){
-	var kind='t';//
-	var x=0;//
-	var y=0;//
-	var t='';//
-	var css='';//
-	return this;
-}
-function TileElementPath(){
-	var kind='p';//
-	var x=0;//
-	var y=0;//
-	var z=0;//
-	var d='';//SVG path 'd' attribute text
-	var css='';//
-	return this;
-}
-function TileElementLine(){
-	var kind='l';//
-	var x1=0;//
-	var y1=0;//
-	var x2=0;//
-	var y2=0;//
-	var css='';//
-	return this;
-}
-function TileElementGroup(){
-	var kind='g';//
-	var d=[];//elements definitions
-	var css='';//
-	return this;
-}
-
-function TileLevel(svg) {
-	var me = this;
-	me.svgns = "http://www.w3.org/2000/svg";
-	me.svg = svg;
-	me.viewWidth = me.svg.clientWidth;
-	me.viewHeight = me.svg.clientHeight;
-	me.innerWidth = me.viewWidth;
-	me.innerHeight = me.viewHeight;
-	me.pxCmRatio = 1;
-	me.twoZoom = false;
-	me.startMouseScreenX = 0;
-	me.startMouseScreenY = 0;
-	me.clickX = 0;
-	me.clickY = 0;
-	me.clicked = false;
-	me.valid = false;
-	me.translateX = 0;
-	me.translateY = 0;
-	me.translateZ = 1;
-	me.twodistance = 0;
-	me.startedTouch = false;
-	me.mx = 100;
-	me.layerNormal = 0;
-	me.layerOverlay = 1;
-	me.layerColumn = 2;
-	me.layerRow = 3;
-	var rect = document.createElementNS(this.svgns, 'rect');
-	rect.setAttributeNS(null, 'height', '1cm');
-	rect.setAttributeNS(null, 'width', '1cm');
-	me.svg.appendChild(rect);
-	var tbb = rect.getBBox();
-	me.tapSize = tbb.width;
-	me.clickLimit = me.tapSize / 6;
-	me.svg.removeChild(rect);
-	me.dragZoom = 1;
-	me.startDragZoom = function () {
-		me.dragZoom = 1.01;
-		me.applyZoomPosition();
-	};
-	me.cancelDragZoom = function () {
-		me.dragZoom = 1.0;
-		me.applyZoomPosition();
-	};
-	me.applyZoomPosition = function () {
-		var rx = -me.translateX - me.dragZoom * me.translateZ * (me.viewWidth - me.viewWidth / me.dragZoom) * (me.clickX / me.viewWidth);
-		var ry = -me.translateY - me.dragZoom * me.translateZ * (me.viewHeight - me.viewHeight / me.dragZoom) * (me.clickY / me.viewHeight);
-		var rw = me.viewWidth * me.translateZ * me.dragZoom;
-		var rh = me.viewHeight * me.translateZ * me.dragZoom;
-		me.svg.setAttribute('viewBox', rx + ' ' + ry + ' ' + rw + ' ' + rh);
-		if (me.model) {
-			for (var k = 0; k < me.model.length; k++) {
-				var layer = me.model[k];
-				var tx = 0;
-				var ty = 0;
-				var tz = 1;
-				var cX = 0;
-				var cY = 0;
-				var sX = 0;
-				var sY = 0;
-				if (me.viewWidth * me.translateZ > me.innerWidth) {
-					cX = (me.viewWidth * me.translateZ - me.innerWidth) / 2;
-				}
-				if (me.viewHeight * me.translateZ > me.innerHeight) {
-					cY = (me.viewHeight * me.translateZ - me.innerHeight) / 2;
-				}
-				if (layer.kind == me.layerOverlay) {
-					tz = me.translateZ;
-					tx = -me.translateX;
-					ty = -me.translateY;
-					cX = 0;
-					cY = 0;
-				} else {
-					if (layer.kind == me.layerColumn) {
-						tx = -me.translateX;
-						cX = 0;
-						if (layer.shiftX) {
-							sX = layer.shiftX * me.tapSize * me.translateZ;
-						}
-					} else {
-						if (layer.kind == me.layerRow) {
-							ty = -me.translateY;
-							cY = 0;
-							if (layer.shiftY) {
-								sY = layer.shiftY * me.tapSize * me.translateZ;
-							}
-						}
-					}
-				}
-				layer.g.setAttribute('transform', 'translate(' + (tx + cX + sX) +
-					',' + (ty + cY + sY) + ') scale(' + tz + ',' + tz + ')');
-			}
-		}
-	};
-	me.setModel = function (model) {
-		me.model = model;
-		me.resetModel();
-	};
-	me.resetModel = function () {
-		me.clearAllDetails();
-		me.applyZoomPosition();
-		me.adjustContentPosition();
-		me.slideToContentPosition();
-		me.valid = false;
-	};
-	me.adjustContentPosition = function () {
-		var a = me.adjusted();
-		if (a.x != me.translateX || a.y != me.translateY || a.z != me.translateZ) {
-			me.translateX = a.x;
-			me.translateY = a.y;
-			me.translateZ = a.z;
-			me.applyZoomPosition();
-		}
-	};
-	me.slideToContentPosition = function () {
-		var a = me.adjusted();
-		if (a.x != me.translateX || a.y != me.translateY || a.z != me.translateZ) {
-			me.startSlideTo(a.x, a.y, a.z);
-		}
-	};
-	me.adjusted = function () {
-		var vX = me.translateX;
-		var vY = me.translateY;
-		var vZ = me.translateZ;
-		if (me.translateX > 0) {
-			vX = 0;
-		} else {
-			if (me.viewWidth - me.translateX / me.translateZ > me.innerWidth / me.translateZ) {
-				if (me.viewWidth * me.translateZ - me.innerWidth <= 0) {
-					vX = me.viewWidth * me.translateZ - me.innerWidth;
-				} else {
-					vX = 0;
-				}
-			}
-		}
-		if (me.translateY > 0) {
-			vY = 0;
-		} else {
-			if (me.viewHeight - me.translateY / me.translateZ > me.innerHeight / me.translateZ) {
-				if (me.viewHeight * me.translateZ - me.innerHeight <= 0) {
-					vY = me.viewHeight * me.translateZ - me.innerHeight;
-				} else {
-					vY = 0;
-				}
-			}
-		}
-		if (me.translateZ < 1) {
-			vZ = 1;
-		} else {
-			if (me.translateZ > me.mx) {
-				vZ = me.mx;
-			}
-		}
-		return {
-			x: vX,
-			y: vY,
-			z: vZ
-		};
-	};
-	me.queueTiles = function () {
-		me.clearUselessDetails();
-		me.tileFromModel();
-	};
-	me.maxZoom = function () {
-		return me.mx;
-	};
-	me.rakeMouseDown = function (mouseEvent) {
-		mouseEvent.preventDefault();
-		me.svg.addEventListener('mousemove', me.rakeMouseMove, true);
-		me.svg.addEventListener('mouseup', me.rakeMouseUp, false);
-		me.startMouseScreenX = mouseEvent.offsetX;
-		me.startMouseScreenY = mouseEvent.offsetY;
-		me.clickX = me.startMouseScreenX;
-		me.clickY = me.startMouseScreenY;
-		me.clicked = false;
-		me.startDragZoom();
-	};
-	me.rakeMouseMove = function (mouseEvent) {
-		mouseEvent.preventDefault();
-		var dX = mouseEvent.offsetX - me.startMouseScreenX;
-		var dY = mouseEvent.offsetY - me.startMouseScreenY;
-		me.translateX = me.translateX + dX * me.translateZ;
-		me.translateY = me.translateY + dY * me.translateZ;
-		me.startMouseScreenX = mouseEvent.offsetX;
-		me.startMouseScreenY = mouseEvent.offsetY;
-		me.applyZoomPosition();
-	};
-	me.rakeMouseUp = function (mouseEvent) {
-		mouseEvent.preventDefault();
-		me.svg.removeEventListener('mousemove', me.rakeMouseMove, true);
-		if (Math.abs(me.clickX - mouseEvent.offsetX) < me.clickLimit //
-			 &&
-			Math.abs(me.clickY - mouseEvent.offsetY) < me.clickLimit) {
-			me.clicked = true;
-		}
-		me.cancelDragZoom();
-		me.slideToContentPosition();
-		me.valid = false;
-	};
-	me.rakeMouseWheel = function (e) {
-		//e.preventDefault();
-		var wheelVal = e.wheelDelta || -e.detail;
-		var min = Math.min(1, wheelVal);
-		var delta = Math.max(-1, min);
-		var zoom = me.translateZ + delta * (me.translateZ) * 0.077;
-		if (zoom < 1) {
-			zoom = 1;
-		}
-		if (zoom > me.maxZoom()) {
-			zoom = me.maxZoom();
-		}
-		me.translateX = me.translateX - (me.translateZ - zoom) * e.offsetX;
-		me.translateY = me.translateY - (me.translateZ - zoom) * e.offsetY;
-		me.translateZ = zoom;
-		me.applyZoomPosition();
-		me.adjustContentPosition();
-		me.valid = false;
-		return false;
-	};
-	me.vectorDistance = function (xy1, xy2) {
-		var xy = me.vectorSubstract(xy1, xy2);
-		var n = me.vectorNorm(xy);
-		return n;
-	};
-	me.vectorSubstract = function (xy1, xy2) {
-		return {
-			x: xy1.x - xy2.x,
-			y: xy1.y - xy2.y
-		};
-	};
-	me.vectorNorm = function (xy) {
-		return Math.sqrt(me.vectorNormSquared(xy));
-	};
-	me.vectorNormSquared = function (xy) {
-		return xy.x * xy.x + xy.y * xy.y;
-	};
-	me.vectorFromTouch = function (touch) {
-		return {
-			x: touch.clientX,
-			y: touch.clientY
-		};
-	};
-	me.vectorFindCenter = function (xy1, xy2) {
-		var xy = me.vectorAdd(xy1, xy2);
-		return me.vectorScale(xy, 0.5);
-	};
-	me.vectorAdd = function (xy1, xy2) {
-		return {
-			x: xy1.x + xy2.x,
-			y: xy1.y + xy2.y
-		};
-	};
-	me.vectorScale = function (xy, coef) {
-		return {
-			x: xy.x * coef,
-			y: xy.y * coef
-		};
-	};
-	me.startTouchZoom = function (touchEvent) {
-		me.twoZoom = true;
-		var p1 = me.vectorFromTouch(touchEvent.touches[0]);
-		var p2 = me.vectorFromTouch(touchEvent.touches[1]);
-		me.twocenter = me.vectorFindCenter(p1, p2);
-		var d = me.vectorDistance(p1, p2);
-		if (d <= 0) {
-			d = 1;
-		}
-		me.twodistance = d;
-	};
-	me.rakeTouchStart = function (touchEvent) {
-		//touchEvent.preventDefault();
-		me.startedTouch = true;
-		if (touchEvent.touches.length < 2) {
-			me.twoZoom = false;
-			me.startMouseScreenX = touchEvent.touches[0].clientX;
-			me.startMouseScreenY = touchEvent.touches[0].clientY;
-			me.clickX = me.startMouseScreenX;
-			me.clickY = me.startMouseScreenY;
-			me.twodistance = 0;
-			me.startDragZoom();
-			return;
-		} else {
-			me.startTouchZoom(touchEvent);
-		}
-		me.clicked = false;
-	};
-	me.rakeTouchMove = function (touchEvent) {
-		//touchEvent.preventDefault();
-		if (me.startedTouch) {
-			if (touchEvent.touches.length < 2) {
-				if (me.twoZoom) {
-					//
-				} else {
-					var dX = touchEvent.touches[0].clientX - me.startMouseScreenX;
-					var dY = touchEvent.touches[0].clientY - me.startMouseScreenY;
-					me.translateX = me.translateX + dX * me.translateZ;
-					me.translateY = me.translateY + dY * me.translateZ;
-					me.startMouseScreenX = touchEvent.touches[0].clientX;
-					me.startMouseScreenY = touchEvent.touches[0].clientY;
-					me.applyZoomPosition();
-					return;
-				}
-			} else {
-				if (!me.twoZoom) {
-					me.startTouchZoom(touchEvent);
-				} else {
-					var p1 = me.vectorFromTouch(touchEvent.touches[0]);
-					var p2 = me.vectorFromTouch(touchEvent.touches[1]);
-					var d = me.vectorDistance(p1, p2);
-					if (d <= 0) {
-						d = 1;
-					}
-					var ratio = d / me.twodistance;
-					me.twodistance = d;
-					var zoom = me.translateZ / ratio;
-					if (zoom < 1) {
-						zoom = 1;
-					}
-					if (zoom > me.maxZoom()) {
-						zoom = me.maxZoom();
-					}
-					var cX = 0;
-					var cY = 0;
-					if (me.viewWidth * me.translateZ > me.innerWidth) {
-						cX = (me.viewWidth - me.innerWidth / me.translateZ) / 2;
-					}
-					if (me.viewHeight * me.translateZ > me.innerHeight) {
-						cY = (me.viewHeight - me.innerHeight / me.translateZ) / 2;
-					}
-					if (me.viewWidth * me.translateZ < me.innerWidth) {
-						me.translateX = me.translateX - (me.translateZ - zoom) * (me.twocenter.x);
-					}
-					if (me.viewHeight * me.translateZ < me.innerHeight) {
-						me.translateY = me.translateY - (me.translateZ - zoom) * (me.twocenter.y);
-					}
-					me.translateZ = zoom;
-					me.dragZoom = 1.0;
-					me.applyZoomPosition();
-				}
-			}
-		}
-	};
-	me.rakeTouchEnd = function (touchEvent) {
-		touchEvent.preventDefault();
-		me.valid = false;
-		if (!me.twoZoom) {
-			if (touchEvent.touches.length < 2) {
-				if (me.startedTouch) {
-					if (Math.abs(me.clickX - me.startMouseScreenX) < me.translateZ * me.clickLimit //
-						 &&
-						Math.abs(me.clickY - me.startMouseScreenY) < me.translateZ * me.clickLimit) {
-						me.clicked = true;
-					}
-				} else {
-					//console.log('touch ended already');
-				}
-				me.cancelDragZoom();
-				me.slideToContentPosition();
-				return;
-			}
-		}
-		me.twoZoom = false;
-		me.startedTouch = false;
-		me.cancelDragZoom();
-		me.slideToContentPosition();
-	};
-	me.msEdgeHook = function (g) {
-		if (g.childNodes && (!(g.children))) {
-			g.children = g.childNodes;
-		}
-	};
-	me.tileGroup = function (g) {
-		var gg = document.createElementNS(me.svgns, 'g');
-		g.appendChild(gg);
-		return gg;
-	};
-	me.clearUselessDetails = function () {
-		if (me.model) {
-			for (var k = 0; k < me.model.length; k++) {
-				var group = me.model[k].g;
-				me.clearUselessGroups(group, me.model[k].kind);
-			}
-		}
-	};
-	me.clearUselessGroups = function (group, kind) {
-		var x = -me.translateX;
-		var y = -me.translateY;
-		var w = me.svg.clientWidth * me.translateZ;
-		var h = me.svg.clientHeight * me.translateZ;
-		if (me.viewWidth * me.translateZ > me.innerWidth) {
-			cX = (me.viewWidth * me.translateZ - me.innerWidth) / 2;
-			x = x - cX;
-		}
-		if (me.viewHeight * me.translateZ > me.innerHeight) {
-			cY = (me.viewHeight * me.translateZ - me.innerHeight) / 2;
-			y = y - cY;
-		}
-		if (kind == me.layerOverlay) {
-			x = 0;
-			y = 0;
-		} else {
-			if (kind == me.layerColumn) {
-				x = 0;
-			} else {
-				if (kind == me.layerRow) {
-					y = 0;
-				}
-			}
-		}
-		me.msEdgeHook(group);
-		for (var i = 0; i < group.children.length; i++) {
-			var child = group.children[i];
-			if (me.outOfWatch(child, x, y, w, h) || child.minZoom > me.translateZ || child.maxZoom <= me.translateZ) {
-				group.removeChild(child);
-				i--;
-			} else {
-				if (child.localName == 'g') {
-					me.clearUselessGroups(child, kind);
-				}
-			}
-		}
-	};
-	me.tileFromModel = function () {
-		if (me.model) {
-			for (var k = 0; k < me.model.length; k++) {
-				var group = me.model[k].g;
-				var arr = me.model[k].m;
-				for (var i = 0; i < arr.length; i++) {
-					var a = arr[i];
-					me.addGroupTile(group, a, me.model[k].kind);
-				}
-			}
-		}
-		me.valid = true;
-	};
-	me.addGroupTile = function (parentGroup, definitions, kind) {
-		var x = -me.translateX;
-		var y = -me.translateY;
-		var w = me.svg.clientWidth * me.translateZ;
-		var h = me.svg.clientHeight * me.translateZ;
-		if (me.viewWidth * me.translateZ > me.innerWidth) {
-			cX = (me.viewWidth * me.translateZ - me.innerWidth) / 2;
-			x = x - cX;
-		}
-		if (me.viewHeight * me.translateZ > me.innerHeight) {
-			cY = (me.viewHeight * me.translateZ - me.innerHeight) / 2;
-			y = y - cY;
-		}
-		if (kind == me.layerOverlay) {
-			x = 0;
-			y = 0;
-		} else {
-			if (kind == me.layerColumn) {
-				x = 0;
-			} else {
-				if (kind == me.layerRow) {
-					y = 0;
-				}
-			}
-		}
-		if (definitions.z[0] <= me.translateZ && definitions.z[1] > me.translateZ) {
-			if (me.collision(definitions.x * me.tapSize, definitions.y * me.tapSize, definitions.w * me.tapSize, definitions.h * me.tapSize //
-				, x, y, w, h)) {
-				var xg = me.childExists(parentGroup, definitions.id);
-				if (xg) {
-					for (var n = 0; n < definitions.l.length; n++) {
-						var d = definitions.l[n];
-						if (d.kind == 'g') {
-							me.addElement(xg, d, kind);
-						}
-					}
-				} else {
-					var g = document.createElementNS(me.svgns, 'g');
-					g.id = definitions.id;
-					g.watchX = definitions.x * me.tapSize;
-					g.watchY = definitions.y * me.tapSize;
-					g.watchW = definitions.w * me.tapSize;
-					g.watchH = definitions.h * me.tapSize;
-					parentGroup.appendChild(g);
-					g.minZoom = definitions.z[0];
-					g.maxZoom = definitions.z[1];
-					for (var n = 0; n < definitions.l.length; n++) {
-						var d = definitions.l[n];
-						me.addElement(g, d, kind);
-					}
-				}
-			}
-		}
-	};
-	me.addElement = function (g, d, kind) {
-		var element = null;
-		if (d.kind == 'r') {
-			element = me.tileRectangle(g, d.x * me.tapSize, d.y * me.tapSize, d.w * me.tapSize, d.h * me.tapSize, d.rx * me.tapSize, d.ry * me.tapSize, d.css);
-		}
-		if (d.kind == 't') {
-			element = me.tileText(g, d.x * me.tapSize, d.y * me.tapSize, d.t, d.css);
-		}
-		if (d.kind == 'p') {
-			element = me.tilePath(g, d.x * me.tapSize, d.y * me.tapSize, d.z, d.l, d.css);
-		}
-		if (d.kind == 'l') {
-			element = me.tileLine(g, d.x1 * me.tapSize, d.y1 * me.tapSize, d.x2 * me.tapSize, d.y2 * me.tapSize, d.css);
-		}
-		if (d.kind == 'g') {
-			me.addGroupTile(g, d, kind);
-		}
-		if (element) {
-			if (d.a) {
-				element.onClickFunction = d.a;
-				element.onclick = function () {
-					if (me.clicked) {
-						if (element) {
-							if (element.onClickFunction) {
-								var xx = element.getBoundingClientRect().x - me.svg.getBoundingClientRect().x;
-								var yy = element.getBoundingClientRect().y - me.svg.getBoundingClientRect().y;
-								element.onClickFunction(me.translateZ * (me.clickX - xx) / me.tapSize, me.translateZ * (me.clickY - yy) / me.tapSize);
-							}
-						}
-					}
-				}
-				element.ontouchend = element.onclick;
-			}
-		}
-	};
-	me.tilePath = function (g, x, y, z, data, cssClass) {
-		var path = document.createElementNS(this.svgns, 'path');
-		path.setAttributeNS(null, 'd', data);
-		var t = "";
-		if ((x) || (y)) {
-			t = 'translate(' + x + ',' + y + ')';
-		}
-		if (z) {
-			t = t + ' scale(' + z + ')';
-		}
-		if (t.length > 0) {
-			path.setAttributeNS(null, 'transform', t);
-		}
-		if (cssClass) {
-			path.classList.add(cssClass);
-		}
-		g.appendChild(path);
-		return path;
-	};
-	me.tileRectangle = function (g, x, y, w, h, rx, ry, cssClass) {
-		var rect = document.createElementNS(me.svgns, 'rect');
-		rect.setAttributeNS(null, 'x', x);
-		rect.setAttributeNS(null, 'y', y);
-		rect.setAttributeNS(null, 'height', h);
-		rect.setAttributeNS(null, 'width', w);
-		if (rx) {
-			rect.setAttributeNS(null, 'rx', rx);
-		}
-		if (ry) {
-			rect.setAttributeNS(null, 'ry', ry);
-		}
-		if (cssClass) {
-			rect.classList.add(cssClass);
-		}
-		g.appendChild(rect);
-		return rect;
-	};
-	me.tileLine = function (g, x1, y1, x2, y2, cssClass) {
-		var line = document.createElementNS(me.svgns, 'line');
-		line.setAttributeNS(null, 'x1', x1);
-		line.setAttributeNS(null, 'y1', y1);
-		line.setAttributeNS(null, 'x2', x2);
-		line.setAttributeNS(null, 'y2', y2);
-		if (cssClass) {
-			line.classList.add(cssClass);
-		}
-		g.appendChild(line);
-		return line;
-	};
-	me.tileText = function (g, x, y, html, cssClass) {
-		var txt = document.createElementNS(this.svgns, 'text');
-		txt.setAttributeNS(null, 'x', x);
-		txt.setAttributeNS(null, 'y', y);
-		if (cssClass) {
-			txt.setAttributeNS(null, 'class', cssClass);
-		}
-		txt.innerHTML = html;
-		g.appendChild(txt);
-		return txt;
-	};
-	me.childExists = function (group, id) {
-		me.msEdgeHook(group);
-		for (var i = 0; i < group.children.length; i++) {
-			var child = group.children[i];
-			if (child.id == id) {
-				return child;
-			}
-		}
-		return null;
-	};
-	me.clearAllDetails = function () {
-		if (me.model) {
-			for (var i = 0; i < me.model.length; i++) {
-				me.clearGroupDetails(me.model[i].g);
-			}
-		}
-	};
-	me.clearGroupDetails = function (group) {
-		me.msEdgeHook(group);
-		while (group.children.length) {
-			group.removeChild(group.children[0]);
-		}
-	};
-	me.outOfView = function (child, x, y, w, h) {
-		var tbb = child.getBBox();
-		return !(me.collision(tbb.x, tbb.y, tbb.width, tbb.height, x, y, w, h));
-	};
-	me.outOfWatch = function (g, x, y, w, h) {
-		return !(me.collision(g.watchX, g.watchY, g.watchW, g.watchH, x, y, w, h));
-	};
-	me.collision = function (x1, y1, w1, h1, x2, y2, w2, h2) {
-		if (this.collision2(x1, w1, x2, w2) && this.collision2(y1, h1, y2, h2)) {
-			return true;
-		} else {
-			return false;
-		}
-	};
-	me.startSlideTo = function (x, y, z, action) {
-		me.startStepSlideTo(10, x, y, z, action);
-	}
-	me.startStepSlideTo = function (s, x, y, z, action) {
-		var stepCount = s;
-		var dx = (x - me.translateX) / stepCount;
-		var dy = (y - me.translateY) / stepCount;
-		var dz = (z - me.translateZ) / stepCount;
-		var xyz = [];
-		for (var i = 0; i < stepCount; i++) {
-			xyz.push({
-				x: me.translateX + dx * i,
-				y: me.translateY + dy * i,
-				z: me.translateZ + dz * i
-			});
-		}
-		xyz.push({
-			x: x,
-			y: y,
-			z: z
-		});
-		me.stepSlideTo(xyz, action);
-	};
-	me.stepSlideTo = function (xyz, action) {
-		var n = xyz.shift();
-		if (n) {
-			me.translateX = n.x;
-			me.translateY = n.y;
-			me.translateZ = n.z;
-			me.applyZoomPosition();
-			var main = me;
-			setTimeout(function () {
-				main.stepSlideTo(xyz, action);
-			}, 10);
-		} else {
-			if (action) {
-				action();
-			}
-			me.adjustContentPosition();
-			me.valid = true;
-			me.queueTiles();
-		}
-	};
-	me.collision2 = function (x, w, left, width) {
-		if (x + w <= left || x >= left + width) {
-			return false;
-		} else {
-			return true;
-		}
-	};
-	me.startLoop = function () {
-		var last = new Date().getTime();
-		var step = function (timestamp) {
-			var now = new Date().getTime();
-			if (last + 222 < now) {
-				if (!(me.valid)) {
-					me.queueTiles();
-				}
-				last = new Date().getTime();
-			}
-			window.requestAnimationFrame(step);
-		};
-		step();
-	};
-	me.svg.addEventListener('mousedown', me.rakeMouseDown, {
-		capture: false
-	});
-	me.svg.addEventListener("mousewheel", me.rakeMouseWheel, {
-		capture: false,
-		passive: true
-	});
-	me.svg.addEventListener("DOMMouseScroll", me.rakeMouseWheel, {
-		capture: false
-	});
-	me.svg.addEventListener("touchstart", me.rakeTouchStart, {
-		capture: false,
-		passive: true
-	});
-	me.svg.addEventListener("touchmove", me.rakeTouchMove, {
-		capture: false,
-		passive: true
-	});
-	me.svg.addEventListener("touchend", me.rakeTouchEnd, {
-		capture: false
-	});
-	me.startLoop();
-	return me;
-}
-if (typeof module === 'object' && module.exports) {
-	module.exports = TileLevel;
-}
-if (typeof window !== 'undefined') {
-	window.TileLevel = TileLevel;
-}
+console.log('tilelevel.js v4.48');
+var _tileLevel = null;
+var LayerKind;
+(function (LayerKind) {
+    LayerKind[LayerKind["normal"] = 0] = "normal";
+    LayerKind[LayerKind["overlay"] = 1] = "overlay";
+    LayerKind[LayerKind["column"] = 2] = "column";
+    LayerKind[LayerKind["row"] = 3] = "row";
+})(LayerKind || (LayerKind = {}));
+;
+var TilePoint = /** @class */ (function () {
+    function TilePoint() {
+        this.x = 0;
+        this.y = 0;
+    }
+    return TilePoint;
+}());
+var TileZoom = /** @class */ (function () {
+    function TileZoom() {
+        this.x = 0;
+        this.y = 0;
+        this.z = 0;
+    }
+    return TileZoom;
+}());
+var TileModelLayer = /** @class */ (function () {
+    function TileModelLayer() {
+        this.g = null;
+        this.kind = LayerKind.normal;
+        this.shiftX = 0;
+        this.shiftY = 0;
+        this.m = [];
+    }
+    return TileModelLayer;
+}());
+var TileLevel = /** @class */ (function () {
+    function TileLevel(contentElement) {
+        this.svgns = "http://www.w3.org/2000/svg";
+        this.svg = null;
+        this.viewWidth = 0;
+        this.viewHeight = 0;
+        this.innerWidth = 0;
+        this.innerHeight = 0;
+        this.translateX = 0;
+        this.translateY = 0;
+        this.translateZ = 1;
+        this.startedTouch = false;
+        this.valid = false;
+        this.clicked = false;
+        this.mx = 100;
+        this.startMouseScreenX = 0;
+        this.startMouseScreenY = 0;
+        this.dragZoom = 1;
+        this.clickX = 0;
+        this.clickY = 0;
+        this.tapSize = 0;
+        this.twoZoom = false;
+        this.clickLimit = this.tapSize / 6;
+        this.twodistance = 0;
+        this.twocenter = null;
+        this.model = [];
+        _tileLevel = this;
+        this.svg = contentElement;
+        this.viewWidth = this.svg.clientWidth;
+        this.viewHeight = this.svg.clientHeight;
+        this.innerWidth = this.viewWidth;
+        this.innerHeight = this.viewHeight;
+        this.setupTapSize();
+        this.svg.addEventListener('mousedown', this.rakeMouseDown, {
+            capture: false
+        });
+        this.svg.addEventListener("mousewheel", this.rakeMouseWheel, {
+            capture: false,
+            passive: true
+        });
+        this.svg.addEventListener("DOMMouseScroll", this.rakeMouseWheel, {
+            capture: false
+        });
+        this.svg.addEventListener("touchstart", this.rakeTouchStart, {
+            capture: false,
+            passive: true
+        });
+        this.svg.addEventListener("touchmove", this.rakeTouchMove, {
+            capture: false,
+            passive: true
+        });
+        this.svg.addEventListener("touchend", this.rakeTouchEnd, {
+            capture: false
+        });
+        this.startLoop();
+        console.log('constructor', this);
+    }
+    TileLevel.prototype.setupTapSize = function () {
+        var rect = document.createElementNS(this.svgns, 'rect');
+        rect.setAttributeNS(null, 'height', '1cm');
+        rect.setAttributeNS(null, 'width', '1cm');
+        this.svg.appendChild(rect);
+        var tbb = rect.getBBox();
+        this.tapSize = tbb.width;
+        this.svg.removeChild(rect);
+        this.clickLimit = this.tapSize / 6;
+    };
+    TileLevel.prototype.startDragZoom = function () {
+        this.dragZoom = 1.01;
+        this.applyZoomPosition();
+    };
+    ;
+    TileLevel.prototype.cancelDragZoom = function () {
+        this.dragZoom = 1.0;
+        this.applyZoomPosition();
+    };
+    ;
+    TileLevel.prototype.applyZoomPosition = function () {
+        var rx = -this.translateX - this.dragZoom * this.translateZ * (this.viewWidth - this.viewWidth / this.dragZoom) * (this.clickX / this.viewWidth);
+        var ry = -this.translateY - this.dragZoom * this.translateZ * (this.viewHeight - this.viewHeight / this.dragZoom) * (this.clickY / this.viewHeight);
+        var rw = this.viewWidth * this.translateZ * this.dragZoom;
+        var rh = this.viewHeight * this.translateZ * this.dragZoom;
+        this.svg.setAttribute('viewBox', rx + ' ' + ry + ' ' + rw + ' ' + rh);
+        if (this.model) {
+            for (var k = 0; k < this.model.length; k++) {
+                var layer = this.model[k];
+                var tx = 0;
+                var ty = 0;
+                var tz = 1;
+                var cX = 0;
+                var cY = 0;
+                var sX = 0;
+                var sY = 0;
+                if (this.viewWidth * this.translateZ > this.innerWidth) {
+                    cX = (this.viewWidth * this.translateZ - this.innerWidth) / 2;
+                }
+                if (this.viewHeight * this.translateZ > this.innerHeight) {
+                    cY = (this.viewHeight * this.translateZ - this.innerHeight) / 2;
+                }
+                if (layer.kind == LayerKind.overlay) {
+                    tz = this.translateZ;
+                    tx = -this.translateX;
+                    ty = -this.translateY;
+                    cX = 0;
+                    cY = 0;
+                }
+                else {
+                    if (layer.kind == LayerKind.column) {
+                        tx = -this.translateX;
+                        cX = 0;
+                        if (layer.shiftX) {
+                            sX = layer.shiftX * this.tapSize * this.translateZ;
+                        }
+                    }
+                    else {
+                        if (layer.kind == LayerKind.row) {
+                            ty = -this.translateY;
+                            cY = 0;
+                            if (layer.shiftY) {
+                                sY = layer.shiftY * this.tapSize * this.translateZ;
+                            }
+                        }
+                    }
+                }
+                layer.g.setAttribute('transform', 'translate(' + (tx + cX + sX) +
+                    ',' + (ty + cY + sY) + ') scale(' + tz + ',' + tz + ')');
+            }
+        }
+    };
+    TileLevel.prototype.setModel = function (layers) {
+        this.model = layers;
+        this.resetModel();
+    };
+    TileLevel.prototype.resetModel = function () {
+        this.clearAllDetails();
+        this.applyZoomPosition();
+        this.adjustContentPosition();
+        this.slideToContentPosition();
+        this.valid = false;
+    };
+    TileLevel.prototype.adjustContentPosition = function () {
+        var a = this.adjusted();
+        if (a.x != this.translateX || a.y != this.translateY || a.z != this.translateZ) {
+            this.translateX = a.x;
+            this.translateY = a.y;
+            this.translateZ = a.z;
+            this.applyZoomPosition();
+        }
+    };
+    TileLevel.prototype.slideToContentPosition = function () {
+        var a = this.adjusted();
+        if (a.x != this.translateX || a.y != this.translateY || a.z != this.translateZ) {
+            this.startSlideTo(a.x, a.y, a.z, null);
+        }
+    };
+    TileLevel.prototype.clearAllDetails = function () {
+        if (this.model) {
+            for (var i = 0; i < this.model.length; i++) {
+                this.clearGroupDetails(this.model[i].g);
+            }
+        }
+    };
+    TileLevel.prototype.clearGroupDetails = function (group) {
+        this.msEdgeHook(group);
+        while (group.children.length) {
+            group.removeChild(group.children[0]);
+        }
+    };
+    TileLevel.prototype.msEdgeHook = function (g) {
+        if (g.childNodes && (!(g.children))) {
+            g.children = g.childNodes;
+        }
+    };
+    TileLevel.prototype.adjusted = function () {
+        var vX = this.translateX;
+        var vY = this.translateY;
+        var vZ = this.translateZ;
+        if (this.translateX > 0) {
+            vX = 0;
+        }
+        else {
+            if (this.viewWidth - this.translateX / this.translateZ > this.innerWidth / this.translateZ) {
+                if (this.viewWidth * this.translateZ - this.innerWidth <= 0) {
+                    vX = this.viewWidth * this.translateZ - this.innerWidth;
+                }
+                else {
+                    vX = 0;
+                }
+            }
+        }
+        if (this.translateY > 0) {
+            vY = 0;
+        }
+        else {
+            if (this.viewHeight - this.translateY / this.translateZ > this.innerHeight / this.translateZ) {
+                if (this.viewHeight * this.translateZ - this.innerHeight <= 0) {
+                    vY = this.viewHeight * this.translateZ - this.innerHeight;
+                }
+                else {
+                    vY = 0;
+                }
+            }
+        }
+        if (this.translateZ < 1) {
+            vZ = 1;
+        }
+        else {
+            if (this.translateZ > this.mx) {
+                vZ = this.mx;
+            }
+        }
+        return {
+            x: vX,
+            y: vY,
+            z: vZ
+        };
+    };
+    TileLevel.prototype.startSlideTo = function (x, y, z, action) {
+        this.startStepSlideTo(10, x, y, z, action);
+    };
+    TileLevel.prototype.startStepSlideTo = function (s, x, y, z, action) {
+        var stepCount = s;
+        var dx = (x - this.translateX) / stepCount;
+        var dy = (y - this.translateY) / stepCount;
+        var dz = (z - this.translateZ) / stepCount;
+        var xyz = [];
+        for (var i = 0; i < stepCount; i++) {
+            xyz.push({
+                x: this.translateX + dx * i,
+                y: this.translateY + dy * i,
+                z: this.translateZ + dz * i
+            });
+        }
+        xyz.push({
+            x: x,
+            y: y,
+            z: z
+        });
+        this.stepSlideTo(xyz, action);
+    };
+    TileLevel.prototype.stepSlideTo = function (xyz, action) {
+        var n = xyz.shift();
+        if (n) {
+            this.translateX = n.x;
+            this.translateY = n.y;
+            this.translateZ = n.z;
+            this.applyZoomPosition();
+            var main_1 = this;
+            setTimeout(function () {
+                main_1.stepSlideTo(xyz, action);
+            }, 10);
+        }
+        else {
+            if (action) {
+                action();
+            }
+            this.adjustContentPosition();
+            this.valid = true;
+            this.queueTiles();
+        }
+    };
+    TileLevel.prototype.maxZoom = function () {
+        return this.mx;
+    };
+    ;
+    TileLevel.prototype.queueTiles = function () {
+        this.clearUselessDetails();
+        this.tileFromModel();
+    };
+    TileLevel.prototype.clearUselessDetails = function () {
+        if (this.model) {
+            for (var k = 0; k < this.model.length; k++) {
+                var group = this.model[k].g;
+                this.clearUselessGroups(group, this.model[k].kind);
+            }
+        }
+    };
+    TileLevel.prototype.clearUselessGroups = function (group, kind) {
+        var x = -this.translateX;
+        var y = -this.translateY;
+        var w = this.svg.clientWidth * this.translateZ;
+        var h = this.svg.clientHeight * this.translateZ;
+        var cX = 0;
+        var cY = 0;
+        if (this.viewWidth * this.translateZ > this.innerWidth) {
+            cX = (this.viewWidth * this.translateZ - this.innerWidth) / 2;
+            x = x - cX;
+        }
+        if (this.viewHeight * this.translateZ > this.innerHeight) {
+            cY = (this.viewHeight * this.translateZ - this.innerHeight) / 2;
+            y = y - cY;
+        }
+        if (kind == LayerKind.overlay) {
+            x = 0;
+            y = 0;
+        }
+        else {
+            if (kind == LayerKind.column) {
+                x = 0;
+            }
+            else {
+                if (kind == LayerKind.row) {
+                    y = 0;
+                }
+            }
+        }
+        this.msEdgeHook(group);
+        for (var i = 0; i < group.children.length; i++) {
+            var child = group.children[i];
+            if (this.outOfWatch(child, x, y, w, h) || child.minZoom > this.translateZ || child.maxZoom <= this.translateZ) {
+                group.removeChild(child);
+                i--;
+            }
+            else {
+                if (child.localName == 'g') {
+                    this.clearUselessGroups(child, kind);
+                }
+            }
+        }
+    };
+    TileLevel.prototype.rakeMouseWheel = function (e) {
+        //e.preventDefault();
+        var wheelVal = e.wheelDelta || -e.detail;
+        var min = Math.min(1, wheelVal);
+        var delta = Math.max(-1, min);
+        var zoom = _tileLevel.translateZ + delta * (_tileLevel.translateZ) * 0.077;
+        if (zoom < 1) {
+            zoom = 1;
+        }
+        if (zoom > _tileLevel.maxZoom()) {
+            zoom = _tileLevel.maxZoom();
+        }
+        _tileLevel.translateX = _tileLevel.translateX - (_tileLevel.translateZ - zoom) * e.offsetX;
+        _tileLevel.translateY = _tileLevel.translateY - (_tileLevel.translateZ - zoom) * e.offsetY;
+        _tileLevel.translateZ = zoom;
+        _tileLevel.applyZoomPosition();
+        _tileLevel.adjustContentPosition();
+        _tileLevel.valid = false;
+        return false;
+    };
+    TileLevel.prototype.rakeMouseDown = function (mouseEvent) {
+        //console.log('rakeMouseDown',mouseEvent,this);
+        mouseEvent.preventDefault();
+        _tileLevel.svg.addEventListener('mousemove', _tileLevel.rakeMouseMove, true);
+        _tileLevel.svg.addEventListener('mouseup', _tileLevel.rakeMouseUp, false);
+        _tileLevel.startMouseScreenX = mouseEvent.offsetX;
+        _tileLevel.startMouseScreenY = mouseEvent.offsetY;
+        _tileLevel.clickX = _tileLevel.startMouseScreenX;
+        _tileLevel.clickY = _tileLevel.startMouseScreenY;
+        _tileLevel.clicked = false;
+        _tileLevel.startDragZoom();
+    };
+    TileLevel.prototype.rakeMouseMove = function (mouseEvent) {
+        mouseEvent.preventDefault();
+        var dX = mouseEvent.offsetX - _tileLevel.startMouseScreenX;
+        var dY = mouseEvent.offsetY - _tileLevel.startMouseScreenY;
+        _tileLevel.translateX = _tileLevel.translateX + dX * _tileLevel.translateZ;
+        _tileLevel.translateY = _tileLevel.translateY + dY * _tileLevel.translateZ;
+        _tileLevel.startMouseScreenX = mouseEvent.offsetX;
+        _tileLevel.startMouseScreenY = mouseEvent.offsetY;
+        _tileLevel.applyZoomPosition();
+    };
+    TileLevel.prototype.rakeMouseUp = function (mouseEvent) {
+        mouseEvent.preventDefault();
+        _tileLevel.svg.removeEventListener('mousemove', _tileLevel.rakeMouseMove, true);
+        if (Math.abs(_tileLevel.clickX - mouseEvent.offsetX) < _tileLevel.clickLimit //
+            &&
+                Math.abs(_tileLevel.clickY - mouseEvent.offsetY) < _tileLevel.clickLimit) {
+            _tileLevel.clicked = true;
+        }
+        _tileLevel.cancelDragZoom();
+        _tileLevel.slideToContentPosition();
+        _tileLevel.valid = false;
+    };
+    TileLevel.prototype.rakeTouchStart = function (touchEvent) {
+        //touchEvent.preventDefault();
+        _tileLevel.startedTouch = true;
+        if (touchEvent.touches.length < 2) {
+            _tileLevel.twoZoom = false;
+            _tileLevel.startMouseScreenX = touchEvent.touches[0].clientX;
+            _tileLevel.startMouseScreenY = touchEvent.touches[0].clientY;
+            _tileLevel.clickX = _tileLevel.startMouseScreenX;
+            _tileLevel.clickY = _tileLevel.startMouseScreenY;
+            _tileLevel.twodistance = 0;
+            _tileLevel.startDragZoom();
+            return;
+        }
+        else {
+            _tileLevel.startTouchZoom(touchEvent);
+        }
+        _tileLevel.clicked = false;
+    };
+    TileLevel.prototype.rakeTouchMove = function (touchEvent) {
+        //touchEvent.preventDefault();
+        if (_tileLevel.startedTouch) {
+            if (touchEvent.touches.length < 2) {
+                if (_tileLevel.twoZoom) {
+                    //
+                }
+                else {
+                    var dX = touchEvent.touches[0].clientX - _tileLevel.startMouseScreenX;
+                    var dY = touchEvent.touches[0].clientY - _tileLevel.startMouseScreenY;
+                    _tileLevel.translateX = _tileLevel.translateX + dX * _tileLevel.translateZ;
+                    _tileLevel.translateY = _tileLevel.translateY + dY * _tileLevel.translateZ;
+                    _tileLevel.startMouseScreenX = touchEvent.touches[0].clientX;
+                    _tileLevel.startMouseScreenY = touchEvent.touches[0].clientY;
+                    _tileLevel.applyZoomPosition();
+                    return;
+                }
+            }
+            else {
+                if (!_tileLevel.twoZoom) {
+                    _tileLevel.startTouchZoom(touchEvent);
+                }
+                else {
+                    var p1 = _tileLevel.vectorFromTouch(touchEvent.touches[0]);
+                    var p2 = _tileLevel.vectorFromTouch(touchEvent.touches[1]);
+                    var d = _tileLevel.vectorDistance(p1, p2);
+                    if (d <= 0) {
+                        d = 1;
+                    }
+                    var ratio = d / _tileLevel.twodistance;
+                    _tileLevel.twodistance = d;
+                    var zoom = _tileLevel.translateZ / ratio;
+                    if (zoom < 1) {
+                        zoom = 1;
+                    }
+                    if (zoom > _tileLevel.maxZoom()) {
+                        zoom = _tileLevel.maxZoom();
+                    }
+                    var cX = 0;
+                    var cY = 0;
+                    if (_tileLevel.viewWidth * _tileLevel.translateZ > _tileLevel.innerWidth) {
+                        cX = (_tileLevel.viewWidth - _tileLevel.innerWidth / _tileLevel.translateZ) / 2;
+                    }
+                    if (_tileLevel.viewHeight * _tileLevel.translateZ > _tileLevel.innerHeight) {
+                        cY = (_tileLevel.viewHeight - _tileLevel.innerHeight / _tileLevel.translateZ) / 2;
+                    }
+                    if (_tileLevel.viewWidth * _tileLevel.translateZ < _tileLevel.innerWidth) {
+                        _tileLevel.translateX = _tileLevel.translateX - (_tileLevel.translateZ - zoom) * (_tileLevel.twocenter.x);
+                    }
+                    if (_tileLevel.viewHeight * _tileLevel.translateZ < _tileLevel.innerHeight) {
+                        _tileLevel.translateY = _tileLevel.translateY - (_tileLevel.translateZ - zoom) * (_tileLevel.twocenter.y);
+                    }
+                    _tileLevel.translateZ = zoom;
+                    _tileLevel.dragZoom = 1.0;
+                    _tileLevel.applyZoomPosition();
+                }
+            }
+        }
+    };
+    TileLevel.prototype.rakeTouchEnd = function (touchEvent) {
+        touchEvent.preventDefault();
+        _tileLevel.valid = false;
+        if (!_tileLevel.twoZoom) {
+            if (touchEvent.touches.length < 2) {
+                if (_tileLevel.startedTouch) {
+                    if (Math.abs(_tileLevel.clickX - _tileLevel.startMouseScreenX) < _tileLevel.translateZ * _tileLevel.clickLimit //
+                        &&
+                            Math.abs(_tileLevel.clickY - _tileLevel.startMouseScreenY) < _tileLevel.translateZ * _tileLevel.clickLimit) {
+                        _tileLevel.clicked = true;
+                    }
+                }
+                else {
+                    //console.log('touch ended already');
+                }
+                _tileLevel.cancelDragZoom();
+                _tileLevel.slideToContentPosition();
+                return;
+            }
+        }
+        _tileLevel.twoZoom = false;
+        _tileLevel.startedTouch = false;
+        _tileLevel.cancelDragZoom();
+        _tileLevel.slideToContentPosition();
+    };
+    TileLevel.prototype.tileFromModel = function () {
+        if (this.model) {
+            for (var k = 0; k < this.model.length; k++) {
+                var group = this.model[k].g;
+                var arr = this.model[k].m;
+                for (var i = 0; i < arr.length; i++) {
+                    var a = arr[i];
+                    this.addGroupTile(group, a, this.model[k].kind);
+                }
+            }
+        }
+        this.valid = true;
+    };
+    TileLevel.prototype.addGroupTile = function (parentGroup, definitions, kind) {
+        var x = -this.translateX;
+        var y = -this.translateY;
+        var w = this.svg.clientWidth * this.translateZ;
+        var h = this.svg.clientHeight * this.translateZ;
+        var cX = 0;
+        var cY = 0;
+        if (this.viewWidth * this.translateZ > this.innerWidth) {
+            cX = (this.viewWidth * this.translateZ - this.innerWidth) / 2;
+            x = x - cX;
+        }
+        if (this.viewHeight * this.translateZ > this.innerHeight) {
+            cY = (this.viewHeight * this.translateZ - this.innerHeight) / 2;
+            y = y - cY;
+        }
+        if (kind == LayerKind.overlay) {
+            x = 0;
+            y = 0;
+        }
+        else {
+            if (kind == LayerKind.column) {
+                x = 0;
+            }
+            else {
+                if (kind == LayerKind.row) {
+                    y = 0;
+                }
+            }
+        }
+        if (definitions.z[0] <= this.translateZ && definitions.z[1] > this.translateZ) {
+            if (this.collision(definitions.x * this.tapSize, definitions.y * this.tapSize, definitions.w * this.tapSize, definitions.h * this.tapSize //
+            , x, y, w, h)) {
+                var xg = this.childExists(parentGroup, definitions.id);
+                if (xg) {
+                    for (var n = 0; n < definitions.l.length; n++) {
+                        var d = definitions.l[n];
+                        if (d.kind == 'g') {
+                            this.addElement(xg, d, kind);
+                        }
+                    }
+                }
+                else {
+                    var g = document.createElementNS(this.svgns, 'g');
+                    g.id = definitions.id;
+                    var gg = g;
+                    gg.watchX = definitions.x * this.tapSize;
+                    gg.watchY = definitions.y * this.tapSize;
+                    gg.watchW = definitions.w * this.tapSize;
+                    gg.watchH = definitions.h * this.tapSize;
+                    parentGroup.appendChild(g);
+                    gg.minZoom = definitions.z[0];
+                    gg.maxZoom = definitions.z[1];
+                    for (var n = 0; n < definitions.l.length; n++) {
+                        var d = definitions.l[n];
+                        this.addElement(g, d, kind);
+                    }
+                }
+            }
+        }
+    };
+    TileLevel.prototype.startTouchZoom = function (touchEvent) {
+        this.twoZoom = true;
+        var p1 = this.vectorFromTouch(touchEvent.touches[0]);
+        var p2 = this.vectorFromTouch(touchEvent.touches[1]);
+        this.twocenter = this.vectorFindCenter(p1, p2);
+        var d = this.vectorDistance(p1, p2);
+        if (d <= 0) {
+            d = 1;
+        }
+        this.twodistance = d;
+    };
+    ;
+    TileLevel.prototype.tilePath = function (g, x, y, z, data, cssClass) {
+        var path = document.createElementNS(this.svgns, 'path');
+        path.setAttributeNS(null, 'd', data);
+        var t = "";
+        if ((x) || (y)) {
+            t = 'translate(' + x + ',' + y + ')';
+        }
+        if (z) {
+            t = t + ' scale(' + z + ')';
+        }
+        if (t.length > 0) {
+            path.setAttributeNS(null, 'transform', t);
+        }
+        if (cssClass) {
+            path.classList.add(cssClass);
+        }
+        g.appendChild(path);
+        return path;
+    };
+    TileLevel.prototype.tileRectangle = function (g, x, y, w, h, rx, ry, cssClass) {
+        var rect = document.createElementNS(this.svgns, 'rect');
+        rect.setAttributeNS(null, 'x', x);
+        rect.setAttributeNS(null, 'y', y);
+        rect.setAttributeNS(null, 'height', h);
+        rect.setAttributeNS(null, 'width', w);
+        if (rx) {
+            rect.setAttributeNS(null, 'rx', rx);
+        }
+        if (ry) {
+            rect.setAttributeNS(null, 'ry', ry);
+        }
+        if (cssClass) {
+            rect.classList.add(cssClass);
+        }
+        g.appendChild(rect);
+        return rect;
+    };
+    TileLevel.prototype.tileLine = function (g, x1, y1, x2, y2, cssClass) {
+        var line = document.createElementNS(this.svgns, 'line');
+        line.setAttributeNS(null, 'x1', x1);
+        line.setAttributeNS(null, 'y1', y1);
+        line.setAttributeNS(null, 'x2', x2);
+        line.setAttributeNS(null, 'y2', y2);
+        if (cssClass) {
+            line.classList.add(cssClass);
+        }
+        g.appendChild(line);
+        return line;
+    };
+    TileLevel.prototype.tileText = function (g, x, y, html, cssClass) {
+        var txt = document.createElementNS(this.svgns, 'text');
+        txt.setAttributeNS(null, 'x', x);
+        txt.setAttributeNS(null, 'y', y);
+        if (cssClass) {
+            txt.setAttributeNS(null, 'class', cssClass);
+        }
+        txt.innerHTML = html;
+        g.appendChild(txt);
+        return txt;
+    };
+    ;
+    TileLevel.prototype.addElement = function (g, d, kind) {
+        var element = null;
+        if (d.kind == 'r') {
+            element = this.tileRectangle(g, d.x * this.tapSize, d.y * this.tapSize, d.w * this.tapSize, d.h * this.tapSize, d.rx * this.tapSize, d.ry * this.tapSize, d.css);
+        }
+        if (d.kind == 't') {
+            element = this.tileText(g, d.x * this.tapSize, d.y * this.tapSize, d.t, d.css);
+        }
+        if (d.kind == 'p') {
+            element = this.tilePath(g, d.x * this.tapSize, d.y * this.tapSize, d.z, d.l, d.css);
+        }
+        if (d.kind == 'l') {
+            element = this.tileLine(g, d.x1 * this.tapSize, d.y1 * this.tapSize, d.x2 * this.tapSize, d.y2 * this.tapSize, d.css);
+        }
+        if (d.kind == 'g') {
+            this.addGroupTile(g, d, kind);
+        }
+        if (element) {
+            if (d.a) {
+                element.onClickFunction = d.a;
+                element.onclick = function () {
+                    if (this.clicked) {
+                        if (element) {
+                            if (element.onClickFunction) {
+                                var xx = element.getBoundingClientRect().x - this.svg.getBoundingClientRect().x;
+                                var yy = element.getBoundingClientRect().y - this.svg.getBoundingClientRect().y;
+                                element.onClickFunction(this.translateZ * (this.clickX - xx) / this.tapSize, this.translateZ * (this.clickY - yy) / this.tapSize);
+                            }
+                        }
+                    }
+                };
+                element.ontouchend = element.onclick;
+            }
+        }
+    };
+    TileLevel.prototype.outOfWatch = function (g, x, y, w, h) {
+        return !(this.collision(g.watchX, g.watchY, g.watchW, g.watchH, x, y, w, h));
+    };
+    TileLevel.prototype.collision = function (x1, y1, w1, h1, x2, y2, w2, h2) {
+        if (this.collision2(x1, w1, x2, w2) && this.collision2(y1, h1, y2, h2)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    };
+    TileLevel.prototype.collision2 = function (x, w, left, width) {
+        if (x + w <= left || x >= left + width) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    };
+    TileLevel.prototype.vectorFromTouch = function (touch) {
+        return {
+            x: touch.clientX,
+            y: touch.clientY
+        };
+    };
+    TileLevel.prototype.vectorDistance = function (xy1, xy2) {
+        var xy = this.vectorSubstract(xy1, xy2);
+        var n = this.vectorNorm(xy);
+        return n;
+    };
+    TileLevel.prototype.vectorSubstract = function (xy1, xy2) {
+        return {
+            x: xy1.x - xy2.x,
+            y: xy1.y - xy2.y
+        };
+    };
+    TileLevel.prototype.vectorNorm = function (xy) {
+        return Math.sqrt(this.vectorNormSquared(xy));
+    };
+    TileLevel.prototype.vectorNormSquared = function (xy) {
+        return xy.x * xy.x + xy.y * xy.y;
+    };
+    TileLevel.prototype.vectorFindCenter = function (xy1, xy2) {
+        var xy = this.vectorAdd(xy1, xy2);
+        return this.vectorScale(xy, 0.5);
+    };
+    ;
+    TileLevel.prototype.vectorAdd = function (xy1, xy2) {
+        return {
+            x: xy1.x + xy2.x,
+            y: xy1.y + xy2.y
+        };
+    };
+    ;
+    TileLevel.prototype.vectorScale = function (xy, coef) {
+        return {
+            x: xy.x * coef,
+            y: xy.y * coef
+        };
+    };
+    ;
+    TileLevel.prototype.childExists = function (group, id) {
+        console.log('childExists', group, id);
+        console.dir(group);
+        this.msEdgeHook(group);
+        for (var i = 0; i < group.children.length; i++) {
+            var child = group.children[i];
+            if (child.id == id) {
+                return child;
+            }
+        }
+        return null;
+    };
+    TileLevel.prototype.startLoop = function () {
+        var last = new Date().getTime();
+        var me = this;
+        var step = function () {
+            var now = new Date().getTime();
+            if (last + 222 < now) {
+                if (!(me.valid)) {
+                    me.queueTiles();
+                }
+                last = new Date().getTime();
+            }
+            window.requestAnimationFrame(step);
+        };
+        step();
+    };
+    return TileLevel;
+}());
