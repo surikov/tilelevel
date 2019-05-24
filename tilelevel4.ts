@@ -1,4 +1,4 @@
-﻿console.log('tilelevel.js v4.48');
+﻿console.log('tilelevel.js v4.49');
 let _tileLevel: TileLevel = null;
 enum LayerKind { normal, overlay, column, row };
 class TilePoint {
@@ -75,11 +75,11 @@ class TileLevel {
 		console.log('constructor', this);
 	}
 	setupTapSize() {
-		let rect:Element = document.createElementNS(this.svgns, 'rect');
+		let rect: Element = document.createElementNS(this.svgns, 'rect');
 		rect.setAttributeNS(null, 'height', '1cm');
 		rect.setAttributeNS(null, 'width', '1cm');
 		this.svg.appendChild(rect);
-		let tbb:DOMRect = (rect as SVGSVGElement).getBBox();
+		let tbb: DOMRect = (rect as SVGSVGElement).getBBox();
 		this.tapSize = tbb.width;
 		this.svg.removeChild(rect);
 		this.clickLimit = this.tapSize / 6;
@@ -187,10 +187,10 @@ class TileLevel {
 			g.children = g.childNodes;
 		}
 	}
-	adjusted() {
-		let vX = this.translateX;
-		let vY = this.translateY;
-		let vZ = this.translateZ;
+	adjusted():TileZoom {
+		let vX:number = this.translateX;
+		let vY:number = this.translateY;
+		let vZ:number = this.translateZ;
 		if (this.translateX > 0) {
 			vX = 0;
 		} else {
@@ -234,7 +234,7 @@ class TileLevel {
 		let dx = (x - this.translateX) / stepCount;
 		let dy = (y - this.translateY) / stepCount;
 		let dz = (z - this.translateZ) / stepCount;
-		let xyz = [];
+		let xyz:TileZoom[] = [];
 		for (let i = 0; i < stepCount; i++) {
 			xyz.push({
 				x: this.translateX + dx * i,
@@ -489,12 +489,12 @@ class TileLevel {
 		this.valid = true;
 	}
 	addGroupTile(parentGroup, definitions, kind) {
-		let x = -this.translateX;
-		let y = -this.translateY;
-		let w = this.svg.clientWidth * this.translateZ;
-		let h = this.svg.clientHeight * this.translateZ;
-		let cX = 0;
-		let cY = 0;
+		let x:number = -this.translateX;
+		let y:number = -this.translateY;
+		let w:number = this.svg.clientWidth * this.translateZ;
+		let h:number = this.svg.clientHeight * this.translateZ;
+		let cX:number = 0;
+		let cY:number = 0;
 		if (this.viewWidth * this.translateZ > this.innerWidth) {
 			cX = (this.viewWidth * this.translateZ - this.innerWidth) / 2;
 			x = x - cX;
@@ -518,7 +518,7 @@ class TileLevel {
 		if (definitions.z[0] <= this.translateZ && definitions.z[1] > this.translateZ) {
 			if (this.collision(definitions.x * this.tapSize, definitions.y * this.tapSize, definitions.w * this.tapSize, definitions.h * this.tapSize //
 				, x, y, w, h)) {
-				let xg = this.childExists(parentGroup, definitions.id);
+				let xg: SVGElement = this.childExists(parentGroup, definitions.id);
 				if (xg) {
 					for (let n = 0; n < definitions.l.length; n++) {
 						let d = definitions.l[n];
@@ -527,7 +527,7 @@ class TileLevel {
 						}
 					}
 				} else {
-					let g = document.createElementNS(this.svgns, 'g');
+					let g: SVGElement = document.createElementNS(this.svgns, 'g') as SVGElement;
 					g.id = definitions.id;
 					let gg = g as any;
 					gg.watchX = definitions.x * this.tapSize;
@@ -548,19 +548,19 @@ class TileLevel {
 
 	startTouchZoom(touchEvent) {
 		this.twoZoom = true;
-		let p1 = this.vectorFromTouch(touchEvent.touches[0]);
-		let p2 = this.vectorFromTouch(touchEvent.touches[1]);
+		let p1:TilePoint = this.vectorFromTouch(touchEvent.touches[0]);
+		let p2:TilePoint  = this.vectorFromTouch(touchEvent.touches[1]);
 		this.twocenter = this.vectorFindCenter(p1, p2);
-		let d = this.vectorDistance(p1, p2);
+		let d :number= this.vectorDistance(p1, p2);
 		if (d <= 0) {
 			d = 1;
 		}
 		this.twodistance = d;
 	};
-	tilePath(g, x, y, z, data, cssClass) {
-		let path = document.createElementNS(this.svgns, 'path');
+	tilePath(g, x, y, z, data, cssClass): SVGElement {
+		let path: SVGElement = document.createElementNS(this.svgns, 'path') as SVGElement;
 		path.setAttributeNS(null, 'd', data);
-		let t = "";
+		let t:string = "";
 		if ((x) || (y)) {
 			t = 'translate(' + x + ',' + y + ')';
 		}
@@ -576,8 +576,8 @@ class TileLevel {
 		g.appendChild(path);
 		return path;
 	}
-	tileRectangle(g, x, y, w, h, rx, ry, cssClass) {
-		let rect = document.createElementNS(this.svgns, 'rect');
+	tileRectangle(g, x, y, w, h, rx, ry, cssClass): SVGElement {
+		let rect: SVGElement = document.createElementNS(this.svgns, 'rect') as  SVGElement;
 		rect.setAttributeNS(null, 'x', x);
 		rect.setAttributeNS(null, 'y', y);
 		rect.setAttributeNS(null, 'height', h);
@@ -594,8 +594,8 @@ class TileLevel {
 		g.appendChild(rect);
 		return rect;
 	}
-	tileLine(g, x1, y1, x2, y2, cssClass) {
-		let line = document.createElementNS(this.svgns, 'line');
+	tileLine(g, x1, y1, x2, y2, cssClass): SVGElement {
+		let line: SVGElement = document.createElementNS(this.svgns, 'line') as  SVGElement;
 		line.setAttributeNS(null, 'x1', x1);
 		line.setAttributeNS(null, 'y1', y1);
 		line.setAttributeNS(null, 'x2', x2);
@@ -606,8 +606,8 @@ class TileLevel {
 		g.appendChild(line);
 		return line;
 	}
-	tileText(g, x, y, html, cssClass) {
-		let txt = document.createElementNS(this.svgns, 'text');
+	tileText(g, x, y, html, cssClass): SVGElement {
+		let txt: SVGElement = document.createElementNS(this.svgns, 'text') as  SVGElement;
 		txt.setAttributeNS(null, 'x', x);
 		txt.setAttributeNS(null, 'y', y);
 		if (cssClass) {
@@ -617,8 +617,8 @@ class TileLevel {
 		g.appendChild(txt);
 		return txt;
 	};
-	addElement(g:SVGElement, d, kind) {
-		let element = null;
+	addElement(g: SVGElement, d, kind) {
+		let element: SVGElement = null;
 		if (d.kind == 'r') {
 			element = this.tileRectangle(g, d.x * this.tapSize, d.y * this.tapSize, d.w * this.tapSize, d.h * this.tapSize, d.rx * this.tapSize, d.ry * this.tapSize, d.css);
 		}
@@ -636,52 +636,53 @@ class TileLevel {
 		}
 		if (element) {
 			if (d.a) {
-				element.onClickFunction = d.a;
-				element.onclick = function () {
+				let e:any = element as any;
+				e.onClickFunction = d.a;
+				e.onclick = function () {
 					if (this.clicked) {
 						if (element) {
-							if (element.onClickFunction) {
-								let xx = element.getBoundingClientRect().x - this.svg.getBoundingClientRect().x;
-								let yy = element.getBoundingClientRect().y - this.svg.getBoundingClientRect().y;
-								element.onClickFunction(this.translateZ * (this.clickX - xx) / this.tapSize, this.translateZ * (this.clickY - yy) / this.tapSize);
+							if (e.onClickFunction) {
+								let xx = e.getBoundingClientRect().x - this.svg.getBoundingClientRect().x;
+								let yy = e.getBoundingClientRect().y - this.svg.getBoundingClientRect().y;
+								e.onClickFunction(this.translateZ * (this.clickX - xx) / this.tapSize, this.translateZ * (this.clickY - yy) / this.tapSize);
 							}
 						}
 					}
 				}
-				element.ontouchend = element.onclick;
+				e.ontouchend = e.onclick;
 			}
 		}
 	}
-	outOfWatch(g:SVGElement, x:number, y:number, w:number, h:number):boolean {
-		let watchX:number=(g as any).watchX;
-		let watchY:number=(g as any).watchY;
-		let watchW:number=(g as any).watchW;
-		let watchH:number=(g as any).watchH;
+	outOfWatch(g: SVGElement, x: number, y: number, w: number, h: number): boolean {
+		let watchX: number = (g as any).watchX;
+		let watchY: number = (g as any).watchY;
+		let watchW: number = (g as any).watchW;
+		let watchH: number = (g as any).watchH;
 		return !(this.collision(watchX, watchY, watchW, watchH, x, y, w, h));
 	}
-	collision(x1:number, y1:number, w1:number, h1:number, x2:number, y2:number, w2:number, h2:number):boolean {
+	collision(x1: number, y1: number, w1: number, h1: number, x2: number, y2: number, w2: number, h2: number): boolean {
 		if (this.collision2(x1, w1, x2, w2) && this.collision2(y1, h1, y2, h2)) {
 			return true;
 		} else {
 			return false;
 		}
 	}
-	collision2(x:number, w:number, left:number, width:number):boolean {
+	collision2(x: number, w: number, left: number, width: number): boolean {
 		if (x + w <= left || x >= left + width) {
 			return false;
 		} else {
 			return true;
 		}
 	}
-	vectorFromTouch(touch:Touch): TilePoint {
+	vectorFromTouch(touch: Touch): TilePoint {
 		return {
 			x: touch.clientX,
 			y: touch.clientY
 		};
 	}
-	vectorDistance(xy1: TilePoint, xy2: TilePoint):number {
+	vectorDistance(xy1: TilePoint, xy2: TilePoint): number {
 		let xy: TilePoint = this.vectorSubstract(xy1, xy2);
-		let n:number = this.vectorNorm(xy);
+		let n: number = this.vectorNorm(xy);
 		return n;
 	}
 	vectorSubstract(xy1: TilePoint, xy2: TilePoint): TilePoint {
@@ -690,10 +691,10 @@ class TileLevel {
 			y: xy1.y - xy2.y
 		};
 	}
-	vectorNorm(xy: TilePoint):number {
+	vectorNorm(xy: TilePoint): number {
 		return Math.sqrt(this.vectorNormSquared(xy));
 	}
-	vectorNormSquared(xy: TilePoint):number {
+	vectorNormSquared(xy: TilePoint): number {
 		return xy.x * xy.x + xy.y * xy.y;
 	}
 	vectorFindCenter(xy1: TilePoint, xy2: TilePoint): TilePoint {
@@ -706,18 +707,18 @@ class TileLevel {
 			y: xy1.y + xy2.y
 		};
 	};
-	vectorScale(xy: TilePoint, coef:number): TilePoint {
+	vectorScale(xy: TilePoint, coef: number): TilePoint {
 		return {
 			x: xy.x * coef,
 			y: xy.y * coef
 		};
 	};
-	childExists(group:SVGElement, id:string) {//SVGGraphicsElement/SVGElement
+	childExists(group: SVGElement, id: string): SVGElement {//SVGGraphicsElement/SVGElement
 		//console.log('childExists',group, id);
 		//console.dir(group);
 		this.msEdgeHook(group);
-		for (let i:number = 0; i < group.children.length; i++) {
-			let child:SVGElement = group.children[i] as SVGElement;
+		for (let i: number = 0; i < group.children.length; i++) {
+			let child: SVGElement = group.children[i] as SVGElement;
 			if (child.id == id) {
 				return child;
 			}

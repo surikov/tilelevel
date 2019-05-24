@@ -1,4 +1,4 @@
-console.log('tilelevel.js v4.48');
+console.log('tilelevel.js v4.49');
 var _tileLevel = null;
 var LayerKind;
 (function (LayerKind) {
@@ -674,24 +674,29 @@ var TileLevel = /** @class */ (function () {
         }
         if (element) {
             if (d.a) {
-                element.onClickFunction = d.a;
-                element.onclick = function () {
+                var e_1 = element;
+                e_1.onClickFunction = d.a;
+                e_1.onclick = function () {
                     if (this.clicked) {
                         if (element) {
-                            if (element.onClickFunction) {
-                                var xx = element.getBoundingClientRect().x - this.svg.getBoundingClientRect().x;
-                                var yy = element.getBoundingClientRect().y - this.svg.getBoundingClientRect().y;
-                                element.onClickFunction(this.translateZ * (this.clickX - xx) / this.tapSize, this.translateZ * (this.clickY - yy) / this.tapSize);
+                            if (e_1.onClickFunction) {
+                                var xx = e_1.getBoundingClientRect().x - this.svg.getBoundingClientRect().x;
+                                var yy = e_1.getBoundingClientRect().y - this.svg.getBoundingClientRect().y;
+                                e_1.onClickFunction(this.translateZ * (this.clickX - xx) / this.tapSize, this.translateZ * (this.clickY - yy) / this.tapSize);
                             }
                         }
                     }
                 };
-                element.ontouchend = element.onclick;
+                e_1.ontouchend = e_1.onclick;
             }
         }
     };
     TileLevel.prototype.outOfWatch = function (g, x, y, w, h) {
-        return !(this.collision(g.watchX, g.watchY, g.watchW, g.watchH, x, y, w, h));
+        var watchX = g.watchX;
+        var watchY = g.watchY;
+        var watchW = g.watchW;
+        var watchH = g.watchH;
+        return !(this.collision(watchX, watchY, watchW, watchH, x, y, w, h));
     };
     TileLevel.prototype.collision = function (x1, y1, w1, h1, x2, y2, w2, h2) {
         if (this.collision2(x1, w1, x2, w2) && this.collision2(y1, h1, y2, h2)) {
@@ -752,8 +757,8 @@ var TileLevel = /** @class */ (function () {
     };
     ;
     TileLevel.prototype.childExists = function (group, id) {
-        console.log('childExists', group, id);
-        console.dir(group);
+        //console.log('childExists',group, id);
+        //console.dir(group);
         this.msEdgeHook(group);
         for (var i = 0; i < group.children.length; i++) {
             var child = group.children[i];
