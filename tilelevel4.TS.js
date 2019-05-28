@@ -1,5 +1,13 @@
 console.log('tilelevel.js v4.49');
 var _tileLevel = null;
+var LayerKind;
+(function (LayerKind) {
+    LayerKind[LayerKind["normal"] = 0] = "normal";
+    LayerKind[LayerKind["overlay"] = 1] = "overlay";
+    LayerKind[LayerKind["column"] = 2] = "column";
+    LayerKind[LayerKind["row"] = 3] = "row";
+})(LayerKind || (LayerKind = {}));
+;
 var TilePoint = /** @class */ (function () {
     function TilePoint() {
         this.x = 0;
@@ -18,9 +26,10 @@ var TileZoom = /** @class */ (function () {
 var TileModelLayer = /** @class */ (function () {
     function TileModelLayer() {
         this.g = null;
-        this.mode = 'normal';
-        //viceversa: boolean;
-        this.definition = [];
+        this.kind = LayerKind.normal;
+        this.shiftX = 0;
+        this.shiftY = 0;
+        this.m = [];
     }
     return TileModelLayer;
 }());
@@ -50,12 +59,6 @@ var TileLevel = /** @class */ (function () {
         this.twodistance = 0;
         this.twocenter = null;
         this.model = [];
-        this.layerLockX = 'lockX';
-        this.layerNormal = 'normal';
-        this.layerOverlay = 'overlay';
-        this.layerLockY = 'lockY';
-        this.layerStickBottom = 'stickBottom';
-        this.layerStickRight = 'stickRight';
         _tileLevel = this;
         this.svg = contentElement;
         this.viewWidth = this.svg.clientWidth;
@@ -66,17 +69,13 @@ var TileLevel = /** @class */ (function () {
         this.svg.addEventListener('mousedown', this.rakeMouseDown, {
             capture: false
         });
-        /*this.svg.addEventListener("mousewheel", this.rakeMouseWheel, {
-            capture: false,
-            passive: true
-        });*/
-        this.svg.addEventListener("wheel", this.rakeMouseWheel, {
+        this.svg.addEventListener("mousewheel", this.rakeMouseWheel, {
             capture: false,
             passive: true
         });
-        /*this.svg.addEventListener("DOMMouseScroll", this.rakeMouseWheel, {
+        this.svg.addEventListener("DOMMouseScroll", this.rakeMouseWheel, {
             capture: false
-        });*/
+        });
         this.svg.addEventListener("touchstart", this.rakeTouchStart, {
             capture: false,
             passive: true
@@ -133,7 +132,7 @@ var TileLevel = /** @class */ (function () {
                 if (this.viewHeight * this.translateZ > this.innerHeight) {
                     cY = (this.viewHeight * this.translateZ - this.innerHeight) / 2;
                 }
-                if (layer.mode == this.layerOverlay) {
+                if (layer.kind == LayerKind.overlay) {
                     tz = this.translateZ;
                     tx = -this.translateX;
                     ty = -this.translateY;
@@ -141,53 +140,19 @@ var TileLevel = /** @class */ (function () {
                     cY = 0;
                 }
                 else {
-                    if (layer.mode == this.layerLockX) {
+                    if (layer.kind == LayerKind.column) {
                         tx = -this.translateX;
                         cX = 0;
-                        if (layer.shift) {
-                            //let shiftX=layer.shiftX(this);
-                            sX = layer.shift * this.tapSize * this.translateZ;
+                        if (layer.shiftX) {
+                            sX = layer.shiftX * this.tapSize * this.translateZ;
                         }
                     }
                     else {
-                        if (layer.mode == this.layerLockY) {
+                        if (layer.kind == LayerKind.row) {
                             ty = -this.translateY;
                             cY = 0;
-                            if (layer.shift) {
-                                //let shiftY=layer.shiftY(this);
-                                sY = layer.shift * this.tapSize * this.translateZ;
-                                /*}else{
-                                    
-                                    sY = (this.viewHeight+layer.shiftY * this.tapSize) * this.translateZ;
-                                    console.log(sY,tz,(ty + cY + sY));
-                                    */
-                            }
-                            /*
-                            if (layer.viceversa) {
-                                if (layer.shiftY) {
-                                    sY = (this.viewHeight+layer.shiftY * this.tapSize) * this.translateZ;
-                                    console.log(layer);
-                                }
-                            }*/
-                        }
-                        else {
-                            if (layer.mode == this.layerStickBottom) {
-                                ty = -this.translateY;
-                                cY = 0;
-                                sY = this.viewHeight * this.translateZ;
-                                if (layer.shift) {
-                                    sY = this.viewHeight * this.translateZ - layer.shift * this.tapSize;
-                                }
-                            }
-                            else {
-                                if (layer.mode == this.layerStickRight) {
-                                    tx = -this.translateX;
-                                    cX = 0;
-                                    sX = this.viewWidth * this.translateZ;
-                                    if (layer.shift) {
-                                        sX = this.viewWidth * this.translateZ - layer.shift * this.tapSize;
-                                    }
-                                }
+                            if (layer.shiftY) {
+                                sY = layer.shiftY * this.tapSize * this.translateZ;
                             }
                         }
                     }
@@ -341,7 +306,7 @@ var TileLevel = /** @class */ (function () {
         if (this.model) {
             for (var k = 0; k < this.model.length; k++) {
                 var group = this.model[k].g;
-                this.clearUselessGroups(group, this.model[k].mode);
+                this.clearUselessGroups(group, this.model[k].kind);
             }
         }
     };
@@ -360,27 +325,17 @@ var TileLevel = /** @class */ (function () {
             cY = (this.viewHeight * this.translateZ - this.innerHeight) / 2;
             y = y - cY;
         }
-        if (kind == this.layerOverlay) {
+        if (kind == LayerKind.overlay) {
             x = 0;
             y = 0;
         }
         else {
-            if (kind == this.layerLockX) {
+            if (kind == LayerKind.column) {
                 x = 0;
             }
             else {
-                if (kind == this.layerLockY) {
+                if (kind == LayerKind.row) {
                     y = 0;
-                }
-                else {
-                    if (kind == this.layerStickRight) {
-                        x = 0;
-                    }
-                    else {
-                        if (kind == this.layerStickBottom) {
-                            y = 0;
-                        }
-                    }
                 }
             }
         }
@@ -399,10 +354,8 @@ var TileLevel = /** @class */ (function () {
         }
     };
     TileLevel.prototype.rakeMouseWheel = function (e) {
-        //console.log('rakeMouseWheel',e.wheelDelta,e.detail,e.deltaX,e.deltaY,e.deltaZ,e);
         //e.preventDefault();
-        //let wheelVal = e.wheelDelta || -e.detail;
-        var wheelVal = e.deltaY;
+        var wheelVal = e.wheelDelta || -e.detail;
         var min = Math.min(1, wheelVal);
         var delta = Math.max(-1, min);
         var zoom = _tileLevel.translateZ + delta * (_tileLevel.translateZ) * 0.077;
@@ -510,14 +463,14 @@ var TileLevel = /** @class */ (function () {
                     if (zoom > _tileLevel.maxZoom()) {
                         zoom = _tileLevel.maxZoom();
                     }
-                    /*let cX:number = 0;
-                    let cY:number = 0;
+                    var cX = 0;
+                    var cY = 0;
                     if (_tileLevel.viewWidth * _tileLevel.translateZ > _tileLevel.innerWidth) {
                         cX = (_tileLevel.viewWidth - _tileLevel.innerWidth / _tileLevel.translateZ) / 2;
                     }
                     if (_tileLevel.viewHeight * _tileLevel.translateZ > _tileLevel.innerHeight) {
                         cY = (_tileLevel.viewHeight - _tileLevel.innerHeight / _tileLevel.translateZ) / 2;
-                    }*/
+                    }
                     if (_tileLevel.viewWidth * _tileLevel.translateZ < _tileLevel.innerWidth) {
                         _tileLevel.translateX = _tileLevel.translateX - (_tileLevel.translateZ - zoom) * (_tileLevel.twocenter.x);
                     }
@@ -560,16 +513,16 @@ var TileLevel = /** @class */ (function () {
         if (this.model) {
             for (var k = 0; k < this.model.length; k++) {
                 var group = this.model[k].g;
-                var arr = this.model[k].definition;
+                var arr = this.model[k].m;
                 for (var i = 0; i < arr.length; i++) {
                     var a = arr[i];
-                    this.addGroupTile(group, a, this.model[k].mode);
+                    this.addGroupTile(group, a, this.model[k].kind);
                 }
             }
         }
         this.valid = true;
     };
-    TileLevel.prototype.addGroupTile = function (parentGroup, definitions, layerKind) {
+    TileLevel.prototype.addGroupTile = function (parentGroup, definitions, kind) {
         var x = -this.translateX;
         var y = -this.translateY;
         var w = this.svg.clientWidth * this.translateZ;
@@ -584,27 +537,17 @@ var TileLevel = /** @class */ (function () {
             cY = (this.viewHeight * this.translateZ - this.innerHeight) / 2;
             y = y - cY;
         }
-        if (layerKind == this.layerOverlay) {
+        if (kind == LayerKind.overlay) {
             x = 0;
             y = 0;
         }
         else {
-            if (layerKind == this.layerLockX) {
+            if (kind == LayerKind.column) {
                 x = 0;
             }
             else {
-                if (layerKind == this.layerLockY) {
+                if (kind == LayerKind.row) {
                     y = 0;
-                }
-                else {
-                    if (layerKind == this.layerStickRight) {
-                        x = 0;
-                    }
-                    else {
-                        if (layerKind == this.layerStickBottom) {
-                            y = 0;
-                        }
-                    }
                 }
             }
         }
@@ -613,27 +556,27 @@ var TileLevel = /** @class */ (function () {
             , x, y, w, h)) {
                 var xg = this.childExists(parentGroup, definitions.id);
                 if (xg) {
-                    for (var n = 0; n < definitions.sub.length; n++) {
-                        var d = definitions.sub[n];
-                        if (d.draw == 'group') {
-                            this.addElement(xg, d, layerKind);
+                    for (var n = 0; n < definitions.l.length; n++) {
+                        var d = definitions.l[n];
+                        if (d.kind == 'g') {
+                            this.addElement(xg, d, kind);
                         }
                     }
                 }
                 else {
                     var g = document.createElementNS(this.svgns, 'g');
                     g.id = definitions.id;
-                    //let gg = g as any;
-                    g.watchX = definitions.x * this.tapSize;
-                    g.watchY = definitions.y * this.tapSize;
-                    g.watchW = definitions.w * this.tapSize;
-                    g.watchH = definitions.h * this.tapSize;
+                    var gg = g;
+                    gg.watchX = definitions.x * this.tapSize;
+                    gg.watchY = definitions.y * this.tapSize;
+                    gg.watchW = definitions.w * this.tapSize;
+                    gg.watchH = definitions.h * this.tapSize;
                     parentGroup.appendChild(g);
-                    g.minZoom = definitions.z[0];
-                    g.maxZoom = definitions.z[1];
-                    for (var n = 0; n < definitions.sub.length; n++) {
-                        var d = definitions.sub[n];
-                        this.addElement(g, d, layerKind);
+                    gg.minZoom = definitions.z[0];
+                    gg.maxZoom = definitions.z[1];
+                    for (var n = 0; n < definitions.l.length; n++) {
+                        var d = definitions.l[n];
+                        this.addElement(g, d, kind);
                     }
                 }
             }
@@ -672,15 +615,15 @@ var TileLevel = /** @class */ (function () {
     };
     TileLevel.prototype.tileRectangle = function (g, x, y, w, h, rx, ry, cssClass) {
         var rect = document.createElementNS(this.svgns, 'rect');
-        rect.setAttributeNS(null, 'x', '' + x);
-        rect.setAttributeNS(null, 'y', '' + y);
-        rect.setAttributeNS(null, 'height', '' + h);
-        rect.setAttributeNS(null, 'width', '' + w);
+        rect.setAttributeNS(null, 'x', x);
+        rect.setAttributeNS(null, 'y', y);
+        rect.setAttributeNS(null, 'height', h);
+        rect.setAttributeNS(null, 'width', w);
         if (rx) {
-            rect.setAttributeNS(null, 'rx', '' + rx);
+            rect.setAttributeNS(null, 'rx', rx);
         }
         if (ry) {
-            rect.setAttributeNS(null, 'ry', '' + ry);
+            rect.setAttributeNS(null, 'ry', ry);
         }
         if (cssClass) {
             rect.classList.add(cssClass);
@@ -690,10 +633,10 @@ var TileLevel = /** @class */ (function () {
     };
     TileLevel.prototype.tileLine = function (g, x1, y1, x2, y2, cssClass) {
         var line = document.createElementNS(this.svgns, 'line');
-        line.setAttributeNS(null, 'x1', '' + x1);
-        line.setAttributeNS(null, 'y1', '' + y1);
-        line.setAttributeNS(null, 'x2', '' + x2);
-        line.setAttributeNS(null, 'y2', '' + y2);
+        line.setAttributeNS(null, 'x1', x1);
+        line.setAttributeNS(null, 'y1', y1);
+        line.setAttributeNS(null, 'x2', x2);
+        line.setAttributeNS(null, 'y2', y2);
         if (cssClass) {
             line.classList.add(cssClass);
         }
@@ -702,8 +645,8 @@ var TileLevel = /** @class */ (function () {
     };
     TileLevel.prototype.tileText = function (g, x, y, html, cssClass) {
         var txt = document.createElementNS(this.svgns, 'text');
-        txt.setAttributeNS(null, 'x', '' + x);
-        txt.setAttributeNS(null, 'y', '' + y);
+        txt.setAttributeNS(null, 'x', x);
+        txt.setAttributeNS(null, 'y', y);
         if (cssClass) {
             txt.setAttributeNS(null, 'class', cssClass);
         }
@@ -712,43 +655,42 @@ var TileLevel = /** @class */ (function () {
         return txt;
     };
     ;
-    TileLevel.prototype.addElement = function (g, d, layerKind) {
+    TileLevel.prototype.addElement = function (g, d, kind) {
         var element = null;
-        if (d.draw == 'rectangle') {
+        if (d.kind == 'r') {
             element = this.tileRectangle(g, d.x * this.tapSize, d.y * this.tapSize, d.w * this.tapSize, d.h * this.tapSize, d.rx * this.tapSize, d.ry * this.tapSize, d.css);
         }
-        if (d.draw == 'text') {
-            element = this.tileText(g, d.x * this.tapSize, d.y * this.tapSize, d.text, d.css);
+        if (d.kind == 't') {
+            element = this.tileText(g, d.x * this.tapSize, d.y * this.tapSize, d.t, d.css);
         }
-        if (d.draw == 'path') {
-            element = this.tilePath(g, d.x * this.tapSize, d.y * this.tapSize, d.scale, d.points, d.css);
+        if (d.kind == 'p') {
+            element = this.tilePath(g, d.x * this.tapSize, d.y * this.tapSize, d.z, d.l, d.css);
         }
-        if (d.draw == 'line') {
+        if (d.kind == 'l') {
             element = this.tileLine(g, d.x1 * this.tapSize, d.y1 * this.tapSize, d.x2 * this.tapSize, d.y2 * this.tapSize, d.css);
         }
-        if (d.draw == 'group') {
-            this.addGroupTile(g, d, layerKind);
+        if (d.kind == 'g') {
+            this.addGroupTile(g, d, kind);
         }
         if (element) {
-            if (d.action) {
+            if (d.a) {
                 //let e:any = element as any;
                 //let e:TileSVGElement = element;
-                element.onClickFunction = d.action;
+                element.onClickFunction = d.a;
                 var me_1 = this;
-                var click = function () {
+                element.onclick = function () {
                     if (me_1.clicked) {
                         if (element) {
                             if (element.onClickFunction) {
-                                //console.log(element.getBoundingClientRect());
-                                var xx = element.getBoundingClientRect().left - me_1.svg.getBoundingClientRect().left;
-                                var yy = element.getBoundingClientRect().top - me_1.svg.getBoundingClientRect().top;
-                                element.onClickFunction(me_1.translateZ * (me_1.clickX - xx) / me_1.tapSize, me_1.translateZ * (me_1.clickY - yy) / me_1.tapSize);
+                                console.log(element.getBoundingClientRect());
+                                //let xx = element.getBoundingClientRect().x - me.svg.getBoundingClientRect().x;
+                                //let yy = element.getBoundingClientRect().y - me.svg.getBoundingClientRect().y;
+                                //element.onClickFunction(me.translateZ * (me.clickX - xx) / me.tapSize, me.translateZ * (me.clickY - yy) / me.tapSize);
                             }
                         }
                     }
                 };
-                element.onclick = click;
-                element.ontouchend = click;
+                element.ontouchend = element.onclick;
             }
         }
     };
