@@ -19,5 +19,7 @@
 .tx100 {font-size: 20cm;fill: rgba(128,128,128,0.5);}
 .tx2 {font-size: 2cm;fill: rgba(128,128,128,0.5);}
 .dbg {fill: rgba(128,128,128,0.5);}
-.redtra {fill: rgba(128,64,32,0.5);}
+.overlayButton {fill: rgba(128,64,32,0.95);}
+.columnButton {fill: rgba(32,64,128,0.95);}
+.rowButton {fill: rgba(64,128,32,0.95);}
 .redborder {stroke:red; stroke-width:0.75cm; stroke-linecap:round;fill: rgba(0,128,32,0.15);}
