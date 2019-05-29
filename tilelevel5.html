@@ -1,0 +1,102 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="initial-scale=1.0, width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+		<script src='tilelevel5.js'></script>
+		<style>
+			.redborder {border-style:solid;border-width:1px;border-color:red}
+			.bluebackground {fill: rgba(0,0,128,0.25);}
+			.size600x400 {width:600px; height:400px;}
+			.backgroundFill {fill: rgba(0,0,0,0.05)}
+			.decorFill {fill: rgba(0,0,0,0.5)}
+			.alertFill {fill: maroon}
+			.spotFill {fill: purple}
+			.mainRollFill {fill: teal}
+			.mainGridFill {fill: black}
+			.backRollFill {fill: lightblue}
+			.backGridFill {fill: darkolivegreen}
+		</style>
+	</head>
+	<body>
+		<h1>Test v5.36</h1>
+		<p id='stat' >State</p>
+
+		<p>
+			<a href='#' onclick='reset();'>reset</a>
+		</p>
+		<svg id="contentSVG" class='redborder size600x400' viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
+			<g id='backgroundGroup'></g>
+			<g id='timelineGroup'></g>
+		</svg>
+		<script>
+		
+		var levelEngine = new TileLevel(document.getElementById('contentSVG'));
+		var cellSize=6;
+		var width16th=(32*4*(120/100)+40*2*(120/180)+32*100*(120/140))*cellSize;
+		levelEngine.start([{
+			g: document.getElementById('backgroundGroup'),
+			definition: fillBackgroundGroup()
+			},{
+			g: document.getElementById('timelineGroup'),
+			definition: fillTimelineGroup()
+			}],width16th * levelEngine.tapSize,128* cellSize* levelEngine.tapSize, 200,999
+		);
+		/*levelEngine.setModel([{
+				g: document.getElementById('backgroundGroup'),
+				definition: fillBackgroundGroup()
+			}]);
+		levelEngine.innerWidth = 30000 * levelEngine.tapSize;
+		levelEngine.innerHeight = 500 * levelEngine.tapSize;
+		levelEngine.mx = 999;
+		levelEngine.applyZoomPosition();*/
+		function fillTimelineGroup(){
+			var content = [];
+			
+			var de10={x: 0,y: 0,w: width16th,h: 128* cellSize,z: [1, 10],sub: []};
+			for(var i=0;i<width16th;i=i+100){
+				de10.sub.push({draw: 'rectangle',x: i,y: 70,w: 3,h: 130,css: 'backRollFill'});
+			}
+			content.push(de10);
+			
+			var de100={x: 0,y: 0,w: width16th,h: 128* cellSize,z: [10, 100],sub: []};
+			for(var i=0;i<width16th;i=i+100){
+				de100.sub.push({draw: 'rectangle',x: i,y: 70,w: 30,h: 130,css: 'decorFill'});
+			}
+			content.push(de100);
+			
+			var de1000={x: 0,y: 0,w: width16th,h: 128* cellSize,z: [100, 500],sub: []};
+			for(var i=0;i<width16th;i=i+500){
+				de1000.sub.push({draw: 'rectangle',x: i,y: 70,w: 30,h: 130,css: 'backGridFill'});
+			}
+			content.push(de1000);
+			
+			var de500={x: 0,y: 0,w: width16th,h: 128* cellSize,z: [500, 1000],sub: []};
+			for(var i=0;i<width16th;i=i+1000){
+				de500.sub.push({draw: 'rectangle',x: i,y: 70,w: 30,h: 130,css: 'spotFill'});
+			}
+			content.push(de500);
+			
+			return content;
+		}
+		function fillBackgroundGroup(){
+			var content = [
+				{x: 0,y: 0,w: width16th,h: 128* cellSize,z: [1, 1000],sub: [
+					{draw: 'rectangle',x: 0,y: 0,w: width16th,h: 128* cellSize,css: 'backgroundFill'}
+					//,{draw: 'rectangle',x: 50,y: 50,w: 29900,h: 400,css: 'bluebackground'}
+					//,{draw: 'rectangle',x: 100,y: 100,w: 29800,h: 300,css: 'bluebackground'}
+					,{draw: 'rectangle',x: 0,y: 20,w: 70,h: 70,css: 'backgroundFill'}
+					,{draw: 'rectangle',x: 100,y: 20,w: 70,h: 70,css: 'decorFill'}
+					,{draw: 'rectangle',x: 200,y: 20,w: 70,h: 70,css: 'alertFill'}
+					,{draw: 'rectangle',x: 300,y: 20,w: 70,h: 70,css: 'spotFill'}
+					,{draw: 'rectangle',x: 400,y: 20,w: 70,h: 70,css: 'mainRollFill'}
+					,{draw: 'rectangle',x: 500,y: 20,w: 70,h: 70,css: 'mainGridFill'}
+					,{draw: 'rectangle',x: 600,y: 20,w: 70,h: 70,css: 'backRollFill'}
+					,{draw: 'rectangle',x: 700,y: 20,w: 70,h: 70,css: 'backGridFill'}
+					]
+				}
+			];
+			return content;
+		}
+		</script>
+	</body>
+</html>
