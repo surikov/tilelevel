@@ -1,4 +1,4 @@
-﻿console.log('tilelevel.js v4.49');
+console.log('tilelevel.js v4.49');
 let _tileLevel: TileLevel = null;
 //enum LayerKind { normal, overlay, column, row };
 type TileDefinition = {
