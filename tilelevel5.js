@@ -39,6 +39,7 @@ var TileLevel = /** @class */ (function () {
         this.valid = false;
         this.clicked = false;
         this.mx = 100;
+        this.mn = 0.1;
         this.startMouseScreenX = 0;
         this.startMouseScreenY = 0;
         this.dragZoom = 1;
@@ -96,12 +97,13 @@ var TileLevel = /** @class */ (function () {
         this.applyZoomPosition();*/
         //console.log('constructor', this);
     }
-    TileLevel.prototype.start = function (layers, innerWidth, innerHeight, curZoom, maxZoom) {
+    TileLevel.prototype.start = function (layers, innerWidth, innerHeight, minZoom, curZoom, maxZoom) {
         this.setModel(layers);
         this.startLoop();
         this.innerWidth = innerWidth;
         this.innerHeight = innerHeight;
         this.mx = maxZoom;
+        this.mn = minZoom;
         this.translateZ = curZoom;
         this.applyZoomPosition();
         this.clearUselessDetails();
@@ -303,12 +305,12 @@ var TileLevel = /** @class */ (function () {
                 }
             }
         }
-        if (this.translateZ < 1) {
-            vZ = 1;
+        if (this.translateZ < this.minZoom()) {
+            vZ = this.minZoom();
         }
         else {
-            if (this.translateZ > this.mx) {
-                vZ = this.mx;
+            if (this.translateZ > this.maxZoom()) {
+                vZ = this.maxZoom();
             }
         }
         return {
@@ -363,6 +365,10 @@ var TileLevel = /** @class */ (function () {
     };
     TileLevel.prototype.maxZoom = function () {
         return this.mx;
+    };
+    ;
+    TileLevel.prototype.minZoom = function () {
+        return this.mn;
     };
     ;
     TileLevel.prototype.queueTiles = function () {
@@ -438,8 +444,8 @@ var TileLevel = /** @class */ (function () {
         var min = Math.min(1, wheelVal);
         var delta = Math.max(-1, min);
         var zoom = _tileLevel.translateZ + delta * (_tileLevel.translateZ) * 0.077;
-        if (zoom < 1) {
-            zoom = 1;
+        if (zoom < _tileLevel.minZoom()) {
+            zoom = _tileLevel.minZoom();
         }
         if (zoom > _tileLevel.maxZoom()) {
             zoom = _tileLevel.maxZoom();
@@ -536,8 +542,8 @@ var TileLevel = /** @class */ (function () {
                     var ratio = d / _tileLevel.twodistance;
                     _tileLevel.twodistance = d;
                     var zoom = _tileLevel.translateZ / ratio;
-                    if (zoom < 1) {
-                        zoom = 1;
+                    if (zoom < _tileLevel.minZoom()) {
+                        zoom = _tileLevel.minZoom();
                     }
                     if (zoom > _tileLevel.maxZoom()) {
                         zoom = _tileLevel.maxZoom();
@@ -718,6 +724,7 @@ var TileLevel = /** @class */ (function () {
             rect.classList.add(cssClass);
         }
         g.appendChild(rect);
+        //console.log(rect);
         return rect;
     };
     TileLevel.prototype.tileLine = function (g, x1, y1, x2, y2, cssClass) {

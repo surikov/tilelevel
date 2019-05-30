@@ -7,6 +7,24 @@
 			.redborder {border-style:solid;border-width:1px;border-color:red}
 			.bluebackground {fill: rgba(0,0,128,0.25);}
 			.size600x400 {width:600px; height:400px;}
+			
+			.baselineHanging {alignment-baseline: hanging;}
+			.anchorRight {text-anchor:end;}
+			
+			.textSize500 {font-size: 50cm;}
+			.textSize300 {font-size: 30cm;}
+			.textSize100 {font-size: 10cm;}
+			.textSize20 {font-size: 2cm;}
+			.textSize3 {font-size: 0.3cm;}
+			
+			.textZoomStep1 {font-size: 0.3cm;}
+			.textZoomStep2 {font-size: 0.9cm;}
+			.textZoomStep3 {font-size: 2.7cm;}
+			.textZoomStep4 {font-size: 8.1cm;}
+			.textZoomStep5 {font-size: 24.3cm;}
+			.textZoomStep6 {font-size: 72.9cm;}
+			.textZoomStep7 {font-size: 218.7cm;}
+			
 			.backgroundFill {fill: rgba(0,0,0,0.05)}
 			.decorFill {fill: rgba(0,0,0,0.5)}
 			.alertFill {fill: maroon}
@@ -27,20 +45,62 @@
 		<svg id="contentSVG" class='redborder size600x400' viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
 			<g id='backgroundGroup'></g>
 			<g id='timelineGroup'></g>
+			<g id='zoomGroup'></g>
+			<g id='leftScale'></g>
+			<g id='rightScale'></g>
+			<g id='overButton'></g>
 		</svg>
 		<script>
 		
 		var levelEngine = new TileLevel(document.getElementById('contentSVG'));
-		var cellSize=6;
+		var smallSize=0.1;
+		var cellSize=0.6;
+		var zoomSmall=cellSize;//6
+		var zoomMiddle=zoomSmall*12;//72
+		var zoomBig=zoomMiddle*4;//288
+		var zoomMax=100;
+		var zoomMin=0.1;
+		var zoomStep1=0.3;
+		var zoomStep2=zoomStep1*3;//9
+		var zoomStep3=zoomStep2*3;//27
+		var zoomStep4=zoomStep3*3;//81
+		var zoomStep5=zoomStep4*3;//243
+		var zoomStep6=zoomStep5*3;//729
+		var zoomStep7=zoomStep6*3;//2187
+		
 		var width16th=(32*4*(120/100)+40*2*(120/180)+32*100*(120/140))*cellSize;
-		levelEngine.start([{
-			g: document.getElementById('backgroundGroup'),
-			definition: fillBackgroundGroup()
-			},{
-			g: document.getElementById('timelineGroup'),
-			definition: fillTimelineGroup()
-			}],width16th * levelEngine.tapSize,128* cellSize* levelEngine.tapSize, 200,999
+		var height16th=128* cellSize;
+		levelEngine.start([
+			{g: document.getElementById('backgroundGroup'),
+				definition: fillBackgroundGroup()
+				}
+			,{g: document.getElementById('timelineGroup')
+				,mode: levelEngine.layerLockY
+				,definition: fillTimelineGroup()
+				}
+			,{g: document.getElementById('zoomGroup')
+				,mode: levelEngine.layerStickBottom
+				,definition: fillZoomGroup()
+				}
+			,{g: document.getElementById('leftScale')
+				,mode: levelEngine.layerLockX
+				,definition: fillLeftGroup()
+				}
+			,{g: document.getElementById('rightScale')
+				,mode: levelEngine.layerStickRight
+				,definition: fillRightGroup()
+				}
+			,{g: document.getElementById('overButton')
+				,mode: levelEngine.layerOverlay
+				,definition: [
+						{x: 0,y: 0,w: width16th,h: height16th,z: [zoomMin, zoomMax+1],sub: [
+							{draw: 'rectangle',x: 10,y: 3,w: 1,h: 1,css: 'backgroundFill'}]
+						}
+					]
+				}
+			],width16th * levelEngine.tapSize,height16th* levelEngine.tapSize, zoomMin, 20,zoomMax
 		);
+		console.log(levelEngine.tapSize,8000/levelEngine.tapSize);
 		/*levelEngine.setModel([{
 				g: document.getElementById('backgroundGroup'),
 				definition: fillBackgroundGroup()
@@ -52,38 +112,193 @@
 		function fillTimelineGroup(){
 			var content = [];
 			
-			var de10={x: 0,y: 0,w: width16th,h: 128* cellSize,z: [1, 10],sub: []};
-			for(var i=0;i<width16th;i=i+100){
-				de10.sub.push({draw: 'rectangle',x: i,y: 70,w: 3,h: 130,css: 'backRollFill'});
+			var de10={x: 0,y: 0,w: width16th,h: height16th,z: [zoomMin, zoomSmall],sub: []};
+			for(var i=0;i<width16th;i=i+2){
+				de10.sub.push({draw: 'text',x: i,y: 0,text:''+i,css: 'decorFill textSize3 baselineHanging'});
 			}
 			content.push(de10);
 			
-			var de100={x: 0,y: 0,w: width16th,h: 128* cellSize,z: [10, 100],sub: []};
-			for(var i=0;i<width16th;i=i+100){
-				de100.sub.push({draw: 'rectangle',x: i,y: 70,w: 30,h: 130,css: 'decorFill'});
+			var de100={x: 0,y: 0,w: width16th,h: height16th,z: [zoomSmall, zoomMiddle],sub: []};
+			for(var i=0;i<width16th;i=i+10){
+				de100.sub.push({draw: 'text',x: i,y: 0,text:''+i,css: 'decorFill textSize20 baselineHanging'});
 			}
 			content.push(de100);
 			
-			var de1000={x: 0,y: 0,w: width16th,h: 128* cellSize,z: [100, 500],sub: []};
-			for(var i=0;i<width16th;i=i+500){
-				de1000.sub.push({draw: 'rectangle',x: i,y: 70,w: 30,h: 130,css: 'backGridFill'});
+			var de1000={x: 0,y: 0,w: width16th,h: height16th,z: [zoomMiddle, zoomBig],sub: []};
+			for(var i=0;i<width16th;i=i+100){
+				de1000.sub.push({draw: 'text',x: i,y: 0,text:''+i,css: 'decorFill textSize100 baselineHanging'});
 			}
 			content.push(de1000);
 			
-			var de500={x: 0,y: 0,w: width16th,h: 128* cellSize,z: [500, 1000],sub: []};
-			for(var i=0;i<width16th;i=i+1000){
-				de500.sub.push({draw: 'rectangle',x: i,y: 70,w: 30,h: 130,css: 'spotFill'});
+			var de500={x: 0,y: 0,w: width16th,h: height16th,z: [zoomBig, zoomMax+1],sub: []};
+			for(var i=0;i<width16th;i=i+300){
+				de500.sub.push({draw: 'text',x: i,y: 0,text:''+i,css: 'decorFill textSize500 baselineHanging'});
 			}
 			content.push(de500);
 			
 			return content;
 		}
+		function fillZoomGroup(){
+			var content = [];
+			
+			
+			
+			var df={x: 0,y: 0,w: width16th,h: height16th,z: [0.1, zoomStep1],sub: []};
+			for(var i=0;i<width16th;i=i+zoomStep3){
+				df.sub.push({draw: 'text',x: i,y: 0,text:'1:'+Math.round(i),css: 'decorFill textZoomStep1'});
+				df.sub.push({draw: 'rectangle',x: i,y: -zoomStep1,w: zoomStep1,h: zoomStep1,css: 'backgroundFill'});
+			}
+			content.push(df);
+			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep1, zoomStep2],sub: []};
+			for(var i=0;i<width16th;i=i+zoomStep4){
+				df.sub.push({draw: 'text',x: i,y: 0,text:'2:'+Math.round(i),css: 'decorFill textZoomStep2'});
+				df.sub.push({draw: 'rectangle',x: i,y: -zoomStep2,w: zoomStep2,h: zoomStep2,css: 'backgroundFill'});
+			}
+			content.push(df);
+			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep2, zoomStep3],sub: []};
+			for(var i=0;i<width16th;i=i+zoomStep5){
+				df.sub.push({draw: 'text',x: i,y: 0,text:'3:'+Math.round(i),css: 'decorFill textZoomStep3'});
+				df.sub.push({draw: 'rectangle',x: i,y: -zoomStep3,w: zoomStep3,h: zoomStep3,css: 'backgroundFill'});
+			}
+			content.push(df);
+			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep3, zoomStep4],sub: []};
+			for(var i=0;i<width16th;i=i+zoomStep6){
+				df.sub.push({draw: 'text',x: i,y: 0,text:'4:'+Math.round(i),css: 'decorFill textZoomStep4'});
+				df.sub.push({draw: 'rectangle',x: i,y: -zoomStep4,w: zoomStep4,h: zoomStep4,css: 'backgroundFill'});
+			}
+			content.push(df);
+			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep4, zoomStep5],sub: []};
+			for(var i=0;i<width16th;i=i+zoomStep7){
+				df.sub.push({draw: 'text',x: i,y: 0,text:'5:'+Math.round(i),css: 'decorFill textZoomStep5'});
+				df.sub.push({draw: 'rectangle',x: i,y: -zoomStep5,w: zoomStep5,h: zoomStep5,css: 'backgroundFill'});
+			}
+			content.push(df);
+			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep5, zoomStep6],sub: []};
+			for(var i=0;i<width16th;i=i+zoomStep7*3){
+				df.sub.push({draw: 'text',x: i,y: 0,text:'6:'+Math.round(i),css: 'decorFill textZoomStep6'});
+				df.sub.push({draw: 'rectangle',x: i,y: -zoomStep6,w: zoomStep6,h: zoomStep6,css: 'backgroundFill'});
+			}
+			content.push(df);
+			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep6, zoomMax+1],sub: []};
+			for(var i=0;i<width16th;i=i+zoomStep7*3*3){
+				df.sub.push({draw: 'text',x: i,y: 0,text:'7:'+Math.round(i),css: 'decorFill textZoomStep7'});
+				df.sub.push({draw: 'rectangle',x: i,y: -zoomStep7,w: zoomStep7,h: zoomStep7,css: 'backgroundFill'});
+			}
+			content.push(df);
+			
+			
+			return content;
+		}
+		
+		function fillRightGroup(){
+			var content = [];
+			
+			
+			
+			var df={x: 0,y: 0,w: width16th,h: height16th,z: [0.1, zoomStep1],sub: []};
+			for(var i=0;i<height16th;i=i+zoomStep2){
+				df.sub.push({draw: 'text',x: 0,y: i,text:'1:'+Math.round(i),css: 'decorFill textZoomStep1 baselineHanging anchorRight'});
+				df.sub.push({draw: 'rectangle',x: -zoomStep1,y:i,w: zoomStep1,h: zoomStep1,css: 'backgroundFill'});
+			}
+			content.push(df);
+			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep1, zoomStep2],sub: []};
+			for(var i=0;i<height16th;i=i+zoomStep3){
+				df.sub.push({draw: 'text',x: 0,y: i,text:'2:'+Math.round(i),css: 'decorFill textZoomStep2 baselineHanging anchorRight'});
+				df.sub.push({draw: 'rectangle',x: -zoomStep2,y:i,w: zoomStep2,h: zoomStep2,css: 'backgroundFill'});
+			}
+			content.push(df);
+			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep2, zoomStep3],sub: []};
+			for(var i=0;i<height16th;i=i+zoomStep4){
+				df.sub.push({draw: 'text',x: 0,y: i,text:'3:'+Math.round(i),css: 'decorFill textZoomStep3 baselineHanging anchorRight'});
+				df.sub.push({draw: 'rectangle',x: -zoomStep3,y:i,w: zoomStep3,h: zoomStep3,css: 'backgroundFill'});
+			}
+			content.push(df);
+			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep3, zoomStep4],sub: []};
+			for(var i=0;i<height16th;i=i+zoomStep5){
+				df.sub.push({draw: 'text',x: 0,y: i,text:'4:'+Math.round(i),css: 'decorFill textZoomStep4 baselineHanging anchorRight'});
+				df.sub.push({draw: 'rectangle',x: -zoomStep4,y:i,w: zoomStep4,h: zoomStep4,css: 'backgroundFill'});
+			}
+			content.push(df);
+			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep4, zoomStep5],sub: []};
+			for(var i=0;i<height16th;i=i+zoomStep6){
+				df.sub.push({draw: 'text',x: 0,y: i,text:'5:'+Math.round(i),css: 'decorFill textZoomStep5 baselineHanging anchorRight'});
+				df.sub.push({draw: 'rectangle',x: -zoomStep5,y:i,w: zoomStep5,h: zoomStep5,css: 'backgroundFill'});
+			}
+			content.push(df);
+			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep5, zoomStep6],sub: []};
+			for(var i=0;i<height16th;i=i+zoomStep7){
+				df.sub.push({draw: 'text',x: 0,y: i,text:'6:'+Math.round(i),css: 'decorFill textZoomStep6 baselineHanging anchorRight'});
+				df.sub.push({draw: 'rectangle',x: -zoomStep6,y:i,w: zoomStep6,h: zoomStep6,css: 'backgroundFill'});
+			}
+			content.push(df);
+			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep6, zoomMax+1],sub: []};
+			for(var i=0;i<height16th;i=i+zoomStep7*3){
+				df.sub.push({draw: 'text',x: 0,y: i,text:'7:'+Math.round(i),css: 'decorFill textZoomStep7 baselineHanging anchorRight'});
+				df.sub.push({draw: 'rectangle',x: -zoomStep7,y:i,w: zoomStep7,h: zoomStep7,css: 'backgroundFill'});
+			}
+			content.push(df);
+			console.log(df);
+			
+			return content;
+		}
+		function fillLeftGroup(){
+			var content = [];
+			
+			
+			
+			var df={x: 0,y: 0,w: width16th,h: height16th,z: [0.1, zoomStep1],sub: []};
+			for(var i=0;i<height16th;i=i+zoomStep2){
+				df.sub.push({draw: 'text',x: 0,y: i,text:'1:'+Math.round(i),css: 'decorFill textZoomStep1 baselineHanging'});
+				df.sub.push({draw: 'rectangle',x: 0,y:i,w: zoomStep1,h: zoomStep1,css: 'backgroundFill'});
+			}
+			content.push(df);
+			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep1, zoomStep2],sub: []};
+			for(var i=0;i<height16th;i=i+zoomStep3){
+				df.sub.push({draw: 'text',x: 0,y: i,text:'2:'+Math.round(i),css: 'decorFill textZoomStep2 baselineHanging'});
+				df.sub.push({draw: 'rectangle',x: 0,y:i,w: zoomStep2,h: zoomStep2,css: 'backgroundFill'});
+			}
+			content.push(df);
+			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep2, zoomStep3],sub: []};
+			for(var i=0;i<height16th;i=i+zoomStep4){
+				df.sub.push({draw: 'text',x: 0,y: i,text:'3:'+Math.round(i),css: 'decorFill textZoomStep3 baselineHanging'});
+				df.sub.push({draw: 'rectangle',x: 0,y:i,w: zoomStep3,h: zoomStep3,css: 'backgroundFill'});
+			}
+			content.push(df);
+			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep3, zoomStep4],sub: []};
+			for(var i=0;i<height16th;i=i+zoomStep5){
+				df.sub.push({draw: 'text',x: 0,y: i,text:'4:'+Math.round(i),css: 'decorFill textZoomStep4 baselineHanging'});
+				df.sub.push({draw: 'rectangle',x: 0,y:i,w: zoomStep4,h: zoomStep4,css: 'backgroundFill'});
+			}
+			content.push(df);
+			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep4, zoomStep5],sub: []};
+			for(var i=0;i<height16th;i=i+zoomStep6){
+				df.sub.push({draw: 'text',x: 0,y: i,text:'5:'+Math.round(i),css: 'decorFill textZoomStep5 baselineHanging'});
+				df.sub.push({draw: 'rectangle',x: 0,y:i,w: zoomStep5,h: zoomStep5,css: 'backgroundFill'});
+			}
+			content.push(df);
+			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep5, zoomStep6],sub: []};
+			for(var i=0;i<height16th;i=i+zoomStep7){
+				df.sub.push({draw: 'text',x: 0,y: i,text:'6:'+Math.round(i),css: 'decorFill textZoomStep6 baselineHanging'});
+				df.sub.push({draw: 'rectangle',x: 0,y:i,w: zoomStep6,h: zoomStep6,css: 'backgroundFill'});
+			}
+			content.push(df);
+			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep6, zoomMax+1],sub: []};
+			for(var i=0;i<height16th;i=i+zoomStep7*3){
+				df.sub.push({draw: 'text',x: 0,y: i,text:'7:'+Math.round(i),css: 'decorFill textZoomStep7 baselineHanging'});
+				df.sub.push({draw: 'rectangle',x: 0,y:i,w: zoomStep7,h: zoomStep7,css: 'backgroundFill'});
+			}
+			content.push(df);
+			
+			
+			return content;
+		}
 		function fillBackgroundGroup(){
 			var content = [
-				{x: 0,y: 0,w: width16th,h: 128* cellSize,z: [1, 1000],sub: [
-					{draw: 'rectangle',x: 0,y: 0,w: width16th,h: 128* cellSize,css: 'backgroundFill'}
+				{x: 0,y: 0,w: width16th,h: height16th,z: [zoomMin, zoomMax+1],sub: [
+					{draw: 'rectangle',x: 0,y: 0,w: width16th,h: height16th,css: 'backgroundFill'}
 					//,{draw: 'rectangle',x: 50,y: 50,w: 29900,h: 400,css: 'bluebackground'}
 					//,{draw: 'rectangle',x: 100,y: 100,w: 29800,h: 300,css: 'bluebackground'}
+					/*
 					,{draw: 'rectangle',x: 0,y: 20,w: 70,h: 70,css: 'backgroundFill'}
 					,{draw: 'rectangle',x: 100,y: 20,w: 70,h: 70,css: 'decorFill'}
 					,{draw: 'rectangle',x: 200,y: 20,w: 70,h: 70,css: 'alertFill'}
@@ -92,6 +307,10 @@
 					,{draw: 'rectangle',x: 500,y: 20,w: 70,h: 70,css: 'mainGridFill'}
 					,{draw: 'rectangle',x: 600,y: 20,w: 70,h: 70,css: 'backRollFill'}
 					,{draw: 'rectangle',x: 700,y: 20,w: 70,h: 70,css: 'backGridFill'}
+					*/
+					,{draw: 'rectangle',x: smallSize,y: smallSize,w: smallSize,h: smallSize,css: 'backgroundFill',action:function(x,y){console.log('smallSize',smallSize,x,y);}}
+					,{draw: 'rectangle',x: smallSize+smallSize+smallSize,y: smallSize,w: cellSize,h: cellSize,css: 'backgroundFill',action:function(x,y){console.log('cellSize',cellSize,x,y);}}
+					,{draw: 'rectangle',x: smallSize+smallSize+smallSize+cellSize+smallSize,y: smallSize,w: 12*cellSize,h: 12*cellSize,css: 'backgroundFill',action:function(x,y){console.log('12*cellSize',12*cellSize,x,y);}}
 					]
 				}
 			];

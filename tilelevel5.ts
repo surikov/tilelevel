@@ -61,6 +61,7 @@ class TileLevel {
 	valid: boolean = false;
 	clicked: boolean = false;
 	mx: number = 100;
+	mn: number = 0.1;
 	startMouseScreenX: number = 0;
 	startMouseScreenY: number = 0;
 	dragZoom: number = 1;
@@ -119,12 +120,13 @@ class TileLevel {
 		this.applyZoomPosition();*/
 		//console.log('constructor', this);
 	}
-	start(layers: TileModelLayer[],innerWidth:number,innerHeight:number,curZoom:number,maxZoom:number){
+	start(layers: TileModelLayer[],innerWidth:number,innerHeight:number,minZoom:number,curZoom:number,maxZoom:number){
 		this.setModel(layers);
 		this.startLoop();
 		this.innerWidth = innerWidth;
 		this.innerHeight = innerHeight;
 		this.mx = maxZoom;
+		this.mn = minZoom;
 		this.translateZ = curZoom;
 		this.applyZoomPosition();
 		this.clearUselessDetails();
@@ -320,11 +322,11 @@ class TileLevel {
 				}
 			}
 		}
-		if (this.translateZ < 1) {
-			vZ = 1;
+		if (this.translateZ < this.minZoom()) {
+			vZ = this.minZoom();
 		} else {
-			if (this.translateZ > this.mx) {
-				vZ = this.mx;
+			if (this.translateZ > this.maxZoom()) {
+				vZ = this.maxZoom();
 			}
 		}
 		return {
@@ -378,6 +380,9 @@ class TileLevel {
 	}
 	maxZoom() {
 		return this.mx;
+	};
+	minZoom() {
+		return this.mn;
 	};
 	queueTiles() {
 		this.clearUselessDetails();
@@ -447,8 +452,8 @@ class TileLevel {
 		let min: number = Math.min(1, wheelVal);
 		let delta: number = Math.max(-1, min);
 		let zoom: number = _tileLevel.translateZ + delta * (_tileLevel.translateZ) * 0.077;
-		if (zoom < 1) {
-			zoom = 1;
+		if (zoom < _tileLevel.minZoom()) {
+			zoom = _tileLevel.minZoom();
 		}
 		if (zoom > _tileLevel.maxZoom()) {
 			zoom = _tileLevel.maxZoom();
@@ -541,8 +546,8 @@ class TileLevel {
 					let ratio: number = d / _tileLevel.twodistance;
 					_tileLevel.twodistance = d;
 					let zoom: number = _tileLevel.translateZ / ratio;
-					if (zoom < 1) {
-						zoom = 1;
+					if (zoom < _tileLevel.minZoom()) {
+						zoom = _tileLevel.minZoom();
 					}
 					if (zoom > _tileLevel.maxZoom()) {
 						zoom = _tileLevel.maxZoom();
@@ -717,6 +722,7 @@ class TileLevel {
 			rect.classList.add(cssClass);
 		}
 		g.appendChild(rect);
+		//console.log(rect);
 		return rect;
 	}
 	tileLine(g: SVGElement, x1: number, y1: number, x2: number, y2: number, cssClass: string): TileSVGElement {
