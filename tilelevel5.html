@@ -146,43 +146,43 @@
 			var df={x: 0,y: 0,w: width16th,h: height16th,z: [0.1, zoomStep1],sub: []};
 			for(var i=0;i<width16th;i=i+zoomStep3){
 				df.sub.push({draw: 'text',x: i,y: 0,text:'1:'+Math.round(i),css: 'decorFill textZoomStep1'});
-				df.sub.push({draw: 'rectangle',x: i,y: -zoomStep1,w: zoomStep1,h: zoomStep1,css: 'backgroundFill'});
+				//df.sub.push({draw: 'rectangle',x: i,y: -zoomStep1,w: zoomStep1,h: zoomStep1,css: 'backgroundFill'});
 			}
 			content.push(df);
 			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep1, zoomStep2],sub: []};
 			for(var i=0;i<width16th;i=i+zoomStep4){
 				df.sub.push({draw: 'text',x: i,y: 0,text:'2:'+Math.round(i),css: 'decorFill textZoomStep2'});
-				df.sub.push({draw: 'rectangle',x: i,y: -zoomStep2,w: zoomStep2,h: zoomStep2,css: 'backgroundFill'});
+				//df.sub.push({draw: 'rectangle',x: i,y: -zoomStep2,w: zoomStep2,h: zoomStep2,css: 'backgroundFill'});
 			}
 			content.push(df);
 			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep2, zoomStep3],sub: []};
 			for(var i=0;i<width16th;i=i+zoomStep5){
 				df.sub.push({draw: 'text',x: i,y: 0,text:'3:'+Math.round(i),css: 'decorFill textZoomStep3'});
-				df.sub.push({draw: 'rectangle',x: i,y: -zoomStep3,w: zoomStep3,h: zoomStep3,css: 'backgroundFill'});
+				//df.sub.push({draw: 'rectangle',x: i,y: -zoomStep3,w: zoomStep3,h: zoomStep3,css: 'backgroundFill'});
 			}
 			content.push(df);
 			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep3, zoomStep4],sub: []};
 			for(var i=0;i<width16th;i=i+zoomStep6){
 				df.sub.push({draw: 'text',x: i,y: 0,text:'4:'+Math.round(i),css: 'decorFill textZoomStep4'});
-				df.sub.push({draw: 'rectangle',x: i,y: -zoomStep4,w: zoomStep4,h: zoomStep4,css: 'backgroundFill'});
+				//df.sub.push({draw: 'rectangle',x: i,y: -zoomStep4,w: zoomStep4,h: zoomStep4,css: 'backgroundFill'});
 			}
 			content.push(df);
 			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep4, zoomStep5],sub: []};
 			for(var i=0;i<width16th;i=i+zoomStep7){
 				df.sub.push({draw: 'text',x: i,y: 0,text:'5:'+Math.round(i),css: 'decorFill textZoomStep5'});
-				df.sub.push({draw: 'rectangle',x: i,y: -zoomStep5,w: zoomStep5,h: zoomStep5,css: 'backgroundFill'});
+				//df.sub.push({draw: 'rectangle',x: i,y: -zoomStep5,w: zoomStep5,h: zoomStep5,css: 'backgroundFill'});
 			}
 			content.push(df);
 			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep5, zoomStep6],sub: []};
 			for(var i=0;i<width16th;i=i+zoomStep7*3){
 				df.sub.push({draw: 'text',x: i,y: 0,text:'6:'+Math.round(i),css: 'decorFill textZoomStep6'});
-				df.sub.push({draw: 'rectangle',x: i,y: -zoomStep6,w: zoomStep6,h: zoomStep6,css: 'backgroundFill'});
+				//df.sub.push({draw: 'rectangle',x: i,y: -zoomStep6,w: zoomStep6,h: zoomStep6,css: 'backgroundFill'});
 			}
 			content.push(df);
 			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep6, zoomMax+1],sub: []};
 			for(var i=0;i<width16th;i=i+zoomStep7*3*3){
 				df.sub.push({draw: 'text',x: i,y: 0,text:'7:'+Math.round(i),css: 'decorFill textZoomStep7'});
-				df.sub.push({draw: 'rectangle',x: i,y: -zoomStep7,w: zoomStep7,h: zoomStep7,css: 'backgroundFill'});
+				//df.sub.push({draw: 'rectangle',x: i,y: -zoomStep7,w: zoomStep7,h: zoomStep7,css: 'backgroundFill'});
 			}
 			content.push(df);
 			
@@ -198,43 +198,43 @@
 			var df={x: 0,y: 0,w: width16th,h: height16th,z: [0.1, zoomStep1],sub: []};
 			for(var i=0;i<height16th;i=i+zoomStep2){
 				df.sub.push({draw: 'text',x: 0,y: i,text:'1:'+Math.round(i),css: 'decorFill textZoomStep1 baselineHanging anchorRight'});
-				df.sub.push({draw: 'rectangle',x: -zoomStep1,y:i,w: zoomStep1,h: zoomStep1,css: 'backgroundFill'});
+				//df.sub.push({draw: 'rectangle',x: -zoomStep1,y:i,w: zoomStep1,h: zoomStep1,css: 'backgroundFill'});
 			}
 			content.push(df);
 			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep1, zoomStep2],sub: []};
 			for(var i=0;i<height16th;i=i+zoomStep3){
 				df.sub.push({draw: 'text',x: 0,y: i,text:'2:'+Math.round(i),css: 'decorFill textZoomStep2 baselineHanging anchorRight'});
-				df.sub.push({draw: 'rectangle',x: -zoomStep2,y:i,w: zoomStep2,h: zoomStep2,css: 'backgroundFill'});
+				//df.sub.push({draw: 'rectangle',x: -zoomStep2,y:i,w: zoomStep2,h: zoomStep2,css: 'backgroundFill'});
 			}
 			content.push(df);
 			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep2, zoomStep3],sub: []};
 			for(var i=0;i<height16th;i=i+zoomStep4){
 				df.sub.push({draw: 'text',x: 0,y: i,text:'3:'+Math.round(i),css: 'decorFill textZoomStep3 baselineHanging anchorRight'});
-				df.sub.push({draw: 'rectangle',x: -zoomStep3,y:i,w: zoomStep3,h: zoomStep3,css: 'backgroundFill'});
+				//df.sub.push({draw: 'rectangle',x: -zoomStep3,y:i,w: zoomStep3,h: zoomStep3,css: 'backgroundFill'});
 			}
 			content.push(df);
 			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep3, zoomStep4],sub: []};
 			for(var i=0;i<height16th;i=i+zoomStep5){
 				df.sub.push({draw: 'text',x: 0,y: i,text:'4:'+Math.round(i),css: 'decorFill textZoomStep4 baselineHanging anchorRight'});
-				df.sub.push({draw: 'rectangle',x: -zoomStep4,y:i,w: zoomStep4,h: zoomStep4,css: 'backgroundFill'});
+				//df.sub.push({draw: 'rectangle',x: -zoomStep4,y:i,w: zoomStep4,h: zoomStep4,css: 'backgroundFill'});
 			}
 			content.push(df);
 			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep4, zoomStep5],sub: []};
 			for(var i=0;i<height16th;i=i+zoomStep6){
 				df.sub.push({draw: 'text',x: 0,y: i,text:'5:'+Math.round(i),css: 'decorFill textZoomStep5 baselineHanging anchorRight'});
-				df.sub.push({draw: 'rectangle',x: -zoomStep5,y:i,w: zoomStep5,h: zoomStep5,css: 'backgroundFill'});
+				//df.sub.push({draw: 'rectangle',x: -zoomStep5,y:i,w: zoomStep5,h: zoomStep5,css: 'backgroundFill'});
 			}
 			content.push(df);
 			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep5, zoomStep6],sub: []};
 			for(var i=0;i<height16th;i=i+zoomStep7){
 				df.sub.push({draw: 'text',x: 0,y: i,text:'6:'+Math.round(i),css: 'decorFill textZoomStep6 baselineHanging anchorRight'});
-				df.sub.push({draw: 'rectangle',x: -zoomStep6,y:i,w: zoomStep6,h: zoomStep6,css: 'backgroundFill'});
+				//df.sub.push({draw: 'rectangle',x: -zoomStep6,y:i,w: zoomStep6,h: zoomStep6,css: 'backgroundFill'});
 			}
 			content.push(df);
 			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep6, zoomMax+1],sub: []};
 			for(var i=0;i<height16th;i=i+zoomStep7*3){
 				df.sub.push({draw: 'text',x: 0,y: i,text:'7:'+Math.round(i),css: 'decorFill textZoomStep7 baselineHanging anchorRight'});
-				df.sub.push({draw: 'rectangle',x: -zoomStep7,y:i,w: zoomStep7,h: zoomStep7,css: 'backgroundFill'});
+				//df.sub.push({draw: 'rectangle',x: -zoomStep7,y:i,w: zoomStep7,h: zoomStep7,css: 'backgroundFill'});
 			}
 			content.push(df);
 			console.log(df);
@@ -249,43 +249,43 @@
 			var df={x: 0,y: 0,w: width16th,h: height16th,z: [0.1, zoomStep1],sub: []};
 			for(var i=0;i<height16th;i=i+zoomStep2){
 				df.sub.push({draw: 'text',x: 0,y: i,text:'1:'+Math.round(i),css: 'decorFill textZoomStep1 baselineHanging'});
-				df.sub.push({draw: 'rectangle',x: 0,y:i,w: zoomStep1,h: zoomStep1,css: 'backgroundFill'});
+				//df.sub.push({draw: 'rectangle',x: 0,y:i,w: zoomStep1,h: zoomStep1,css: 'backgroundFill'});
 			}
 			content.push(df);
 			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep1, zoomStep2],sub: []};
 			for(var i=0;i<height16th;i=i+zoomStep3){
 				df.sub.push({draw: 'text',x: 0,y: i,text:'2:'+Math.round(i),css: 'decorFill textZoomStep2 baselineHanging'});
-				df.sub.push({draw: 'rectangle',x: 0,y:i,w: zoomStep2,h: zoomStep2,css: 'backgroundFill'});
+				//df.sub.push({draw: 'rectangle',x: 0,y:i,w: zoomStep2,h: zoomStep2,css: 'backgroundFill'});
 			}
 			content.push(df);
 			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep2, zoomStep3],sub: []};
 			for(var i=0;i<height16th;i=i+zoomStep4){
 				df.sub.push({draw: 'text',x: 0,y: i,text:'3:'+Math.round(i),css: 'decorFill textZoomStep3 baselineHanging'});
-				df.sub.push({draw: 'rectangle',x: 0,y:i,w: zoomStep3,h: zoomStep3,css: 'backgroundFill'});
+				//df.sub.push({draw: 'rectangle',x: 0,y:i,w: zoomStep3,h: zoomStep3,css: 'backgroundFill'});
 			}
 			content.push(df);
 			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep3, zoomStep4],sub: []};
 			for(var i=0;i<height16th;i=i+zoomStep5){
 				df.sub.push({draw: 'text',x: 0,y: i,text:'4:'+Math.round(i),css: 'decorFill textZoomStep4 baselineHanging'});
-				df.sub.push({draw: 'rectangle',x: 0,y:i,w: zoomStep4,h: zoomStep4,css: 'backgroundFill'});
+				//df.sub.push({draw: 'rectangle',x: 0,y:i,w: zoomStep4,h: zoomStep4,css: 'backgroundFill'});
 			}
 			content.push(df);
 			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep4, zoomStep5],sub: []};
 			for(var i=0;i<height16th;i=i+zoomStep6){
 				df.sub.push({draw: 'text',x: 0,y: i,text:'5:'+Math.round(i),css: 'decorFill textZoomStep5 baselineHanging'});
-				df.sub.push({draw: 'rectangle',x: 0,y:i,w: zoomStep5,h: zoomStep5,css: 'backgroundFill'});
+				//df.sub.push({draw: 'rectangle',x: 0,y:i,w: zoomStep5,h: zoomStep5,css: 'backgroundFill'});
 			}
 			content.push(df);
 			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep5, zoomStep6],sub: []};
 			for(var i=0;i<height16th;i=i+zoomStep7){
 				df.sub.push({draw: 'text',x: 0,y: i,text:'6:'+Math.round(i),css: 'decorFill textZoomStep6 baselineHanging'});
-				df.sub.push({draw: 'rectangle',x: 0,y:i,w: zoomStep6,h: zoomStep6,css: 'backgroundFill'});
+				//df.sub.push({draw: 'rectangle',x: 0,y:i,w: zoomStep6,h: zoomStep6,css: 'backgroundFill'});
 			}
 			content.push(df);
 			var df={x: 0,y: 0,w: width16th,h: height16th,z: [zoomStep6, zoomMax+1],sub: []};
 			for(var i=0;i<height16th;i=i+zoomStep7*3){
 				df.sub.push({draw: 'text',x: 0,y: i,text:'7:'+Math.round(i),css: 'decorFill textZoomStep7 baselineHanging'});
-				df.sub.push({draw: 'rectangle',x: 0,y:i,w: zoomStep7,h: zoomStep7,css: 'backgroundFill'});
+				//df.sub.push({draw: 'rectangle',x: 0,y:i,w: zoomStep7,h: zoomStep7,css: 'backgroundFill'});
 			}
 			content.push(df);
 			
@@ -308,9 +308,9 @@
 					,{draw: 'rectangle',x: 600,y: 20,w: 70,h: 70,css: 'backRollFill'}
 					,{draw: 'rectangle',x: 700,y: 20,w: 70,h: 70,css: 'backGridFill'}
 					*/
-					,{draw: 'rectangle',x: smallSize,y: smallSize,w: smallSize,h: smallSize,css: 'backgroundFill',action:function(x,y){console.log('smallSize',smallSize,x,y);}}
-					,{draw: 'rectangle',x: smallSize+smallSize+smallSize,y: smallSize,w: cellSize,h: cellSize,css: 'backgroundFill',action:function(x,y){console.log('cellSize',cellSize,x,y);}}
-					,{draw: 'rectangle',x: smallSize+smallSize+smallSize+cellSize+smallSize,y: smallSize,w: 12*cellSize,h: 12*cellSize,css: 'backgroundFill',action:function(x,y){console.log('12*cellSize',12*cellSize,x,y);}}
+					,{draw: 'rectangle',x: smallSize,y: smallSize,w: smallSize,h: smallSize,css: 'backGridFill',action:function(x,y){console.log('smallSize',smallSize,x,y);}}
+					,{draw: 'rectangle',x: smallSize+smallSize+smallSize,y: smallSize,w: cellSize,h: cellSize,css: 'backGridFill',action:function(x,y){console.log('cellSize',cellSize,x,y);}}
+					,{draw: 'rectangle',x: smallSize+smallSize+smallSize+cellSize+smallSize,y: smallSize,w: 12*cellSize,h: 12*cellSize,css: 'backGridFill',action:function(x,y){console.log('12*cellSize',12*cellSize,x,y);}}
 					]
 				}
 			];
