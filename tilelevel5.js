@@ -1,4 +1,4 @@
-console.log('tilelevel.js v4.49');
+console.log('tilelevel.js v4.51');
 var _tileLevel = null;
 var TilePoint = /** @class */ (function () {
     function TilePoint() {
@@ -119,6 +119,11 @@ var TileLevel = /** @class */ (function () {
         this.svg.removeChild(rect);
         this.clickLimit = this.tapSize / 6;
     };
+    TileLevel.prototype.readViewSize = function () {
+        this.viewWidth = this.svg.clientWidth;
+        this.viewHeight = this.svg.clientHeight;
+        this.resetModel();
+    };
     TileLevel.prototype.startDragZoom = function () {
         this.dragZoom = 1.01;
         this.applyZoomPosition();
@@ -217,20 +222,20 @@ var TileLevel = /** @class */ (function () {
     };
     TileLevel.prototype.setModel = function (layers) {
         for (var i = 0; i < layers.length; i++) {
-            this.setIDs(layers[i].definition);
+            this.autoID(layers[i].definition);
         }
         //console.log(layers);
         this.model = layers;
         this.resetModel();
     };
-    TileLevel.prototype.setIDs = function (definition) {
+    TileLevel.prototype.autoID = function (definition) {
         if (definition) {
             if (definition.length) {
                 for (var i = 0; i < definition.length; i++) {
                     if (!(definition[i].id)) {
                         definition[i].id = 'id' + Math.floor(Math.random() * 1000000000);
                     }
-                    this.setIDs(definition[i].sub);
+                    this.autoID(definition[i].sub);
                 }
             }
         }
@@ -313,6 +318,7 @@ var TileLevel = /** @class */ (function () {
                 vZ = this.maxZoom();
             }
         }
+        //console.log(this.translateX,this.translateY,this.translateZ,vX,vY,vZ);
         return {
             x: vX,
             y: vY,
