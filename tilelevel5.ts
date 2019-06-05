@@ -2,6 +2,41 @@
 
 let _tileLevel: TileLevel = null;
 //enum LayerKind { normal, overlay, column, row };
+type RiffDuration ={
+	count:number
+	,fraction:number
+};
+type RiffPitch ={
+	key:number
+	,octave:number
+	,shift:number
+};
+type RiffPoint ={
+	pitch:RiffPitch
+	,duration:RiffDuration
+};
+type RiffChord ={
+	start:RiffDuration
+	,points:RiffPoint[]
+	,icon:string
+	,comment:string
+};
+type RiffMeasure ={
+	chords:RiffChord[]
+	,fifths:number
+	,tempo:number
+	,meter:RiffDuration
+	,transpose:number
+	,clef:number
+};
+type RiffVoice ={
+	title:string
+	,measures:RiffMeasure[]
+};
+type RiffSong ={
+	title:string
+	,voices:RiffVoice[]
+};
 type TileDefinition = {
 	id: string// = 'id'+Math.floor(Math.random()*1000000000)
 	, draw: string
@@ -47,6 +82,87 @@ class TileModelLayer {
 	shift: number;
 	//viceversa: boolean;
 	definition: TileDefinition[] = [];
+}
+class TreeValue{
+	name:string;value:string;children:TreeValue[]
+}
+function of(name:string,tree:TreeValue):TreeValue{
+	for(let i=0;i<tree.children.length;i++){
+		if(tree.children[i].name==name){
+			return tree.children[i];
+		}
+	}
+	return {name:'',value:'',children:[]};
+}
+function all(name,tree):TreeValue[]{
+	let r:TreeValue[]=[];
+	for(let i=0;i<tree.children.length;i++){
+		if(tree.children[i].name==name){
+			r.push(tree.children[i]);
+		}
+	}
+	return r;
+}
+let fileLoadActionHandler:(treeValue:TreeValue)=>{};
+function onFileLoad(action:(treeValue:TreeValue)=>{}){
+	fileLoadActionHandler=action;
+	return handleFileSelect;
+}
+function handleFileSelect(event:Event) {
+	//<input type="file" id="filesinput" name="filesarr[]" />
+	//document.getElementById('filesinput').addEventListener('change', handleFileSelect, false);
+	//console.log(of('work-title',of('work',of('score-partwise',tree))).value);
+	//console.log(all('supports',of('encoding',of('identification',of('score-partwise',tree)))));
+	//console.log(of('work-title',of('work',of('score-partwise2',tree))).value);
+	//console.log(all('supports',of('encoding',of('identification',of('score-partwise2',tree)))));
+	//console.log(event);
+	let file:File = (event.target as any).files[0];
+	//console.log(file);
+	let fileReader:FileReader = new FileReader();
+	fileReader.onload = function (progressEvent:ProgressEvent  ) {
+		//console.log(progressEvent);
+		//var arrayBuffer = progressEvent.target.result;
+		//var s=String.fromCharCode.apply(null, new Uint8Array(arrayBuffer));
+		//console.log(arrayBuffer,s);
+		//var midiFile = new MIDIFile(arrayBuffer);
+		//var song = midiFile.parseSong();
+		//startLoad(song);
+		let xml:string=(progressEvent.target as any).result;
+		//console.log(xml);
+		var domParser:DOMParser = new DOMParser();
+		var _document:Document = domParser.parseFromString(xml,"text/xml");
+		//console.dir(_document);
+		var tree:TreeValue={name:'',value:'',children:readDocChildren(_document)};
+		//console.log(tree);
+		//console.log(of('work-title',of('work',of('score-partwise',tree))).value);
+		//console.log(all('supports',of('encoding',of('identification',of('score-partwise',tree)))));
+		//console.log(of('work-title',of('work',of('score-partwise2',tree))).value);
+		//console.log(all('supports',of('encoding',of('identification',of('score-partwise2',tree)))));
+		fileLoadActionHandler(tree);
+	};
+	fileReader.readAsText(file);
+}
+function readDocChildren(node):TreeValue[]{
+	let children:TreeValue[]=[];
+	//console.dir(node);
+	if(node.children){
+		for(let i=0;i<node.children.length;i++){
+			let c=node.children[i];
+			let t='';
+			if(c.childNodes && c.childNodes[0] && c.childNodes[0].nodeName=='#text'){
+				t=(''+c.childNodes[0].nodeValue).trim();
+			}
+			//var t={name:c.tagName,value:'none',children:readDocChildren(node.children[i])};
+			children.push({name:c.localName ,value:t ,children:readDocChildren(c) }); 
+		}
+	}
+	if(node.attributes){
+		for(let i=0;i<node.attributes.length;i++){
+			let a=node.attributes[i];
+			children.push({name:a.localName ,value:a.value ,children:[] });
+		}
+	}
+	return children;
 }
 class TileLevel {
 	svgns: string = "http://www.w3.org/2000/svg";

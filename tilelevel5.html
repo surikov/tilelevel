@@ -7,7 +7,7 @@
 			.redborder {border-style:solid;border-width:1px;border-color:red}
 			.bluebackground {fill: rgba(0,0,128,0.25);}
 			.size600x400 {width:600px; height:400px;}
-			.sizeBig {width:100%; height:100%;overflow: hidden;}
+			.sizeBig {width:100%; height:70%;overflow: hidden;}
 			
 			.baselineHanging {alignment-baseline: hanging;}
 			.anchorRight {text-anchor:end;}
@@ -112,7 +112,13 @@
 		window.onresize = onWindowResize;
 		onWindowResize();
 
-		document.getElementById('filesinput').addEventListener('change', handleFileSelect, false);
+		document.getElementById('filesinput').addEventListener('change', onFileLoad(function(tree){
+			console.log(tree);
+			//console.log(of('work-title',of('work',of('score-partwise',tree))).value);
+			//console.log(all('supports',of('encoding',of('identification',of('score-partwise',tree)))));
+			//console.log(of('work-title',of('work',of('score-partwise2',tree))).value);
+			//console.log(all('supports',of('encoding',of('identification',of('score-partwise2',tree)))));
+		}), false);
 
 		//console.log(levelEngine.tapSize,8000/levelEngine.tapSize);
 		/*levelEngine.setModel([{
@@ -123,7 +129,7 @@
 		levelEngine.innerHeight = 500 * levelEngine.tapSize;
 		levelEngine.mx = 999;
 		levelEngine.applyZoomPosition();*/
-		function of(name,tree){
+		/*function of(name,tree){
 			for(var i=0;i<tree.children.length;i++){
 				if(tree.children[i].name==name){
 					return tree.children[i];
@@ -139,14 +145,14 @@
 				}
 			}
 			return r;
-		}
-		function handleFileSelect(event) {
+		}*/
+		/*function handleFileSelect(event) {
 			console.log(event);
 			var file = event.target.files[0];
 			console.log(file);
 			var fileReader = new FileReader();
 			fileReader.onload = function (progressEvent ) {
-				//console.log(progressEvent);
+				console.log(progressEvent);
 				//var arrayBuffer = progressEvent.target.result;
 				//var s=String.fromCharCode.apply(null, new Uint8Array(arrayBuffer));
 				//console.log(arrayBuffer,s);
@@ -160,14 +166,14 @@
 				console.dir(_document);
 				var tree={name:'',value:'',children:readDocChildren(_document)};
 				console.log(tree);
-				console.log(of('work-title',of('work',of('score-partwise',tree))).value);
-				console.log(all('supports',of('encoding',of('identification',of('score-partwise',tree)))));
-				console.log(of('work-title',of('work',of('score-partwise2',tree))).value);
-				console.log(all('supports',of('encoding',of('identification',of('score-partwise2',tree)))));
+				//console.log(of('work-title',of('work',of('score-partwise',tree))).value);
+				//console.log(all('supports',of('encoding',of('identification',of('score-partwise',tree)))));
+				//console.log(of('work-title',of('work',of('score-partwise2',tree))).value);
+				//console.log(all('supports',of('encoding',of('identification',of('score-partwise2',tree)))));
 			};
 			fileReader.readAsText(file);
-		}
-		function readDocChildren(node){
+		}*/
+		/*function readDocChildren(node){
 			var children=[];
 			//console.dir(node);
 			if(node.children){
@@ -186,7 +192,7 @@
 				}
 			}
 			return children;
-		}
+		}*/
 		function onWindowResize(){
 			var element = document.getElementById('contentSVG');
 			button.x=element.clientWidth/levelEngine.tapSize-1;
