@@ -114,7 +114,32 @@
 
 		document.getElementById('filesinput').addEventListener('change', onFileLoad(function(tree){
 			console.log(tree);
-			//console.log(of('work-title',of('work',of('score-partwise',tree))).value);
+			console.log('title:',of('credit-words',of('credit',of('score-partwise',tree))).value);
+			console.log('software:',of('software',of('encoding',of('identification',of('score-partwise',tree)))).value);
+			var traksList=all('score-part',of('part-list',of('score-partwise',tree)));
+			var tracksParts=all('part',of('score-partwise',tree));
+			//console.log('tracksParts:',tracksParts);
+			for(var i=0;i<traksList.length;i++){
+				var track=traksList[i];
+				console.log('track:',of('id',track).value,of('part-name',track).value);
+				for(var k=0;k<tracksParts.length;k++){
+					var part=tracksParts[k];
+					if(of('id',part).value==of('id',track).value){
+						var measures=all('measure',part);
+						//console.log('part:',part,measures);
+						for(var m=0;m<measures.length;m++){
+							var divisions=of('divisions',of('attributes',measures[m])).value;
+							if(divisions){
+								console.log('divisions:',divisions);
+							}
+							var fifths=of('fifths',of('key',of('attributes',measures[m]))).value;
+							if(fifths){
+								console.log('fifths:',fifths);
+							}
+						}
+					}
+				}
+			}
 			//console.log(all('supports',of('encoding',of('identification',of('score-partwise',tree)))));
 			//console.log(of('work-title',of('work',of('score-partwise2',tree))).value);
 			//console.log(all('supports',of('encoding',of('identification',of('score-partwise2',tree)))));

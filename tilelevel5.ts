@@ -2,6 +2,9 @@
 
 let _tileLevel: TileLevel = null;
 //enum LayerKind { normal, overlay, column, row };
+type RiffGraceNote={
+	vibrato:boolean
+};
 type RiffDuration ={
 	count:number
 	,fraction:number
@@ -14,12 +17,14 @@ type RiffPitch ={
 type RiffPoint ={
 	pitch:RiffPitch
 	,duration:RiffDuration
+	,graceNote:RiffGraceNote
 };
 type RiffChord ={
 	start:RiffDuration
 	,points:RiffPoint[]
 	,icon:string
 	,comment:string
+	,graceNote:RiffGraceNote
 };
 type RiffMeasure ={
 	chords:RiffChord[]
