@@ -1,4 +1,6 @@
-console.log('tilelevel.js v4.51');
+"use strict";
+exports.__esModule = true;
+console.log('tilelevel.js v5.51');
 var _tileLevel = null;
 var TilePoint = /** @class */ (function () {
     function TilePoint() {
@@ -24,89 +26,6 @@ var TileModelLayer = /** @class */ (function () {
     }
     return TileModelLayer;
 }());
-var TreeValue = /** @class */ (function () {
-    function TreeValue() {
-    }
-    return TreeValue;
-}());
-function of(name, tree) {
-    for (var i = 0; i < tree.children.length; i++) {
-        if (tree.children[i].name == name) {
-            return tree.children[i];
-        }
-    }
-    return { name: '', value: '', children: [] };
-}
-function all(name, tree) {
-    var r = [];
-    for (var i = 0; i < tree.children.length; i++) {
-        if (tree.children[i].name == name) {
-            r.push(tree.children[i]);
-        }
-    }
-    return r;
-}
-var fileLoadActionHandler;
-function onFileLoad(action) {
-    fileLoadActionHandler = action;
-    return handleFileSelect;
-}
-function handleFileSelect(event) {
-    //<input type="file" id="filesinput" name="filesarr[]" />
-    //document.getElementById('filesinput').addEventListener('change', handleFileSelect, false);
-    //console.log(of('work-title',of('work',of('score-partwise',tree))).value);
-    //console.log(all('supports',of('encoding',of('identification',of('score-partwise',tree)))));
-    //console.log(of('work-title',of('work',of('score-partwise2',tree))).value);
-    //console.log(all('supports',of('encoding',of('identification',of('score-partwise2',tree)))));
-    //console.log(event);
-    var file = event.target.files[0];
-    //console.log(file);
-    var fileReader = new FileReader();
-    fileReader.onload = function (progressEvent) {
-        //console.log(progressEvent);
-        //var arrayBuffer = progressEvent.target.result;
-        //var s=String.fromCharCode.apply(null, new Uint8Array(arrayBuffer));
-        //console.log(arrayBuffer,s);
-        //var midiFile = new MIDIFile(arrayBuffer);
-        //var song = midiFile.parseSong();
-        //startLoad(song);
-        var xml = progressEvent.target.result;
-        //console.log(xml);
-        var domParser = new DOMParser();
-        var _document = domParser.parseFromString(xml, "text/xml");
-        //console.dir(_document);
-        var tree = { name: '', value: '', children: readDocChildren(_document) };
-        //console.log(tree);
-        //console.log(of('work-title',of('work',of('score-partwise',tree))).value);
-        //console.log(all('supports',of('encoding',of('identification',of('score-partwise',tree)))));
-        //console.log(of('work-title',of('work',of('score-partwise2',tree))).value);
-        //console.log(all('supports',of('encoding',of('identification',of('score-partwise2',tree)))));
-        fileLoadActionHandler(tree);
-    };
-    fileReader.readAsText(file);
-}
-function readDocChildren(node) {
-    var children = [];
-    //console.dir(node);
-    if (node.children) {
-        for (var i = 0; i < node.children.length; i++) {
-            var c = node.children[i];
-            var t = '';
-            if (c.childNodes && c.childNodes[0] && c.childNodes[0].nodeName == '#text') {
-                t = ('' + c.childNodes[0].nodeValue).trim();
-            }
-            //var t={name:c.tagName,value:'none',children:readDocChildren(node.children[i])};
-            children.push({ name: c.localName, value: t, children: readDocChildren(c) });
-        }
-    }
-    if (node.attributes) {
-        for (var i = 0; i < node.attributes.length; i++) {
-            var a = node.attributes[i];
-            children.push({ name: a.localName, value: a.value, children: [] });
-        }
-    }
-    return children;
-}
 var TileLevel = /** @class */ (function () {
     function TileLevel(contentElement) {
         this.svgns = "http://www.w3.org/2000/svg";
@@ -974,3 +893,4 @@ var TileLevel = /** @class */ (function () {
     };
     return TileLevel;
 }());
+exports.TileLevel = TileLevel;
