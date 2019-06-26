@@ -86,14 +86,29 @@ define("MXMLReaderApp", ["require", "exports", "treeValue", "treeValue"], functi
                     var part = tracksParts[k];
                     if (treeValue_1.Of('id', part).value == treeValue_1.Of('id', track).value) {
                         var measures = treeValue_2.everyOf('measure', part);
+                        var divisionNum = 99;
                         for (var m = 0; m < measures.length; m++) {
                             var divisions = treeValue_1.Of('divisions', treeValue_1.Of('attributes', measures[m])).value;
                             if (divisions) {
-                                console.log('divisions:', divisions);
+                                console.log('	' + m, 'divisions:', divisions);
+                                divisionNum = parseInt(divisions);
                             }
                             var fifths = treeValue_1.Of('fifths', treeValue_1.Of('key', treeValue_1.Of('attributes', measures[m]))).value;
                             if (fifths) {
-                                console.log('fifths:', fifths);
+                                console.log('	' + m, 'fifths:', fifths);
+                            }
+                            var sign = treeValue_1.Of('sign', treeValue_1.Of('clef', treeValue_1.Of('attributes', measures[m]))).value;
+                            if (sign) {
+                                console.log('	' + m, 'sign:', sign, treeValue_1.Of('line', treeValue_1.Of('clef', treeValue_1.Of('attributes', measures[m]))).value);
+                            }
+                            var beats = treeValue_1.Of('beats', treeValue_1.Of('time', treeValue_1.Of('attributes', measures[m]))).value;
+                            if (beats) {
+                                console.log('	' + m, 'beats:', beats, '/', treeValue_1.Of('beat-type', treeValue_1.Of('time', treeValue_1.Of('attributes', measures[m]))).value);
+                            }
+                            var notes = treeValue_2.everyOf('note', measures[m]);
+                            for (var n = 0; n < notes.length; n++) {
+                                var d = parseInt(treeValue_1.Of('duration', notes[n]).value);
+                                console.log('		', treeValue_1.Of('voice', notes[n]).value, ':', '(', treeValue_1.Of('step', treeValue_1.Of('pitch', notes[n])).value, treeValue_1.Of('alter', treeValue_1.Of('pitch', notes[n])).value, ')', treeValue_1.Of('octave', treeValue_1.Of('pitch', notes[n])).value, ':', treeValue_1.Of('duration', notes[n]).value, treeValue_1.Of('type', notes[n]).value, '=', d / divisionNum, '/4');
                             }
                         }
                     }
