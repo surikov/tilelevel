@@ -1,6 +1,13 @@
 ﻿import { TreeValue } from "./treeValue";
 import { Of } from "./treeValue";
 import { everyOf } from "./treeValue";
+import { RiffSong } from "./musicData";
+import { RiffVoice } from "./musicData";
+import { RiffMeasure } from "./musicData";
+import { RiffChord } from "./musicData";
+import { RiffPoint } from "./musicData";
+import { RiffPitch } from "./musicData";
+import { RiffDuration } from "./musicData";
 
 let mxmlReaderApp: MXMLReaderApp = null;
 
@@ -24,7 +31,7 @@ class MXMLReaderApp {
 			var domParser: DOMParser = new DOMParser();
 			var _document: Document = domParser.parseFromString(xml, "text/xml");
 			var tree: TreeValue = { name: '', value: '', children: t.readDocChildren(_document) };
-			t.parseAction(tree);
+			console.log(t.parseAction(tree));
 		};
 		fileReader.readAsText(file);
 	}
@@ -52,7 +59,60 @@ class MXMLReaderApp {
 		}
 		return children;
 	}
-	parseAction(tree: TreeValue){
+	parseAction(tree: TreeValue):RiffSong{
+		let riffSong:RiffSong={title:Of('credit-words', Of('credit', Of('score-partwise', tree))).value,voices:[]};
+		let traksList:TreeValue[] = everyOf('score-part', Of('part-list', Of('score-partwise', tree)));
+		let tracksParts:TreeValue[] = everyOf('part', Of('score-partwise', tree));
+		let tempo:number=120;
+		for (let i = 0; i < traksList.length; i++) {
+			let track:TreeValue = traksList[i];
+			//console.log('track:',track);
+			for (let k = 0; k < tracksParts.length; k++) {
+				let part = tracksParts[k];
+				if (Of('id', part).value == Of('id', track).value) {
+					let measures:TreeValue[] = everyOf('measure', part);
+					let voices:string[]=[];
+					for (let m = 0; m < measures.length; m++) {
+						let measure:TreeValue=measures[m];
+						var notes:TreeValue[]=everyOf('note', measures[m]);
+						for (var n = 0; n < notes.length; n++) {
+							let note:TreeValue=notes[n];
+							let voice=Of('voice', note).value;
+							if(voices.indexOf(voice) < 0){
+								voices.push(voice);
+							}
+						}
+					}
+					//console.log(voices);
+					for(let v=0;v<voices.length;v++){
+						let trackVoice:RiffVoice={title: Of('part-name', track).value+': '+voices[v], measures: []};
+						riffSong.voices.push(trackVoice);
+						for (let m = 0; m < measures.length; m++) {
+							let measure:TreeValue=measures[m];
+							tempo=this.txtNum(Of('tempo', Of('sound', Of('direction', measure))).value,tempo);
+							let riffMeasure:RiffMeasure = {chords: []
+								, fifths: 0
+								, tempo: tempo
+								, meter: {count: 0, fraction: 0}
+								, transpose: 0
+								, clef: 0
+							};
+							trackVoice.measures.push(riffMeasure);
+						}
+					}
+				}
+			}
+		}
+		return riffSong;
+	}
+	txtNum(txt:string,defValue:number):number{
+		if(txt){
+			return parseInt(txt);
+		}else{
+			return defValue;
+		}
+	}
+	parseAction_____________(tree: TreeValue){
 		console.log(tree);
 		console.log('title:', Of('credit-words', Of('credit', Of('score-partwise', tree))).value);
 		console.log('software:', Of('software', Of('encoding', Of('identification', Of('score-partwise',
@@ -91,7 +151,7 @@ class MXMLReaderApp {
 						var notes:TreeValue[]=everyOf('note', measures[m]);
 						for (var n = 0; n < notes.length; n++) {
 							var d=parseInt(Of('duration', notes[n]).value);
-							console.log('		'
+							/*console.log('		'
 								,Of('voice', notes[n]).value,':'
 								,'(',Of('step',Of('pitch', notes[n])).value
 								,Of('alter',Of('pitch', notes[n])).value
@@ -100,8 +160,8 @@ class MXMLReaderApp {
 								
 								,':',Of('duration', notes[n]).value
 								,Of('type', notes[n]).value
-								,'=',d/divisionNum,'/4'
-								);
+								,':',Of('duration', notes[n]).value,'/',divisionNum,'=',d/divisionNum,'/4'
+								);*/
 						}
 					}
 				}

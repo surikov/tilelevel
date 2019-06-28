@@ -27,6 +27,10 @@ define("treeValue", ["require", "exports"], function (require, exports) {
     }
     exports.everyOf = everyOf;
 });
+define("musicData", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+});
 define("MXMLReaderApp", ["require", "exports", "treeValue", "treeValue"], function (require, exports, treeValue_1, treeValue_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -49,7 +53,7 @@ define("MXMLReaderApp", ["require", "exports", "treeValue", "treeValue"], functi
                 var domParser = new DOMParser();
                 var _document = domParser.parseFromString(xml, "text/xml");
                 var tree = { name: '', value: '', children: t.readDocChildren(_document) };
-                t.parseAction(tree);
+                console.log(t.parseAction(tree));
             };
             fileReader.readAsText(file);
         };
@@ -74,6 +78,58 @@ define("MXMLReaderApp", ["require", "exports", "treeValue", "treeValue"], functi
             return children;
         };
         MXMLReaderApp.prototype.parseAction = function (tree) {
+            var riffSong = { title: treeValue_1.Of('credit-words', treeValue_1.Of('credit', treeValue_1.Of('score-partwise', tree))).value, voices: [] };
+            var traksList = treeValue_2.everyOf('score-part', treeValue_1.Of('part-list', treeValue_1.Of('score-partwise', tree)));
+            var tracksParts = treeValue_2.everyOf('part', treeValue_1.Of('score-partwise', tree));
+            var tempo = 120;
+            for (var i = 0; i < traksList.length; i++) {
+                var track = traksList[i];
+                for (var k = 0; k < tracksParts.length; k++) {
+                    var part = tracksParts[k];
+                    if (treeValue_1.Of('id', part).value == treeValue_1.Of('id', track).value) {
+                        var measures = treeValue_2.everyOf('measure', part);
+                        var voices = [];
+                        for (var m = 0; m < measures.length; m++) {
+                            var measure = measures[m];
+                            var notes = treeValue_2.everyOf('note', measures[m]);
+                            for (var n = 0; n < notes.length; n++) {
+                                var note = notes[n];
+                                var voice = treeValue_1.Of('voice', note).value;
+                                if (voices.indexOf(voice) < 0) {
+                                    voices.push(voice);
+                                }
+                            }
+                        }
+                        for (var v = 0; v < voices.length; v++) {
+                            var trackVoice = { title: treeValue_1.Of('part-name', track).value + ': ' + voices[v], measures: [] };
+                            riffSong.voices.push(trackVoice);
+                            for (var m = 0; m < measures.length; m++) {
+                                var measure = measures[m];
+                                tempo = this.txtNum(treeValue_1.Of('tempo', treeValue_1.Of('sound', treeValue_1.Of('direction', measure))).value, tempo);
+                                var riffMeasure = { chords: [],
+                                    fifths: 0,
+                                    tempo: tempo,
+                                    meter: { count: 0, fraction: 0 },
+                                    transpose: 0,
+                                    clef: 0
+                                };
+                                trackVoice.measures.push(riffMeasure);
+                            }
+                        }
+                    }
+                }
+            }
+            return riffSong;
+        };
+        MXMLReaderApp.prototype.txtNum = function (txt, defValue) {
+            if (txt) {
+                return parseInt(txt);
+            }
+            else {
+                return defValue;
+            }
+        };
+        MXMLReaderApp.prototype.parseAction_____________ = function (tree) {
             console.log(tree);
             console.log('title:', treeValue_1.Of('credit-words', treeValue_1.Of('credit', treeValue_1.Of('score-partwise', tree))).value);
             console.log('software:', treeValue_1.Of('software', treeValue_1.Of('encoding', treeValue_1.Of('identification', treeValue_1.Of('score-partwise', tree)))).value);
@@ -108,7 +164,6 @@ define("MXMLReaderApp", ["require", "exports", "treeValue", "treeValue"], functi
                             var notes = treeValue_2.everyOf('note', measures[m]);
                             for (var n = 0; n < notes.length; n++) {
                                 var d = parseInt(treeValue_1.Of('duration', notes[n]).value);
-                                console.log('		', treeValue_1.Of('voice', notes[n]).value, ':', '(', treeValue_1.Of('step', treeValue_1.Of('pitch', notes[n])).value, treeValue_1.Of('alter', treeValue_1.Of('pitch', notes[n])).value, ')', treeValue_1.Of('octave', treeValue_1.Of('pitch', notes[n])).value, ':', treeValue_1.Of('duration', notes[n]).value, treeValue_1.Of('type', notes[n]).value, '=', d / divisionNum, '/4');
                             }
                         }
                     }
